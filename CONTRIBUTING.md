@@ -1,80 +1,94 @@
-# Contributing to the Diabetes Predictor project
+# Contributing
 
-We welcome any input, feedback, bug reports, and contributions via [Diabetes Predictor Py GitHub Repository](https://github.com/UBC-MDS/diabetes_predictor_py). Your participation helps improve this project and ensures its continued success.
+**QuantaTrack** is an open-source dashboard project, and we welcome contributions of all kinds: 
+new features, bug fixes, suggestions for improvements, and updates to the documentation are all appreciated.
 
-All contributions, suggestions, and feedback are accepted under the [Project's license](./LICENSE.md). By contributing, you represent that you own or have the authority to submit the contribution under the [Project's license](./LICENSE.md). All feedback, suggestions, or contributions are not confidential. The project abides by the [UBC-MDS Code of Conduct](https://ubc-mds.github.io/resources_pages/code_of_conduct/).
+## Contributor Agreement
 
-## How To Contribute Code to Diabetes Predictor Py
+By contributing to **QuantaTrack**, you agree that we may redistribute your work under [our license](./LICENSE). 
+In return, we will review your contributions and address any issues as quickly as possible. 
+Please note that by contributing to this project, you also agree to abide by our [Code of Conduct](./CODE_OF_CONDUCT.md).
 
-### Setting Up Your Environment
+### How to Contribute
 
-To contribute, you must first be invited by the administrators of the [UBC-MDS GitHub organization](https://github.com/UBC-MDS). Once you have access:
+There are several ways to get started with contributing to **QuantaTrack**. 
+Whether you’re submitting an issue or contributing code, we welcome all types of feedback and collaboration.
 
-1. **Clone the Repository**  
-   Fork the `diabetes_predictor_py` repository on GitHub, then clone your fork to your local machine. For more details on forking, see the [GitHub Documentation](https://help.github.com/en/articles/fork-a-repo).
+1. If you do not have a [GitHub][github] account, you can [send us comments by email][contact]. 
+However, using GitHub is more efficient for quick responses.
 
-   ```bash
-   git clone https://github.com/YOUR-USERNAME/diabetes_predictor_py.git
-   ```
+2. If you have a [GitHub][github] account (or are willing to [create one][github-join]) but are not familiar with Git, 
+you can report issues or suggest improvements by [creating an issue][new-issues]. 
+This allows us to keep track of the problem and respond quickly.
 
-2. **Set Up Your Environment**  
-   The project includes both `conda-lock.yml` and `environment.yml` files for managing dependencies. Use `conda` to set up your environment:
+3. If you are comfortable with Git and would like to contribute code, you can submit a pull request (PR). 
+The instructions for doing this are outlined below.
 
-   ```bash
-   conda env create -f environment.yml
-   conda activate diabetes_predictor_py
-   ```
+### Using GitHub
 
-   Alternatively, use `conda-lock` if required for environment replication:
+If you want to contribute via GitHub, we follow [GitHub flow][github-flow] for managing changes. Here are the basic steps:
 
-   ```bash
-   conda-lock install --name diabetes_predictor_py
-   ```
+1. **Fork the repository** to your GitHub account.
+2. **Create a new branch** for each significant change.
+3. **Make your changes** and commit them in the new branch.
+4. **Push your branch** to your fork on GitHub.
+5. **Submit a pull request (PR)** from your branch to the main repository. Be sure to tag a project administrator to review your PR.
+6. If you receive feedback, make any necessary changes, commit them, and push them to your branch: the PR will automatically update.
 
-3. **Sync Your Fork**  
-   To keep your fork up-to-date with changes in the main repository, use the [fetch upstream button on GitHub](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork).
+### What to Contribute
 
-### Creating a Branch
+There are many ways to contribute to **QuantaTrack**:
 
-Before making changes, create a new branch for your work:
+- **Feature Implementation:** Propose new features or improvements to existing ones.
+- **Bug Fixes:** Help fix bugs or issues with the dashboard or app’s functionality.
+- **Documentation:** Improve the documentation for the dashboard app, including setup instructions, usage guides, or API documentation.
+- **Design and UI Improvements:** Contribute to improving the user interface and experience (UX).
+- **Testing:** Help test new features or existing ones to ensure everything works smoothly.
 
-```bash
-git switch -c <your-branch-name>
-```
+### Contribution Guidelines
 
-With this branch checked out, make the desired changes to the project.
+#### Implement Features
 
-### Creating a Pull Request
+If you are proposing a new feature:
 
-When you're ready to submit your changes:
+- Provide a clear explanation of how the feature will work.
+- Keep the scope of the feature as focused as possible, making it easier for others to review and integrate.
+- Be aware that this is a volunteer-driven project, and contributions are welcome!
 
-1. **Commit Your Changes**  
-   Add and commit your changes to the new branch:
+#### Report Bugs
 
-   ```bash
-   git add <modified-files>
-   git commit -m "Descriptive message about your changes"
-   git push origin <your-branch-name>
-   ```
+When reporting a bug, please include the following:
 
-2. **Submit a Pull Request**  
-   Go to the GitHub repository page and create a pull request (PR) from your branch to the main repository. Follow these steps:
-   - Provide a clear description of the changes you made and their purpose.
-   - Tag an administrator as a reviewer to ensure your PR is reviewed promptly.
+- The **browser** and **OS** you are using, as well as the version.
+- A **step-by-step description** of how to reproduce the issue.
+- Screenshots or error logs, if applicable, to help us understand the problem.
 
-   For detailed instructions, refer to [Creating a Pull Request](https://help.github.com/en/articles/creating-a-pull-request).
+#### Write Documentation
 
-3. **Communicate in the Pull Request**  
-   Use the PR discussion thread to communicate with reviewers and collaborators. Respond to feedback and push updates to your branch as needed.
+We value comprehensive documentation to help other users understand and contribute to the project. You can contribute by:
 
-### Getting Your PR Merged
+- Improving the documentation for the dashboard or app’s features.
+- Helping others by writing usage guides, tutorials, or troubleshooting tips.
+- Reviewing existing documentation for clarity and completeness.
 
-After submitting your Pull Request (PR), reviewers may provide feedback or request changes. Make the necessary updates in your branch and push the changes to automatically update the PR. Once your PR is approved, you will be able to merge it into the main branch.
+### What *Not* to Contribute
 
-## Additional Notes
+We are not looking for contributions that:
 
-- Please follow existing code style and conventions in the project.
-- Update relevant documentation (if applicable) as part of your PR.
-- Ensure new features are thoroughly tested and maintain existing functionality.
+- Are **platform-specific** and do not work across different operating systems (e.g., Windows, macOS, and Linux). 
+The dashboard should be cross-platform and work consistently for all users.
+- Include **unnecessary features** or changes that may complicate the user experience without clear benefit.
 
-Thank you for contributing to Diabetes Predictor Py! Your efforts help make this project better for everyone :) 
+### Attribution
+
+This `CONTRIBUTING.md` is adapted from [Software Carpentry's CONTRIBUTING.md][attribution].
+
+[attribution]: https://github.com/swcarpentry/r-novice-inflammation/blob/main/CONTRIBUTING.md
+[contact]: mailto:your-email@example.com
+[github]: https://github.com
+[github-flow]: https://guides.github.com/introduction/flow/
+[github-join]: https://github.com/join
+[how-contribute]: https://egghead.io/courses/how-to-contribute-to-an-open-source-project-on-github
+[new-issues]: https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/creating-an-issue
+[pull-request]: https://help.github.com/en/articles/creating-a-pull-request
+[repo]: https://github.com/UBC-MDS/DSCI-532_2025_3_QuantaTrack
