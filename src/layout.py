@@ -143,10 +143,10 @@ content = html.Div(
     [
         html.H1("NASDAQ 100 Companies", className="mt-3"),
         html.A("NASDAQ 100 Index ETF", href="https://www.invesco.com/us/financial-products/etfs/product-detail?audienceType=Investor&productId=ETF-QQQM", className="text-primary"),
+        # 使用 Iframe 显示 pyecharts 渲染的图表
+        html.Iframe(srcDoc=render_pie_chart(), style={"border": "0", "width": "100%", "height": "600px"}),
         html.Div("Filter Criteria", className="text-muted"),
         filter_form,
-        # 修改：使用 Iframe 显示 pyecharts 渲染的图表
-        html.Iframe(srcDoc=render_pie_chart(), style={"border": "0", "width": "100%", "height": "600px"}),
         # 新增下载 CSV 按钮和下载组件
         dbc.Button("Download CSV", id="download-csv-btn", color="primary", className="mb-3"),
         dcc.Download(id="download-csv"),

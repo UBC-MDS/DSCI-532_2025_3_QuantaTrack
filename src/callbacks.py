@@ -6,7 +6,6 @@ from qqqm_data import getQQQMHolding
 
 df = getQQQMHolding()
 
-
 def register_callbacks(app):
     """注册 Dash 回调函数"""
 
