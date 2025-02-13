@@ -65,8 +65,9 @@ def getMinuteData(ticker):
     df['volume_total'] = df['volume_total'].ffill()
 
     # 将 timestamp 转换为 pandas 的 datetime 对象
-    df['Timestamp_str'] = pd.to_datetime(df['timestamp'].to_list(), unit='ms').tz_localize('UTC').tz_convert('America/New_York')
-    df['Timestamp_str'] = df['Timestamp_str'].dt.strftime('%Y-%m-%d %H:%M:%S')
+    df['Timestamp_str'] = pd.to_datetime(df['timestamp'], unit='ms', utc=True)\
+                           .tz_convert('America/New_York')\
+                           .dt.strftime('%Y-%m-%d %H:%M:%S')
 
     # 加入 Ticker 列
     df['Ticker'] = ticker
@@ -109,12 +110,9 @@ def getBatchQuote(symbols):
        'goodwill_in_net_assets', 'shareholder_funds']
     """
     # 将 timestamp 转换为 pandas 的 datetime 对象
-    df['Timestamp_str'] = (
-        pd.to_datetime(df['timestamp'].to_list(), unit='ms')
-        .tz_localize('UTC')
-        .tz_convert('America/New_York')
-        .strftime('%Y-%m-%d %H:%M:%S %z')
-    )
+    df['Timestamp_str'] = pd.to_datetime(df['timestamp'], unit='ms', utc=True)\
+                           .dt.tz_convert('America/New_York')\
+                           .dt.strftime('%Y-%m-%d %H:%M:%S %z')
 
     # 填充缺失值
     df.fillna({'dividend': 0, 'dividend_yield': 0}, inplace=True)
@@ -155,24 +153,15 @@ def getBondQuote(symbols):
        'Timestamp_str']
     """
     # 将 timestamp 转换为 pandas 的 datetime 对象
-    df['Timestamp_str'] = (
-        pd.to_datetime(df['timestamp'].to_list(), unit='ms')
-        .tz_localize('UTC')
-        .tz_convert('Asia/Shanghai')
-        .strftime('%Y-%m-%d %H:%M:%S %z')
-    )
-    df['list_date_str'] = (
-        pd.to_datetime(df['list_date'].to_list(), unit='ms')
-        .tz_localize('UTC')
-        .tz_convert('Asia/Shanghai')
-        .strftime('%Y-%m-%d')
-    )
-    df['maturity_date_str'] = (
-        pd.to_datetime(df['maturity_date'].to_list(), unit='ms')
-        .tz_localize('UTC')
-        .tz_convert('Asia/Shanghai')
-        .strftime('%Y-%m-%d')
-    )
+    df['Timestamp_str'] = pd.to_datetime(df['timestamp'], unit='ms', utc=True)\
+                           .dt.tz_convert('Asia/Shanghai')\
+                           .dt.strftime('%Y-%m-%d %H:%M:%S %z')
+    df['list_date_str'] = pd.to_datetime(df['list_date'], unit='ms', utc=True)\
+                           .dt.tz_convert('Asia/Shanghai')\
+                           .dt.strftime('%Y-%m-%d')
+    df['maturity_date_str'] = pd.to_datetime(df['maturity_date'], unit='ms', utc=True)\
+                               .dt.tz_convert('Asia/Shanghai')\
+                               .dt.strftime('%Y-%m-%d')
     # 填充缺失值
     #df.fillna({'dividend': 0, 'dividend_yield': 0}, inplace=True)
 
@@ -203,18 +192,12 @@ def getETFQuote(symbols):
     '''
 
     # 将 timestamp 转换为 pandas 的 datetime 对象
-    df['Timestamp_str'] = (
-        pd.to_datetime(df['timestamp'].to_list(), unit='ms')
-        .tz_localize('UTC')
-        .tz_convert('Asia/Shanghai')
-        .strftime('%Y-%m-%d %H:%M:%S %z')
-    )
-    df['NAV_Date_str'] = (
-        pd.to_datetime(df['nav_date'].to_list(), unit='ms')
-        .tz_localize('UTC')
-        .tz_convert('Asia/Shanghai')
-        .strftime('%Y-%m-%d')
-    )
+    df['Timestamp_str'] = pd.to_datetime(df['timestamp'], unit='ms', utc=True)\
+                           .dt.tz_convert('Asia/Shanghai')\
+                           .dt.strftime('%Y-%m-%d %H:%M:%S %z')
+    df['NAV_Date_str'] = pd.to_datetime(df['nav_date'], unit='ms', utc=True)\
+                          .dt.tz_convert('Asia/Shanghai')\
+                          .dt.strftime('%Y-%m-%d')
     # 填充缺失值
     #df.fillna({'dividend': 0, 'dividend_yield': 0}, inplace=True)
 
@@ -237,12 +220,9 @@ def getUSETFQuote(symbols):
     df = pd.DataFrame(quote_data_list)
 
     # 将 timestamp 转换为 pandas 的 datetime 对象
-    df['Timestamp_str'] = (
-        pd.to_datetime(df['timestamp'].to_list(), unit='ms')
-        .tz_localize('UTC')
-        .tz_convert('Asia/Shanghai')
-        .strftime('%Y-%m-%d %H:%M:%S %z')
-    )
+    df['Timestamp_str'] = pd.to_datetime(df['timestamp'], unit='ms', utc=True)\
+                           .dt.tz_convert('Asia/Shanghai')\
+                           .dt.strftime('%Y-%m-%d %H:%M:%S %z')
 
     # 填充缺失值
     #df.fillna({'dividend': 0, 'dividend_yield': 0}, inplace=True)
@@ -303,12 +283,9 @@ def getStockHistory(symbol,days = 30, begin = get_current_beijing_time()):
     df = pd.DataFrame(items, columns=columns)
 
     # 将 timestamp 转换为 pandas 的 datetime 对象
-    df['Timestamp_str'] = (
-        pd.to_datetime(df['timestamp'].to_list(), unit='ms')
-        .tz_localize('UTC')
-        .tz_convert('Asia/Shanghai')
-        .strftime('%Y-%m-%d %H:%M:%S %z')
-    )
+    df['Timestamp_str'] = pd.to_datetime(df['timestamp'], unit='ms', utc=True)\
+                           .dt.tz_convert('Asia/Shanghai')\
+                           .dt.strftime('%Y-%m-%d %H:%M:%S %z')
 
     df['percent'] = df['percent'].div(100)
     # 加入 Ticker 列
