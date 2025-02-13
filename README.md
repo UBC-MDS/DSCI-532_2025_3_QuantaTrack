@@ -2,7 +2,7 @@
 
 ## Authors
 
-Ethan Fange, Jenny Zhang, Kevin Gao, Ziyuan Zhao (alphabetically ordered)
+Ethan Fang, Jenny Zhang, Kevin Gao, Ziyuan Zhao (alphabetically ordered)
 
 ## About
 
