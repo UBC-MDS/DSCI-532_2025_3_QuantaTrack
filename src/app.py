@@ -1,7 +1,7 @@
 import dash
 import dash_bootstrap_components as dbc
-from src.layout import layout
-from src.callbacks import register_callbacks
+from layout import layout
+from callbacks import register_callbacks
 
 # 初始化 Dash 应用
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])

@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 from io import BytesIO
 
-from src.xueqiu_data import getBatchQuote
+from xueqiu_data import getBatchQuote
 # 添加缓存变量
 _ndx_holding_cache = None
 

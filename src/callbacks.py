@@ -1,7 +1,8 @@
 import pandas as pd
-from dash import Input, Output, dcc   \
+import plotly.express as px  # 新增导入 Plotly Express
+from dash import Input, Output, dcc
 
-from src.qqqm_data import getQQQMHolding
+from qqqm_data import getQQQMHolding
 
 df = getQQQMHolding()
 
@@ -26,9 +27,9 @@ def register_callbacks(app):
         Output("stock-table", "data"),
         [Input("filter-ticker", "value"),
          Input("filter-name", "value"),
-         Input("filter-sector", "value")]
+         Input("filter-sector", "value")]  # 移除 PE 滑块监听
     )
-    def update_table(ticker, name, sector):
+    def update_table(ticker, name, sector):  # 移除 pe_range 参数
         """更新表格数据"""
         filtered_df = df.copy()
 

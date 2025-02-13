@@ -1,6 +1,56 @@
+# %%
 import dash_bootstrap_components as dbc
 from dash import dcc, html, dash_table, callback, Input, Output, State
+import pandas as pd
 
+from pyecharts.charts import Pie
+from pyecharts import options as opts
+from qqqm_data import getQQQMHolding
+
+
+def render_pie_chart():
+    # 1. 获取并处理数据
+    _df = getQQQMHolding()
+    df_group = _df.groupby('Name', as_index=False).agg({'Weight': 'sum'})
+    df_group = df_group.sort_values(by='Weight', ascending=False)
+    top_10 = df_group.nlargest(10, 'Weight')
+    rest = df_group.iloc[10:]
+    rest_combined = pd.DataFrame({'Name': ['Other Companies'], 'Weight': [rest['Weight'].sum()]})
+    combined_df = pd.concat([top_10, rest_combined], ignore_index=True)
+    
+    # 2. 组装 (名称, 权重) 列表
+    data = list(zip(combined_df['Name'], combined_df['Weight']))
+
+    # 3. 为前 10 项指定不同颜色
+    colors= [
+        "#5470C6", "#91CC75", "#FAC858", "#EE6666", "#73C0DE",
+        "#3BA272", "#FC8452", "#9A60B4", "#EA7CCC", "#4A90E2","#999999"]
+
+    # 4. 创建环形图
+    chart = (
+        Pie()
+        .add(
+            series_name="",
+            data_pair=data,
+            radius=["40%", "75%"],  # 环形图的内外半径
+            center=["50%", "50%"]   # 图表居中
+        )
+        .set_colors(colors)  # 为每个扇区设置颜色
+        .set_global_opts(
+            title_opts=opts.TitleOpts(
+                title="NASDAQ 100 Companies by Weight", 
+                pos_left="center"
+            ),
+            legend_opts=opts.LegendOpts(is_show=False),  # 隐藏图例
+            tooltip_opts=opts.TooltipOpts(formatter="{b}: {d}%")
+        )
+    )
+
+    # 5. 返回嵌入式 HTML
+    return chart.render_embed()
+
+
+# %%
 # 侧边栏 (Sidebar)
 sidebar = html.Div(
     [
@@ -90,7 +140,7 @@ store_components = html.Div([
     dcc.Store(id="original-data")  # 假定在首次加载时设置为原始数据内容
 ])
 
-# 页面内容 (Main Content)
+# 页面内容 (Main Content) 修改：使用 html.Iframe 显示 pyecharts 图表
 content = html.Div(
     [
         html.H2("NASDAQ 100 Companies", className="mt-3"),
@@ -98,6 +148,8 @@ content = html.Div(
         dbc.Checkbox(id="show-charts", label="Show Charts", value=False),
         html.Div("Filter Criteria", className="text-muted"),
         filter_form,
+        # 修改：使用 Iframe 显示 pyecharts 渲染的图表
+        html.Iframe(srcDoc=render_pie_chart(), style={"border": "0", "width": "100%", "height": "600px"}),
         # 新增下载 CSV 按钮和下载组件
         dbc.Button("Download CSV", id="download-csv-btn", color="primary", className="mb-3"),
         dcc.Download(id="download-csv"),
