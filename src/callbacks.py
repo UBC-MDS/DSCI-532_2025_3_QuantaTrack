@@ -27,9 +27,9 @@ def register_callbacks(app):
         Output("stock-table", "data"),
         [Input("filter-ticker", "value"),
          Input("filter-name", "value"),
-         Input("filter-sector", "value")]  # 移除 PE 滑块监听
+         Input("filter-sector", "value")]  
     )
-    def update_table(ticker, name, sector):  # 移除 pe_range 参数
+    def update_table(ticker, name, sector):  
         """更新表格数据"""
         filtered_df = df.copy()
 
@@ -65,14 +65,6 @@ def register_callbacks(app):
                     "backgroundColor": color
                 })
         return styles
-
-    @app.callback(
-        Output("show-charts", "style"),
-        [Input("show-charts", "value")]
-    )
-    def toggle_chart_visibility(show):
-        """控制图表显示隐藏"""
-        return {"display": "block" if show else "none"}
 
     @app.callback(
         Output("download-csv", "data"),

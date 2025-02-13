@@ -1,4 +1,3 @@
-# %%
 import dash_bootstrap_components as dbc
 from dash import dcc, html, dash_table, callback, Input, Output, State
 import pandas as pd
@@ -50,7 +49,6 @@ def render_pie_chart():
     return chart.render_embed()
 
 
-# %%
 # 侧边栏 (Sidebar)
 sidebar = html.Div(
     [
@@ -143,9 +141,8 @@ store_components = html.Div([
 # 页面内容 (Main Content) 修改：使用 html.Iframe 显示 pyecharts 图表
 content = html.Div(
     [
-        html.H2("NASDAQ 100 Companies", className="mt-3"),
+        html.H1("NASDAQ 100 Companies", className="mt-3"),
         html.A("NASDAQ 100 Index ETF", href="https://www.invesco.com/us/financial-products/etfs/product-detail?audienceType=Investor&productId=ETF-QQQM", className="text-primary"),
-        dbc.Checkbox(id="show-charts", label="Show Charts", value=False),
         html.Div("Filter Criteria", className="text-muted"),
         filter_form,
         # 修改：使用 Iframe 显示 pyecharts 渲染的图表
@@ -175,6 +172,7 @@ layout = html.Div([sidebar, content])
     State("original-data", "data"),
     prevent_initial_call=True
 )
+
 def update_sort(sort_by, sort_state, data, original_data):
     # 初始化原始数据
     if not original_data:
