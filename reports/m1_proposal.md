@@ -1,6 +1,13 @@
 # QuantaTrack Proposal
 
 ## 1. Motivation and purpose
+
+The rapidly changing landscape of financial markets demands tools that provide real-time insights and empower investors to make informed decisions with confidence. QuantaTrack was developed to address this need, offering a comprehensive and user-friendly dashboard tailored for monitoring the NASDAQ100. With a focus on accessibility and functionality, the platform aims to equip investors with the necessary tools to track critical performance metrics, analyze trends, and assess market shifts—all in one place.
+
+At its core, QuantaTrack seeks to simplify the complex world of investing by consolidating essential data into an intuitive interface. The app's advanced analytics tools enable users to closely monitor individual stocks, spot emerging trends, and identify potential investment opportunities. By delivering detailed performance analysis, QuantaTrack helps investors not only to track their portfolio but also to anticipate market movements and adapt their strategies accordingly.
+
+The purpose of QuantaTrack is to bridge the gap between technical complexity and practical usability. We want to ensure that investors, whether seasoned or new to the market, can quickly access the information they need to make decisions that align with their investment goals. In an era where time is critical, QuantaTrack aims to be the go-to platform for navigating the NASDAQ100, offering reliable data and insights that support effective decision-making in a fast-paced market environment.
+
 ## 2. Description of the data
 
 The dataset used for this project is derived from the NASDAQ 100 Companies and includes key financial metrics for each company in the index. 
