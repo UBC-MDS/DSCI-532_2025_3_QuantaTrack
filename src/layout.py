@@ -83,6 +83,25 @@ filter_form = dbc.Row(
     className="mb-3",
 )
 
+# 修改更新频率选择 Dropdown：选项改为 "3秒"、"10秒" 和 "不更新"，默认值为 "不更新"
+update_speed_dropdown = dbc.Row(
+    dbc.Col(
+        dcc.Dropdown(
+            id="update-speed",
+            options=[
+                {"label": "3秒", "value": "3秒"},
+                {"label": "10秒", "value": "10秒"},
+                {"label": "不更新", "value": "不更新"}
+            ],
+            value="不更新",
+            clearable=False,
+            style={"width": "150px"}
+        ),
+        width="auto"
+    ),
+    className="mb-3"
+)
+
 # 保存原始列定义（用于恢复原始表头名称）
 original_columns = [
     {"name": col, "id": col, "type": "numeric", "format": {"specifier": ".2%"}}
@@ -132,11 +151,19 @@ table = dash_table.DataTable(
     style_data_conditional=[],  # 回调将更新该属性
 )
 
-# 添加 dcc.Store 保存排序状态和原始数据顺序
+# 修改 store_components，新增 data-store 用于存放更新数据
 store_components = html.Div([
     dcc.Store(id="sort-state", data={}),
-    dcc.Store(id="original-data")  # 假定在首次加载时设置为原始数据内容
+    dcc.Store(id="original-data"),
+    dcc.Store(id="data-store")
 ])
+
+# 新增 dcc.Interval 用于触发数据更新（隐藏组件）
+data_update_interval = dcc.Interval(
+    id="data-update-interval",
+    interval=1000,  # 默认 1秒
+    n_intervals=0
+)
 
 # 页面内容 (Main Content) 修改：使用 html.Iframe 显示 pyecharts 图表
 content = html.Div(
@@ -146,12 +173,14 @@ content = html.Div(
         # 使用 Iframe 显示 pyecharts 渲染的图表
         html.Iframe(srcDoc=render_pie_chart(), style={"border": "0", "width": "100%", "height": "600px"}),
         html.Div("Filter Criteria", className="text-muted"),
+        update_speed_dropdown,  # 新增更新频率选择控件
         filter_form,
         # 新增下载 CSV 按钮和下载组件
         dbc.Button("Download CSV", id="download-csv-btn", color="primary", className="mb-3"),
         dcc.Download(id="download-csv"),
         table,
-        store_components  # 添加排序状态与原始数据存储
+        store_components,  # 添加排序状态与原始数据存储
+        data_update_interval  # 新增 Interval 控件，用于周期更新
     ],
     style={"margin-left": "220px", "padding": "20px"},
 )
@@ -206,9 +235,9 @@ def update_sort(sort_by, sort_state, data, original_data):
         cid = col_def["id"]
         base_name = col_def["name"].split(" ")[0]
         arrow = ""
-        if sort_state.get(cid, "none") == "asc":
+        if sort_state.get(cid, "asc") == "asc":
             arrow = " ↑"
-        elif sort_state.get(cid, "none") == "desc":
+        elif sort_state.get(cid, "desc") == "desc":
             arrow = " ↓"
         new_columns.append({**col_def, "name": base_name + arrow})
 

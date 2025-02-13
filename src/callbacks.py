@@ -1,10 +1,9 @@
 import pandas as pd
 import plotly.express as px  # 新增导入 Plotly Express
 from dash import Input, Output, dcc
+import dash
 
 from qqqm_data import getQQQMHolding
-
-df = getQQQMHolding()
 
 def register_callbacks(app):
     """注册 Dash 回调函数"""
@@ -22,29 +21,44 @@ def register_callbacks(app):
         except:
             return ''
 
+    # 回调：每 n 秒更新数据，存入 dcc.Store（需在布局中添加 dcc.Store(id="data-store")）
+    @app.callback(
+        Output("data-store", "data"),
+        Input("data-update-interval", "n_intervals")
+    )
+    def update_data(n_intervals):
+        return getQQQMHolding().to_dict("records")
+
+    # 回调：根据下拉菜单选择更新频率，修改 Interval 组件属性（需在布局中添加 dcc.Interval(id="data-update-interval")和 dcc.Dropdown(id="update-speed")）
+    @app.callback(
+        [Output("data-update-interval", "disabled"), Output("data-update-interval", "interval")],
+        Input("update-speed", "value")
+    )
+    def update_interval_speed(value):
+        if value == "3秒":
+            return False, 3000
+        elif value == "10秒":
+            return False, 10000
+        else:  # "不更新"
+            return True, 1000  # interval 值无关紧要
+
     @app.callback(
         Output("stock-table", "data"),
         [Input("filter-ticker", "value"),
          Input("filter-name", "value"),
-         Input("filter-sector", "value")]  
+         Input("filter-sector", "value"),
+         Input("data-store", "data")]
     )
-    def update_table(ticker, name, sector):  
+    def update_table(ticker, name, sector, data):
         """更新表格数据"""
-        filtered_df = df.copy()
-
-        # 按 Ticker 过滤（模糊匹配）
+        df = pd.DataFrame(data) if data else pd.DataFrame()
         if ticker:
-            filtered_df = filtered_df[filtered_df["Ticker"].str.contains(ticker, case=False, na=False)]
-
-        # 按 Name 过滤（模糊匹配）
+            df = df[df["Ticker"].str.contains(ticker, case=False, na=False)]
         if name:
-            filtered_df = filtered_df[filtered_df["Name"].str.contains(name, case=False, na=False)]
-
-        # 按 Sector 过滤
+            df = df[df["Name"].str.contains(name, case=False, na=False)]
         if sector and sector != "All":
-            filtered_df = filtered_df[filtered_df["Sector"] == sector]
-
-        return filtered_df.to_dict("records")
+            df = df[df["Sector"] == sector]
+        return df.to_dict("records")
 
     @app.callback(
         Output("stock-table", "style_data_conditional"),
@@ -67,9 +81,18 @@ def register_callbacks(app):
 
     @app.callback(
         Output("download-csv", "data"),
-        Input("download-csv-btn", "n_clicks"),
+        [Input("download-csv-btn", "n_clicks"),
+         Input("data-store", "data")],
         prevent_initial_call=True
     )
-    def download_csv(n_clicks):
-        """将 df 导出为 CSV 文件下载"""
-        return dcc.send_data_frame(df.to_csv, "NASDAQ_100.csv", index=False)
+    def download_csv(n_clicks, data):
+        """当点击按钮时将数据导出为 CSV 文件下载"""
+        ctx = dash.callback_context
+        if not ctx.triggered or ctx.triggered[0]["prop_id"] != "download-csv-btn.n_clicks":
+            # 如果不是按钮触发，则不进行下载
+            from dash.exceptions import PreventUpdate
+            raise PreventUpdate
+        df = pd.DataFrame(data) if data else pd.DataFrame()
+        def generate_csv_text(_):
+            return df.to_csv(index=False)
+        return dcc.send_string(generate_csv_text, "NASDAQ_100.csv")
