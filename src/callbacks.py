@@ -1,24 +1,26 @@
 import pandas as pd
-from dash import Input, Output
+from dash import Input, Output, dcc   \
 
-# 预设数据（模拟 NASDAQ 100 数据）
-data = {
-    "Ticker": ["AAPL", "NVDA", "MSFT", "AMZN", "AVGO", "META"],
-    "Name": ["Apple Inc", "NVIDIA Corp", "Microsoft Corp", "Amazon.com Inc", "Broadcom Inc", "Meta Platforms Inc"],
-    "Weight": ["8.68%", "8.03%", "7.70%", "6.09%", "4.39%", "3.94%"],
-    "Price": [236.23, 130.97, 409.05, 230.67, 236.01, 725.01],
-    "IntradayReturn": [1.55, -1.38, -0.58, -0.90, 0.41, 0.72],
-    "Volume": ["28.06M", "123.99M", "10.64M", "19.29M", "10.40M", "8.69M"],
-    "Amount": ["6.57B", "16.26B", "4.35B", "4.44B", "2.43B", "6.26B"],
-    "MarketCap": ["3548.66B", "3207.33B", "3040.83B", "2444.58B", "1106.26B", "1836.93B"],
-    "YTDReturn": [-5.56, -2.48, -2.95, 5.14, 1.80, 23.83],
-    "Sector": ["Tech", "Tech", "Tech", "Consumer", "Tech", "Consumer"],
-}
+from src.qqqm_data import getQQQMHolding
 
-df = pd.DataFrame(data)
+df = getQQQMHolding()
+
 
 def register_callbacks(app):
     """注册 Dash 回调函数"""
+
+    def highlight_change(val):
+        try:
+            val = float(val)
+            if val < 0:
+                opacity = min(abs(val) / 0.1, 1)
+                color = f'rgba(255, 0, 0, {opacity})'  # 红色渐变
+            else:
+                opacity = min(val / 0.1, 1)
+                color = f'rgba(0, 255, 0, {opacity})'  # 绿色渐变
+            return color
+        except:
+            return ''
 
     @app.callback(
         Output("stock-table", "data"),
@@ -45,9 +47,37 @@ def register_callbacks(app):
         return filtered_df.to_dict("records")
 
     @app.callback(
+        Output("stock-table", "style_data_conditional"),
+        Input("stock-table", "data")
+    )
+    def update_intraday_return_styles(data):
+        """应用 highlight_change 至 IntradayReturn 列"""
+        styles = []
+        if data:
+            for i, row in enumerate(data):
+                val = row.get("IntradayReturn")
+                if val is None:
+                    continue
+                color = highlight_change(val)
+                styles.append({
+                    "if": { "row_index": i, "column_id": "IntradayReturn" },
+                    "backgroundColor": color
+                })
+        return styles
+
+    @app.callback(
         Output("show-charts", "style"),
         [Input("show-charts", "value")]
     )
     def toggle_chart_visibility(show):
         """控制图表显示隐藏"""
         return {"display": "block" if show else "none"}
+
+    @app.callback(
+        Output("download-csv", "data"),
+        Input("download-csv-btn", "n_clicks"),
+        prevent_initial_call=True
+    )
+    def download_csv(n_clicks):
+        """将 df 导出为 CSV 文件下载"""
+        return dcc.send_data_frame(df.to_csv, "NASDAQ_100.csv", index=False)
