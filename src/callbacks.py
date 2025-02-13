@@ -35,9 +35,9 @@ def register_callbacks(app):
         Input("update-speed", "value")
     )
     def update_interval_speed(value):
-        if value == "3秒":
+        if value == "3s":
             return False, 3000
-        elif value == "10秒":
+        elif value == "10s":
             return False, 10000
         else:  # "不更新"
             return True, 1000  # interval 值无关紧要
