@@ -85,17 +85,20 @@ Next, John dives deeper into the intraday return metric and notices that Tesla I
 
 ![QuantaTrack Dashboard Sketch](../img/sketch.png)
 
-### High-Level Description
+### Description
 
-The QuantaTrack dashboard consists of multiple interactive components designed for real-time market monitoring. Users can filter data, analyze key financial metrics, and visualize trends efficiently. The main components of the dashboard include:
+The QuantaTrack dashboard is designed to provide investors with an interactive and user-friendly experience for tracking the NASDAQ 100 index. The interface is structured into multiple panels, allowing users to explore financial metrics and stock performance efficiently.
 
-- **Filters & Controls Panel (Left Sidebar):** Users can filter companies based on sector, market capitalization, and time range. A search box allows quick lookup of specific companies.
-- **NASDAQ 100 Industry Distribution (Pie Chart):** Displays sector-wise distribution of companies within the NASDAQ 100 index.
-- **Top/Bottom 10 Intraday Contributors (Bar Charts - Horizontal & Vertical):** Highlights the top-performing and worst-performing companies based on their intraday returns.
-- **Sector-Wise Weighted Return (Bubble/Scatter Plot):** Helps investors compare sector performance with respective market weights.
-- **YTD Return Distribution (Histogram):** Shows the spread of returns across all companies in the NASDAQ 100, helping users analyze market trends.
-- **Model Price vs. Actual Price (Scatter Plot):** Compares real stock prices to predicted model values, with dividend yield represented through color intensity.
-- **Stock Screener Table:** A sortable and searchable table providing key stock-level financial metrics.
+- **Filters & Controls Panel:** This section enables users to refine their analysis by filtering companies based on sector, selecting a specific index (NASDAQ 100 or S&P 500), and searching for companies by ticker or name. These tools ensure that users can easily focus on relevant data.
 
-Users will interact with the dashboard by adjusting filters, selecting specific stocks, and analyzing detailed company performance to make informed investment decisions.
+- **NASDAQ 100 by Industry (Pie Chart):** This visualization represents the sectoral composition of the NASDAQ 100, helping users understand the weight of different industries in the index.
 
+- **Intraday Contribution by Company (Bar Chart - Horizontal):** This chart highlights the top and bottom companies in terms of intraday performance, allowing users to quickly identify the biggest market movers.
+
+- **Model Price vs. Actual Price with Dividend Yield (Scatter Plot):** This visualization compares the actual market price of stocks to their estimated model prices, with the dividend yield represented as a color gradient. This helps investors identify potentially overvalued or undervalued stocks.
+
+- **YTD Return Distribution (Histogram):** This plot shows the year-to-date return distribution of NASDAQ 100 stocks, helping users assess market trends and overall performance.
+
+- **Stock Screener Table:** The table provides a structured, sortable, and searchable view of key financial data for NASDAQ 100 companies, including market cap and YTD return. Users can quickly identify trends and compare different stocks based on their financial metrics.
+
+Users will interact with the dashboard by applying filters, hovering over data points for detailed insights, and dynamically updating the visualizations to explore trends and market shifts. The combination of structured data tables and interactive charts ensures that investors can make data-driven decisions efficiently. The design follows best practices for financial data visualization, keeping complexity manageable while ensuring that all key insights are easily accessible.
