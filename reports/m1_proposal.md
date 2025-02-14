@@ -83,7 +83,7 @@ Next, John dives deeper into the intraday return metric and notices that Tesla I
 
 ### App Sketch
 
-![QuantaTrack Dashboard Sketch](img/sketch.png)
+![QuantaTrack Dashboard Sketch](../img/sketch.png)
 
 ### High-Level Description
 
