@@ -56,7 +56,7 @@ sidebar = html.Div(
         html.Ul(
             [
                 html.Li(dbc.NavLink("NASDAQ 100", active=True, href="#")),
-                html.Li("S&P 500"),
+                #html.Li("S&P 500"),
             ]
         ),
     ],
