@@ -4,7 +4,7 @@
 
 The financial markets are evolving rapidly, and investors face the challenge of making informed decisions amid a sea of complex data. QuantaTrack was developed to address this need, providing a user-friendly dashboard designed for tracking and analyzing the NASDAQ100. The platform aims to simplify market analysis by offering investors access to key performance metrics and trends, all in one place. QuantaTrack’s purpose is to streamline complex data and make it actionable, helping users stay informed and confident in their investment decisions.
 
-QuantaTrack is built to serve both seasoned investors and those new to the market, providing a straightforward interface for monitoring market shifts, spotting emerging trends, and assessing stock performance. By combining advanced analytics with easy-to-understand visuals, QuantaTrack helps users track their portfolio, anticipate market movements, and adapt their strategies in real-time. In an environment where quick, informed decisions are critical, QuantaTrack aims to be the go-to platform for investors seeking reliable insights on the NASDAQ100.
+QuantaTrack is built to serve both seasoned investors and those new to the market, providing a straightforward interface for monitoring market shifts, spotting emerging trends, and assessing stock performance. By combining advanced analytics with easy-to-understand visuals, QuantaTrack helps users track their portfolio, anticipate market movements, and adapt their strategies in real-time. The purpose of QuantaTrack is to bridge the gap between technical complexity and practical usability, ensuring that users can quickly access the information they need. In an environment where quick, informed decisions are critical, QuantaTrack aims to be the go-to platform for investors seeking reliable insights on the NASDAQ100.
 
 ## 2. Description of the data
 
@@ -46,7 +46,7 @@ Next, John dives deeper into the intraday return metric and notices that Tesla I
 
 The QuantaTrack dashboard is designed to provide investors with an interactive and user-friendly experience for tracking the NASDAQ 100 index. The interface is structured into multiple panels, allowing users to explore financial metrics and stock performance efficiently.
 
-- **Filters & Controls Panel:** This section enables users to refine their analysis by filtering companies based on sector, selecting a specific index (NASDAQ 100), and searching for companies by ticker or name. These tools ensure that users can easily focus on relevant data.
+- **Filters & Controls Panel:** This section enables users to refine their analysis by filtering companies based on sector and searching for companies by ticker or name. These tools ensure that users can easily focus on relevant data.
 
 - **NASDAQ 100 by Industry (Pie Chart):** This visualization represents the sectoral composition of the NASDAQ 100, helping users understand the weight of different industries in the index.
 
