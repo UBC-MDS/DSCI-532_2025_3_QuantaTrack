@@ -129,14 +129,17 @@ dmypy.json
 .pyre/
 **__pycache__
 
-# PyCharm
-.idea/
+src/__pycache__
+tests/__pycache__
 
-# RStudio project files
-**.Rproj.user/
-**.Rproj.user*
-**.Rproj
 **.Rhistory
+**.ipython
+**.Jupyter
+**.local
+**.npm
+**.pytest_cache
+*.bash_history
 
-# MacOS
-.DS_Store
+**.cache/
+**.conda/
+
