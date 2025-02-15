@@ -29,7 +29,7 @@ SOFTWARE.
 ## Non-Software Content
 
 The non-software content, including but not limited to documentation, design, and visual elements, 
-is licensed under the **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Licens**. 
+is licensed under the **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License**. 
 You are free to use, modify, and redistribute the content, provided that you give appropriate credit to the creators and indicate if changes were made.
 
 Copyright (c) 2025, Ethan Fang, Jenny Zhang, Kevin Gao, Ziyuan Zhao
