@@ -43,7 +43,6 @@ There are many ways to contribute to **QuantaTrack**:
 - **Bug Fixes:** Help fix bugs or issues with the dashboard or app’s functionality.
 - **Documentation:** Improve the documentation for the dashboard app, including setup instructions, usage guides, or API documentation.
 - **Design and UI Improvements:** Contribute to improving the user interface and experience (UX).
-- **Testing:** Help test new features or existing ones to ensure everything works smoothly.
 
 ### Contribution Guidelines
 
