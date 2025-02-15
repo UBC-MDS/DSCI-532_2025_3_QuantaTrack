@@ -46,7 +46,7 @@ Next, John dives deeper into the intraday return metric and notices that Tesla I
 
 The QuantaTrack dashboard is designed to provide investors with an interactive and user-friendly experience for tracking the NASDAQ 100 index. The interface is structured into multiple panels, allowing users to explore financial metrics and stock performance efficiently.
 
-- **Filters & Controls Panel:** This section enables users to refine their analysis by filtering companies based on sector, selecting a specific index (NASDAQ 100 or S&P 500), and searching for companies by ticker or name. These tools ensure that users can easily focus on relevant data.
+- **Filters & Controls Panel:** This section enables users to refine their analysis by filtering companies based on sector and searching for companies by ticker or name. These tools ensure that users can easily focus on relevant data.
 
 - **NASDAQ 100 by Industry (Pie Chart):** This visualization represents the sectoral composition of the NASDAQ 100, helping users understand the weight of different industries in the index.
 
