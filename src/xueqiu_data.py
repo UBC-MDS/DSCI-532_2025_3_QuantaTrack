@@ -6,9 +6,11 @@ import pytz
 
 import requests
 
+# 提取 headers
 headers = {
     "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
     "accept-language": "zh-CN,zh;q=0.9,en;q=0.8",
+    "cache-control": "max-age=0",
     "priority": "u=0, i",
     "sec-ch-ua": '"Not(A:Brand";v="99", "Google Chrome";v="133", "Chromium";v="133")',
     "sec-ch-ua-mobile": "?0",
@@ -21,21 +23,23 @@ headers = {
     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
 }
 
+# 提取 cookies
 cookies = {
     "cookiesu": "501716971730603",
     "device_id": "b466cc5fe5c41c2cf5113e1dc9758e94",
     "s": "br1biz2pdb",
     "bid": "3f1caaa1da9c9048cf5319e6a0c33666_lwsmxccn",
     "remember": "1",
-    "xq_a_token": "ad0c76ebec59c335683e9c829d229902421be184",
-    "xqat": "ad0c76ebec59c335683e9c829d229902421be184",
-    "xq_id_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ1aWQiOjIxMTA3NTAwNjIsImlzcyI6InVjIiwiZXhwIjoxNzQxMzI1NTA5LCJjdG0iOjE3Mzg3MzM3NzkyMjYsImNpZCI6ImQ5ZDBuNEFadXAifQ.o3ERaxqVjeTNJblmuRKENhbxML8EMGa0zQuiI4JMy38qDqK3QRcyYBOG2hnfJf1QGCS_1jtUacxjgLjEDwZ_cAeUCdHZ4a4PmFHIxLzwCm_cLg38T2d5NqddtaiceZFl-rmm4kzF6WAUEoAUrJXnrYn9yd4PWjA6pG1tr99und9iB-SZ78Tml0UGHyrka8Qt1ebJ6EVqDrlNABThY9utY9-a4pPnHknN-ooJ15O0rLhTIrqnhO8ZHSer-5ii6rpZuVCfu2xZFXt0YalPXQEcdKVJm5RpADv2ydqPZUDEI8X2GB1dyt2yOn6o8zwbPnV86nQIUQbCKo__gonzvHttnw",
-    "xq_r_token": "fa088756ba361870080110924808b5fa01c3ef13",
     "xq_is_login": "1",
     "u": "2110750062",
-    "Hm_lvt_1db88642e346389874251b5a1eded6e3": "1738819328,1738860881,1738891671,1739173290",
+    "Hm_lvt_1db88642e346389874251b5a1eded6e3": "1739854474,1739914865,1739951903,1739995087",
     "HMACCOUNT": "90AC0DA1311E6AC3",
-    "Hm_lpvt_1db88642e346389874251b5a1eded6e3": "1739173300",
+    "xq_a_token": "c0624837776ef160538ea564c1226a031c57eda2",
+    "xqat": "c0624837776ef160538ea564c1226a031c57eda2",
+    "xq_id_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ1aWQiOjIxMTA3NTAwNjIsImlzcyI6InVjIiwiZXhwIjoxNzQyNjI0MDIxLCJjdG0iOjE3NDAwMzIwMjExNzUsImNpZCI6ImQ5ZDBuNEFadXAifQ.bjooTOEJnB7JmE9BELAWuBLaIG3itZgjq5tH8WmLJW1rsSvg2jhD2fDCjVgVxIdFRRmaEe1BW9abjBtv4EIqAEOtiCTJSBgCd3cqNaK6j6a0PLjrtj2v3YFwcqcsFuZnioNM53bZ6-YZOdOxhkU51Z_wGVXmfLSLo4Y84kciCN2eL6Ybt_9fKlUPMRftdNUh92qOpN9186jfJ9ThuhbM1HrAlizQEatN3geMJCQyQ_O6vhDMv5Z6iNF4X8xXte6t4KE1Yqj-DeBiJaZ3D_IsIWsWEVu7fR3GZEphgoVFFeUcvwTbzithBuCVGXkR-bNpMctvJPvJWzeZxbmQeLasmg",
+    "xq_r_token": "0860346c7cb5f3e8be2929ecc09698c3f53608dc",
+    "is_overseas": "1",
+    "Hm_lpvt_1db88642e346389874251b5a1eded6e3": "1740036370",
 }
 
 
@@ -64,12 +68,14 @@ def getMinuteData(ticker):
     df['amount_total'] = df['amount_total'].ffill()
     df['volume_total'] = df['volume_total'].ffill()
 
-    # 将 timestamp 转换为 pandas 的 datetime 对象
-    df['Timestamp_str'] = pd.to_datetime(df['timestamp'], unit='ms', utc=True)\
-                           .tz_convert('America/New_York')\
-                           .dt.strftime('%Y-%m-%d %H:%M:%S')
+    # 转换为 datetime 类型（毫秒级时间戳）
+    df['Timestamp_str'] = pd.to_datetime(df['timestamp'], unit='ms', utc=True)
 
-    # 加入 Ticker 列
+    # 确保转换后的 datetime 列是 DatetimeIndex
+    df['Timestamp_str'] = df['Timestamp_str'].dt.tz_convert('America/New_York')
+
+    # 以字符串格式存储
+    df['Timestamp_str'] = df['Timestamp_str'].dt.strftime('%Y-%m-%d %H:%M:%S %z')
     df['Ticker'] = ticker
 
     return df
@@ -241,7 +247,17 @@ def get_current_beijing_time():
     milliseconds = int(beijing_now.timestamp() * 1000)
     return milliseconds
 
-def getStockHistory(symbol,days = 30, begin = get_current_beijing_time()):
+def get_current_newyork_time():
+    # 获取当前UTC时间
+    utc_now = datetime.now(pytz.utc)
+    # 将UTC时间转换为北京时间
+    beijing_tz = pytz.timezone('America/New_York')
+    beijing_now = utc_now.astimezone(beijing_tz)
+    # 将北京时间转换为毫秒时间戳
+    milliseconds = int(beijing_now.timestamp() * 1000)
+    return milliseconds
+
+def getStockHistory(symbol,days = 30, timezone = 'Asia/Shanghai'):
     """
     获取一个股票的日线历史数据。
 
@@ -269,6 +285,10 @@ def getStockHistory(symbol,days = 30, begin = get_current_beijing_time()):
     - Timestamp_str: 格式化的北京时间字符串
     - Ticker: 股票代码
     """
+    if timezone == 'Asia/Shanghai':
+        begin = get_current_beijing_time()
+    elif timezone == 'America/New_York':
+        begin  =get_current_newyork_time()
 
     url = f'https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol={symbol}&begin={begin}&period=day&type=before&count=-{days}'
 
@@ -284,7 +304,7 @@ def getStockHistory(symbol,days = 30, begin = get_current_beijing_time()):
 
     # 将 timestamp 转换为 pandas 的 datetime 对象
     df['Timestamp_str'] = pd.to_datetime(df['timestamp'], unit='ms', utc=True)\
-                           .dt.tz_convert('Asia/Shanghai')\
+                           .dt.tz_convert(timezone)\
                            .dt.strftime('%Y-%m-%d %H:%M:%S %z')
 
     df['percent'] = df['percent'].div(100)
@@ -303,7 +323,7 @@ def getStockHistory(symbol,days = 30, begin = get_current_beijing_time()):
 # %%
 if __name__ == "__main__":
     pass
-    df = getMinuteData('AAPL')
+    #df = getMinuteData('AAPL')
     #ticker_list = ['SH019742']
     # ticker_list = ['SZ161125','SZ161130','SH513000','SH513300']
     # df = getETFQuote(ticker_list)
@@ -314,6 +334,9 @@ if __name__ == "__main__":
 
     #stock_ticker_list = ['AAPL','GOOG']
     #df = getBatchQuote(stock_ticker_list)
+
+    df = getStockHistory('AAPL',days = 30, timezone='America/New_York')
+    
 
 
 
