@@ -202,7 +202,6 @@ layout = html.Div([sidebar, content])
     State("original-data", "data"),
     prevent_initial_call=True
 )
-
 def update_sort(sort_by, sort_state, data, original_data):
     # 初始化原始数据
     if not original_data:
