@@ -15,7 +15,6 @@ def register_callbacks(app):
         Input("filter-sector", "value")  # Input: sector dropdown value
     )
     def update_scatter_plot(selected_sectors):
-        print(f"Selected sectors: {selected_sectors}")
         # Call render_scatter_plot function with the selected sectors and return the HTML
         return html.Iframe(
             srcDoc=render_scatter_plot(selected_sectors),  # Generate the chart with selected sectors
@@ -60,22 +59,20 @@ def register_callbacks(app):
         Output("stock-table", "data"),
         [Input("filter-ticker", "value"),
          Input("filter-name", "value"),
-         Input("filter-sector", "value"),
+         # Input("filter-sector", "value"),
          Input("data-store", "data")]
     )
-    def update_table(ticker, name, sector, data):
+    def update_table(ticker, name, data):
         """更新表格数据"""
         df = pd.DataFrame(data) if data else pd.DataFrame()
         
         # Apply sector filter (if "All" is selected, no filtering is applied)
-        if sector and sector != "All":
-            df = df[df["Sector"].isin(sector)]  # Use isin to support multi-sector selection
+        # if "All" not in selected_sectors:  # Only filter if "All" is not selected
+        #     df = df[df["Sector"].isin(selected_sectors)]  # Use isin to support multi-sector selection
         if ticker:
             df = df[df["Ticker"].str.contains(ticker, case=False, na=False)]
         if name:
             df = df[df["Name"].str.contains(name, case=False, na=False)]
-        if sector and sector != "All":
-            df = df[df["Sector"] == sector]
         return df.to_dict("records")
 
     @app.callback(
@@ -101,6 +98,7 @@ def register_callbacks(app):
         Output("download-csv", "data"),
         [Input("download-csv-btn", "n_clicks"),
          Input("data-store", "data")],
+         # Input("filter-sector", "value")],
         prevent_initial_call=True
     )
     def download_csv(n_clicks, data):
@@ -111,11 +109,13 @@ def register_callbacks(app):
             from dash.exceptions import PreventUpdate
             raise PreventUpdate
         df = pd.DataFrame(data) if data else pd.DataFrame()
-        
+        print(df)
+
         # Apply sector filter (if "All" is selected, no filtering is applied)
-        if sector and sector != "All":
-            df = df[df["Sector"].isin(sector)]  # Use isin to support multi-sector selection
+        # if "All" not in selected_sectors:  # Only filter if "All" is not selected
+        #     df = df[df["Sector"].isin(selected_sectors)]  # Use isin to support multi-sector selection
         
-        def generate_csv_text(_):
-            return df.to_csv(index=False)
-        return dcc.send_string(generate_csv_text, "NASDAQ_100.csv")
+        return dcc.send_string(df.to_csv(index=False), "NASDAQ_100.csv")
+        # def generate_csv_text(_):
+        #     return df.to_csv(index=False)
+        # return dcc.send_string(generate_csv_text, "NASDAQ_100.csv")
