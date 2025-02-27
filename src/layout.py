@@ -4,6 +4,7 @@ import pandas as pd
 
 from pyecharts.charts import Pie
 import plotly.graph_objects as go
+import plotly.express as px
 from pyecharts import options as opts
 from qqqm_data import getQQQMHolding
 
@@ -49,52 +50,91 @@ def render_pie_chart():
     # 5. 返回嵌入式 HTML
     return chart.render_embed()
 
-
 # Function to render the scatter plot based on selected sectors
-def render_scatter_plot(selected_sectors="All"):
+def render_scatter_plot(selected_sectors):
     # 1. 获取并处理数据
     _df = getQQQMHolding()
-    print(_df)
 
     # 2. 如果有筛选的 sectors, 根据它们过滤数据
-    if selected_sectors != "All":
+    if "All" not in selected_sectors:  # Only filter if "All" is not selected
         _df = _df[_df["Sector"].isin(selected_sectors)]  # Filter by selected sectors
-    print(_df)
 
     # 3. 清洗和准备数据
     scatter_data = []
     for index, row in _df.iterrows():
-        if pd.notna(row['DividendYield']) and pd.notna(row['ForwardPE']):  # Only take rows with valid values
+        if pd.notna(row['DividendYield']) and pd.notna(row['PE']):  # Only take rows with valid values
             scatter_data.append(
                 {
-                    "x": row['ForwardPE'],  # X-axis: Forward PE
+                    "x": row['PE'],  # X-axis: PE (Forward PE or other PE)
                     "y": row['DividendYield'],  # Y-axis: Dividend Yield
-                    "text": f"{row['Ticker']} - {row['Name']}<br>Dividend Yield = {row['DividendYield']}%<br>Forward PE = {row['ForwardPE']}",  # Tooltip text
-                    "name": row['Name'],  # Display company name in legend
+                    "text": f"{row['Ticker']} - {row['Name']}<br>Sector = {row['Sector']}<br>Dividend Yield = {row['DividendYield']}%<br>PE = {row['PE']}",  # Tooltip with Sector
+                    "name": row['Name'],  # Display company name in legend (if needed)
+                    "sector": row['Sector']  # Store sector information for color coding
                 }
             )
 
     # 4. 创建 Plotly 散点图
     fig = go.Figure()
 
-    # Add data points to the figure
+    # Create a color map for sectors
+    unique_sectors = _df['Sector'].unique()  # Get unique sectors
+    sector_to_color = {sector: px.colors.qualitative.Set1[i % len(px.colors.qualitative.Set1)] 
+                       for i, sector in enumerate(unique_sectors)}  # Map sector to a color using a color palette
+
+    # 5. 创建 Plotly 散点图
+    fig = go.Figure()
+
+    # Add data points to the figure, color by sector
     for data in scatter_data:
         fig.add_trace(go.Scatter(
             x=[data['x']],
             y=[data['y']],
             mode='markers',
             text=data['text'],  # Tooltip content
-            name=data['name'],  # Company name in legend
-            marker=dict(size=10)  # Adjust marker size
+            name=data['name'],  # Company name in legend (if needed)
+            marker=dict(
+                size=10,  # Adjust marker size
+                color=sector_to_color.get(data['sector'], 'rgba(0, 0, 0, 0.7)'),  # Color by sector (default to black if sector not in map)
+            )
         ))
 
     # 5. Update layout
     fig.update_layout(
-        title="Dividend Yield vs. Forward PE",
-        xaxis_title="Forward PE",
+        title="Dividend Yield vs. PE",
+        xaxis_title="PE",
         yaxis_title="Dividend Yield",
         hovermode='closest',  # Show the closest points in hover
-        showlegend=True,  # Show legend
+        showlegend=False,  # Remove the legend
+        plot_bgcolor="rgba(255, 255, 255, 0)",  # Transparent background for the plot
+        paper_bgcolor="white",  # White background for the entire figure
+        xaxis=dict(
+            range=[0, 100],  # Limit x-axis from 0 to 100
+            showgrid=True,  # Show grid lines
+            zeroline=True,  # Show zero line
+            gridcolor='rgba(0, 0, 0, 0.1)',  # Light gray grid lines
+            showline=True,  # Show outer axis line (border)
+            linewidth=1,  # Reduced border thickness for the x-axis
+            linecolor='black'  # Outer line color for the x-axis
+        ),
+        yaxis=dict(
+            showgrid=True,  # Show grid lines
+            zeroline=True,  # Show zero line
+            gridcolor='rgba(0, 0, 0, 0.1)',  # Light gray grid lines
+            showline=True,  # Show outer axis line (border)
+            linewidth=1,  # Reduced border thickness for the y-axis
+            linecolor='black',  # Outer line color for the y-axis
+            tickformat=".0%",  # Format the ticks as percentages
+        ),
+        # Full border around the whole chart
+        margin=dict(l=50, r=50, t=50, b=50),  # Add margins to ensure full border
+        shapes=[
+            dict(
+                type="rect",  # Shape type is rectangle
+                x0=0, x1=1, y0=0, y1=1,  # Full area of the plot
+                xref="paper", yref="paper",  # Reference to paper coordinates (entire figure)
+                line=dict(color="black", width=1)  # Black border with thinner thickness
+            )
+        ]
     )
 
     # 6. Return the figure's HTML

@@ -15,6 +15,7 @@ def register_callbacks(app):
         Input("filter-sector", "value")  # Input: sector dropdown value
     )
     def update_scatter_plot(selected_sectors):
+        print(f"Selected sectors: {selected_sectors}")
         # Call render_scatter_plot function with the selected sectors and return the HTML
         return html.Iframe(
             srcDoc=render_scatter_plot(selected_sectors),  # Generate the chart with selected sectors
@@ -110,6 +111,11 @@ def register_callbacks(app):
             from dash.exceptions import PreventUpdate
             raise PreventUpdate
         df = pd.DataFrame(data) if data else pd.DataFrame()
+        
+        # Apply sector filter (if "All" is selected, no filtering is applied)
+        if sector and sector != "All":
+            df = df[df["Sector"].isin(sector)]  # Use isin to support multi-sector selection
+        
         def generate_csv_text(_):
             return df.to_csv(index=False)
         return dcc.send_string(generate_csv_text, "NASDAQ_100.csv")
