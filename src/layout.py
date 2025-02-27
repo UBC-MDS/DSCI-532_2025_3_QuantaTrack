@@ -9,9 +9,13 @@ from pyecharts import options as opts
 from qqqm_data import getQQQMHolding
 
 
-def render_pie_chart():
+def render_pie_chart(selected_sectors=["All"]):
     # 1. 获取并处理数据
     _df = getQQQMHolding()
+    
+    if "All" not in selected_sectors:
+        _df = _df[_df["Sector"].isin(selected_sectors)]  # Apply sector filtering
+
     df_group = _df.groupby('Name', as_index=False).agg({'Weight': 'sum'})
     df_group = df_group.sort_values(by='Weight', ascending=False)
     top_10 = df_group.nlargest(10, 'Weight')
@@ -24,8 +28,8 @@ def render_pie_chart():
 
     # 3. 为前 10 项指定不同颜色
     colors= [
-        "#5470C6", "#91CC75", "#FAC858", "#EE6666", "#73C0DE",
-        "#3BA272", "#FC8452", "#9A60B4", "#EA7CCC", "#4A90E2","#999999"]
+        "#08306b", "#08519c", "#2171b5", "#4292c6", "#6baed6",
+        "#9ecae1", "#c6dbef", "#deebf7", "#f7fbff", "#cccccc"]
 
     # 4. 创建环形图
     chart = (
@@ -143,6 +147,127 @@ def render_scatter_plot(selected_sectors):
     # 6. Return the figure's HTML
     return fig.to_html(full_html=False)
 
+<<<<<<< HEAD
+=======
+def render_ytd_distribution(selected_sectors=["All"]):
+    """
+    Renders a histogram with kernel density overlay 
+    for YTD Return, including vertical lines for mean & median.
+    """
+    df = getQQQMHolding()
+
+    # Apply sector filtering
+    if "All" not in selected_sectors:
+        df = df[df["Sector"].isin(selected_sectors)]
+
+    # Ensure YTDReturn is numeric
+    df["YTDReturn"] = pd.to_numeric(df["YTDReturn"], errors="coerce")
+
+    # Drop NaNs
+    df = df.dropna(subset=["YTDReturn"])
+
+    # Basic histogram with Plotly Express
+    fig = px.histogram(
+        df, 
+        x="YTDReturn", 
+        nbins=20, 
+        #title="YTD Return Distribution", 
+        opacity=0.5
+    )
+    fig.update_traces(name="YTDReturn")
+
+    # Add kernel density for smooth curve
+    fig.add_trace(
+        px.histogram(df, x="YTDReturn", nbins=20, histnorm="probability density").data[0]
+    )
+    fig.data[1].marker = dict(opacity=0)  # Hide second histogram bars, keep the curve
+    #fig.data[1].line = dict(color="blue", width=2)
+
+    # Calculate mean & median
+    mean_val = df["YTDReturn"].mean()
+    median_val = df["YTDReturn"].median()
+
+    # Add lines for mean (green) & median (red)
+    fig.add_vline(x=mean_val, line_width=2, line_dash="solid", line_color="green",
+                  annotation_text=f"Mean: {mean_val:.2%}",
+                  annotation_position="top right")
+    fig.add_vline(x=median_val, line_width=2, line_dash="solid", line_color="red",
+                  annotation_text=f"Median: {median_val:.2%}",
+                  annotation_position="top left")
+
+    # Format x-axis as percentage
+    fig.update_layout(
+        xaxis=dict(tickformat=".0%", range=[-0.4, 0.4]),
+        margin=dict(l=50, r=50, t=50, b=50)
+    )
+    
+    return fig.to_html(full_html=False)
+
+def render_intraday_contribution_5(selected_sectors=["All"]):
+    """
+    Shows a single horizontal bar chart with the top 5 and bottom 5
+    companies by IntradayContribution. Negative bars = green,
+    positive bars = red. Ordered ascending (most negative on bottom).
+    """
+    df = getQQQMHolding()
+
+    # 1. Filter by sectors unless 'All'
+    if "All" not in selected_sectors:
+        df = df[df["Sector"].isin(selected_sectors)]
+
+    # 2. Convert IntradayContribution to numeric, drop NaNs
+    df["IntradayContribution"] = pd.to_numeric(df["IntradayContribution"], errors="coerce")
+    df.dropna(subset=["IntradayContribution"], inplace=True)
+
+    # 3. Sort ascending: most negative is first in the list
+    df_sorted = df.sort_values("IntradayContribution")
+
+    # 4. Bottom 5 (lowest) and Top 5 (highest)
+    bottom_5 = df_sorted.head(5)
+    top_5 = df_sorted.tail(5)
+
+    # 5. Combine them into a single DataFrame
+    combined = pd.concat([bottom_5, top_5], ignore_index=True)
+
+    # For each row, create a label like: "NVDA (-0.70%)"
+    combined["Label"] = combined["Ticker"] + " (" + (combined["IntradayContribution"] * 100).round(2).astype(str) + "%)"
+
+    # 6. Determine bar colors (negative=red, positive=green)
+    bar_colors = []
+    for val in combined["IntradayContribution"]:
+        if val < 0:
+            bar_colors.append("#e74c3c")
+        else:
+            bar_colors.append("#2ecc71")
+
+    # 7. Build a horizontal bar chart
+    fig = go.Figure(
+        data=[
+            go.Bar(
+                x=combined["IntradayContribution"],  # X values
+                y=combined["Label"],                 # Y labels
+                orientation="h",
+                text=combined["Ticker"],             # For hover text (optional)
+                marker=dict(color=bar_colors),
+            )
+        ]
+    )
+
+    # 8. Configure layout
+    fig.update_layout(
+        #title="Top 5 / Bottom 5 Companies by Intraday Contribution",
+        xaxis_title="IntradayContribution",
+        yaxis_title="Company",
+        margin=dict(l=150, r=50, t=50, b=50),
+        plot_bgcolor="white",
+        showlegend=False
+    )
+    # Format x-axis as % 
+    fig.update_xaxes(tickformat=".2%")
+
+    return fig.to_html(full_html=False)
+
+>>>>>>> origin/main
 # Sidebar (with multi-select dropdown for sectors)
 sidebar = html.Div(
     [
@@ -271,9 +396,19 @@ content = html.Div(
     [
         html.H1("NASDAQ 100 Companies", className="mt-3"),
         html.A("NASDAQ 100 Index ETF", href="https://www.invesco.com/us/financial-products/etfs/product-detail?audienceType=Investor&productId=ETF-QQQM", className="text-primary"),
+<<<<<<< HEAD
         # 使用 Iframe 显示 pyecharts 渲染的图表
         html.Iframe(srcDoc=render_pie_chart(), 
                     style={"border": "0", "width": "100%", "height": "600px"}),
+=======
+        # 使用 Iframe 显示 piecharts 渲染的图表
+        html.Div(id="pie-chart-container", children=[
+            html.Iframe(
+                srcDoc=render_pie_chart(selected_sectors=["All"]), 
+                style={"border": "0", "width": "100%", "height": "600px"}
+            )
+        ]),
+>>>>>>> origin/main
         # Using Iframe to display the Plotly scatter plot
         html.Div(id="scatter-plot-container", children=[
             html.Iframe(
@@ -281,6 +416,24 @@ content = html.Div(
                 style={"border": "0", "width": "100%", "height": "600px"}
             )
         ]),
+<<<<<<< HEAD
+=======
+        html.H3("YTD Return Distribution"),
+        html.Div(id="ytd-dist-container", children=[
+            html.Iframe(
+                srcDoc=render_ytd_distribution(selected_sectors=["All"]),
+                style={"border": "0", "width": "100%", "height": "600px"}
+            )
+        ]),
+
+        html.H3("Top 5 / Bottom 5 by Intraday Contribution"),
+        html.Div(id="intraday-contribution-top5-bottom5-container", children=[
+            html.Iframe(
+                srcDoc=render_intraday_contribution_5(selected_sectors=["All"]),
+                style={"border": "0", "width": "100%", "height": "600px"}
+            )
+        ]),
+>>>>>>> origin/main
         html.Div("Refresh Time", className="text-muted"),
         update_speed_dropdown,  # 新增更新频率选择控件
         html.Div("Filter Criteria", className="text-muted"),
