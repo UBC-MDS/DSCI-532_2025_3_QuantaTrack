@@ -65,6 +65,10 @@ def register_callbacks(app):
     def update_table(ticker, name, sector, data):
         """更新表格数据"""
         df = pd.DataFrame(data) if data else pd.DataFrame()
+        
+        # Apply sector filter (if "All" is selected, no filtering is applied)
+        if sector and sector != "All":
+            df = df[df["Sector"].isin(sector)]  # Use isin to support multi-sector selection
         if ticker:
             df = df[df["Ticker"].str.contains(ticker, case=False, na=False)]
         if name:
