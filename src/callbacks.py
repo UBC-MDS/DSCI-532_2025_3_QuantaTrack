@@ -130,9 +130,9 @@ def register_callbacks(app):
         
         df = pd.DataFrame(data) if data else pd.DataFrame()
 
-        # # Filter by sectors (handling multiple selections)
-        # if sectors and "All" not in sectors:
-        #     df = df[df["Sector"].isin(sectors)]  # Filter to keep rows with sectors in the selected list
+        # Filter by sectors (handling multiple selections)
+        if sectors and "All" not in sectors:
+            df = df[df["Sector"].isin(sectors)]  # Filter to keep rows with sectors in the selected list
         
         return dcc.send_string(df.to_csv(index=False), "NASDAQ_100.csv")
         # def generate_csv_text(_):
