@@ -1,8 +1,10 @@
 import pandas as pd
+import re
 import plotly.express as px  # 新增导入 Plotly Express
-from dash import Input, Output, dcc
+from dash import html, dcc, Input, Output
 import dash
 
+from layout import *
 from qqqm_data import getQQQMHolding
 
 def register_callbacks(app):
@@ -21,6 +23,18 @@ def register_callbacks(app):
         except:
             return ''
 
+    # Callback for scatter plot based on sector filter
+    @app.callback(
+        Output("scatter-plot-container", "children"),  # Output container for scatter plot
+        Input("filter-sector", "value")  # Input: sector dropdown value
+    )
+    def update_scatter_plot(selected_sectors):
+        # Call render_scatter_plot function with the selected sectors and return the HTML
+        return html.Iframe(
+            srcDoc=render_scatter_plot(selected_sectors),  # Generate the chart with selected sectors
+            style={"border": "0", "width": "100%", "height": "600px"}  # Style the iframe
+        )
+    
     # 回调：每 n 秒更新数据，存入 dcc.Store（需在布局中添加 dcc.Store(id="data-store")）
     @app.callback(
         Output("data-store", "data"),
@@ -49,16 +63,36 @@ def register_callbacks(app):
          Input("filter-sector", "value"),
          Input("data-store", "data")]
     )
-    def update_table(ticker, name, sector, data):
+    def update_table(ticker, name, sectors, data):
         """更新表格数据"""
         df = pd.DataFrame(data) if data else pd.DataFrame()
+
         if ticker:
             df = df[df["Ticker"].str.contains(ticker, case=False, na=False)]
         if name:
             df = df[df["Name"].str.contains(name, case=False, na=False)]
-        if sector and sector != "All":
-            df = df[df["Sector"] == sector]
+
+        # Filter by sectors (handling multiple selections)
+        if sectors and "All" not in sectors:
+            df = df[df["Sector"].isin(sectors)]  # Filter to keep rows with sectors in the selected list
+        
         return df.to_dict("records")
+        
+        # # Apply ticker filter (if provided)
+        # if ticker:
+        #     if isinstance(ticker, list):  # If ticker is a list, use vectorized str.contains with OR condition
+        #         ticker_pattern = "|".join([re.escape(t) for t in ticker])  # Create regex pattern
+        #         df = df[df["Ticker"].str.contains(ticker_pattern, case=False, na=False)]
+        #     else:  # Single ticker value
+        #         df = df[df["Ticker"].str.contains(ticker, case=False, na=False)]
+
+        # # Apply name filter (if provided)
+        # if name:
+        #     if isinstance(name, list):  # If name is a list, use vectorized str.contains with OR condition
+        #         name_pattern = "|".join([re.escape(n) for n in name])  # Create regex pattern
+        #         df = df[df["Name"].str.contains(name_pattern, case=False, na=False)]
+        #     else:  # Single name value
+        #         df = df[df["Name"].str.contains(name, case=False, na=False)]
 
     @app.callback(
         Output("stock-table", "style_data_conditional"),
@@ -82,17 +116,25 @@ def register_callbacks(app):
     @app.callback(
         Output("download-csv", "data"),
         [Input("download-csv-btn", "n_clicks"),
-         Input("data-store", "data")],
+         Input("data-store", "data"),
+         Input("filter-sector", "value")],
         prevent_initial_call=True
     )
-    def download_csv(n_clicks, data):
+    def download_csv(n_clicks, data, sectors):
         """当点击按钮时将数据导出为 CSV 文件下载"""
         ctx = dash.callback_context
         if not ctx.triggered or ctx.triggered[0]["prop_id"] != "download-csv-btn.n_clicks":
             # 如果不是按钮触发，则不进行下载
             from dash.exceptions import PreventUpdate
             raise PreventUpdate
+        
         df = pd.DataFrame(data) if data else pd.DataFrame()
-        def generate_csv_text(_):
-            return df.to_csv(index=False)
-        return dcc.send_string(generate_csv_text, "NASDAQ_100.csv")
+
+        # Filter by sectors (handling multiple selections)
+        if sectors and "All" not in sectors:
+            df = df[df["Sector"].isin(sectors)]  # Filter to keep rows with sectors in the selected list
+        
+        return dcc.send_string(df.to_csv(index=False), "NASDAQ_100.csv")
+        # def generate_csv_text(_):
+        #     return df.to_csv(index=False)
+        # return dcc.send_string(generate_csv_text, "QuantaTrack_Output.csv")

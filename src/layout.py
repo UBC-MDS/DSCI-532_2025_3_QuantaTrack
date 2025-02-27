@@ -3,6 +3,8 @@ from dash import dcc, html, dash_table, callback, Input, Output, State
 import pandas as pd
 
 from pyecharts.charts import Pie
+import plotly.graph_objects as go
+import plotly.express as px
 from pyecharts import options as opts
 from qqqm_data import getQQQMHolding
 
@@ -48,8 +50,100 @@ def render_pie_chart():
     # 5. 返回嵌入式 HTML
     return chart.render_embed()
 
+# Function to render the scatter plot based on selected sectors
+def render_scatter_plot(selected_sectors):
+    # 1. 获取并处理数据
+    _df = getQQQMHolding()
 
-# 侧边栏 (Sidebar)
+    # 2. 如果有筛选的 sectors, 根据它们过滤数据
+    selected_sectors = selected_sectors or ["All"]
+    if "All" not in selected_sectors:  # Only filter if "All" is not selected
+        _df = _df[_df["Sector"].isin(selected_sectors)]  # Filter by selected sectors
+
+    # 3. 清洗和准备数据
+    scatter_data = []
+    for index, row in _df.iterrows():
+        if pd.notna(row['DividendYield']) and pd.notna(row['PE']):  # Only take rows with valid values
+            scatter_data.append(
+                {
+                    "x": row['PE'],  # X-axis: PE (Forward PE or other PE)
+                    "y": row['DividendYield'],  # Y-axis: Dividend Yield
+                    "text": f"{row['Ticker']} - {row['Name']}<br>Sector = {row['Sector']}<br>Dividend Yield = {row['DividendYield']}%<br>PE = {row['PE']}",  # Tooltip with Sector
+                    "name": row['Name'],  # Display company name in legend (if needed)
+                    "sector": row['Sector']  # Store sector information for color coding
+                }
+            )
+
+    # 4. 创建 Plotly 散点图
+    fig = go.Figure()
+
+    # Create a color map for sectors
+    unique_sectors = _df['Sector'].unique()  # Get unique sectors
+    sector_to_color = {sector: px.colors.qualitative.Set1[i % len(px.colors.qualitative.Set1)] 
+                       for i, sector in enumerate(unique_sectors)}  # Map sector to a color using a color palette
+
+    # 5. 创建 Plotly 散点图
+    fig = go.Figure()
+
+    # Add data points to the figure, color by sector
+    for data in scatter_data:
+        fig.add_trace(go.Scatter(
+            x=[data['x']],
+            y=[data['y']],
+            mode='markers',
+            text=data['text'],  # Tooltip content
+            name=data['name'],  # Company name in legend (if needed)
+            marker=dict(
+                size=10,  # Adjust marker size
+                color=sector_to_color.get(data['sector'], 'rgba(0, 0, 0, 0.7)'),  # Color by sector (default to black if sector not in map)
+            )
+        ))
+
+    # 5. Update layout
+    fig.update_layout(
+        title="Dividend Yield vs. PE",
+        title_font=dict(size=24, color="black", family="Calibri", weight="bold"),
+        title_x=0.5,
+        xaxis_title="PE",
+        yaxis_title="Dividend Yield",
+        hovermode='closest',  # Show the closest points in hover
+        showlegend=False,  # Remove the legend
+        plot_bgcolor="rgba(255, 255, 255, 0)",  # Transparent background for the plot
+        paper_bgcolor="white",  # White background for the entire figure
+        xaxis=dict(
+            range=[0, 100],  # Limit x-axis from 0 to 100
+            showgrid=True,  # Show grid lines
+            zeroline=True,  # Show zero line
+            gridcolor='rgba(0, 0, 0, 0.1)',  # Light gray grid lines
+            showline=True,  # Show outer axis line (border)
+            linewidth=1,  # Reduced border thickness for the x-axis
+            linecolor='black'  # Outer line color for the x-axis
+        ),
+        yaxis=dict(
+            showgrid=True,  # Show grid lines
+            zeroline=True,  # Show zero line
+            gridcolor='rgba(0, 0, 0, 0.1)',  # Light gray grid lines
+            showline=True,  # Show outer axis line (border)
+            linewidth=1,  # Reduced border thickness for the y-axis
+            linecolor='black',  # Outer line color for the y-axis
+            tickformat=".0%",  # Format the ticks as percentages
+        ),
+        # Full border around the whole chart
+        margin=dict(l=50, r=50, t=50, b=50),  # Add margins to ensure full border
+        shapes=[
+            dict(
+                type="rect",  # Shape type is rectangle
+                x0=0, x1=1, y0=0, y1=1,  # Full area of the plot
+                xref="paper", yref="paper",  # Reference to paper coordinates (entire figure)
+                line=dict(color="black", width=1)  # Black border with thinner thickness
+            )
+        ]
+    )
+
+    # 6. Return the figure's HTML
+    return fig.to_html(full_html=False)
+
+# Sidebar (with multi-select dropdown for sectors)
 sidebar = html.Div(
     [
         html.H5("US", className="text-muted"),
@@ -59,26 +153,33 @@ sidebar = html.Div(
                 #html.Li("S&P 500"),
             ]
         ),
+        html.Hr(),  # Optional line separator
+        html.H6("Select Sectors", className="text-muted"),  # Title for the dropdown
+        dbc.Col(
+            dcc.Dropdown(
+                id="filter-sector",
+                options=[{"label": "All", "value": "All"}] + [{"label": sec, "value": sec} for sec in [
+                    'Information Technology', 'Consumer Discretionary', 'Communication Services',
+                    'Consumer Staples', 'Materials', 'Health Care', 'Industrials', 'Utilities',
+                    'Financials', 'Energy', 'Real Estate'
+                ]],
+                value=["All"],  # Default selection can be 'All'
+                multi=True,  # Make it multi-select
+                clearable=True,  # Allow clearing the selection
+                style={"width": "100%"}  # Make the dropdown full-width
+            ),
+            style={"padding-top": "10px"}
+        ),
     ],
     className="sidebar p-3",
-    style={"width": "200px", "height": "100vh", "position": "fixed", "left": "0", "top": "0", "background": "#f8f9fa"},
+    style={"width": "300px", "height": "100vh", "position": "fixed", "left": "0", "top": "0", "background": "#f8f9fa"},
 )
 
-# 筛选条件 (Filter Criteria)
+# Filter Form (with ticker and name input)
 filter_form = dbc.Row(
     [
         dbc.Col(dcc.Input(id="filter-ticker", type="text", placeholder="Ticker", className="form-control"), width=2),
         dbc.Col(dcc.Input(id="filter-name", type="text", placeholder="Name", className="form-control"), width=2),
-        dbc.Col(dcc.Dropdown(
-            id="filter-sector",
-            options=[{"label": "All", "value": "All"}] + [{"label": sec, "value": sec} for sec in [
-                'Information Technology', 'Consumer Discretionary', 'Communication Services', 
-                'Consumer Staples', 'Materials', 'Health Care', 'Industrials', 'Utilities', 
-                'Financials', 'Energy', 'Real Estate'
-            ]],
-            value="All",
-            clearable=False
-        ), width=3),
     ],
     className="mb-3",
 )
@@ -171,7 +272,15 @@ content = html.Div(
         html.H1("NASDAQ 100 Companies", className="mt-3"),
         html.A("NASDAQ 100 Index ETF", href="https://www.invesco.com/us/financial-products/etfs/product-detail?audienceType=Investor&productId=ETF-QQQM", className="text-primary"),
         # 使用 Iframe 显示 pyecharts 渲染的图表
-        html.Iframe(srcDoc=render_pie_chart(), style={"border": "0", "width": "100%", "height": "600px"}),
+        html.Iframe(srcDoc=render_pie_chart(), 
+                    style={"border": "0", "width": "100%", "height": "600px"}),
+        # Using Iframe to display the Plotly scatter plot
+        html.Div(id="scatter-plot-container", children=[
+            html.Iframe(
+                srcDoc=render_scatter_plot(selected_sectors=["All"]),  # Default to all sectors
+                style={"border": "0", "width": "100%", "height": "600px"}
+            )
+        ]),
         html.Div("Refresh Time", className="text-muted"),
         update_speed_dropdown,  # 新增更新频率选择控件
         html.Div("Filter Criteria", className="text-muted"),
@@ -183,7 +292,7 @@ content = html.Div(
         store_components,  # 添加排序状态与原始数据存储
         data_update_interval  # 新增 Interval 控件，用于周期更新
     ],
-    style={"margin-left": "220px", "padding": "20px"},
+    style={"margin-left": "320px", "padding": "20px"},
 )
 
 # 组合完整布局
@@ -206,7 +315,7 @@ def update_sort(sort_by, sort_state, data, original_data):
     # 初始化原始数据
     if not original_data:
         original_data = data
-
+    
     # 决定要操作的排序列
     if sort_by:
         sort_col = sort_by[0]["column_id"]
