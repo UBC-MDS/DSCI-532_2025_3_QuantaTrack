@@ -1,4 +1,5 @@
 import pandas as pd
+import re
 import plotly.express as px  # 新增导入 Plotly Express
 from dash import html, dcc, Input, Output
 import dash
@@ -59,21 +60,42 @@ def register_callbacks(app):
         Output("stock-table", "data"),
         [Input("filter-ticker", "value"),
          Input("filter-name", "value"),
-         # Input("filter-sector", "value"),
+         Input("filter-sector", "value"),
          Input("data-store", "data")]
     )
-    def update_table(ticker, name, data):
+    def update_table(ticker, name, sectors, data):
         """更新表格数据"""
         df = pd.DataFrame(data) if data else pd.DataFrame()
-        
-        # Apply sector filter (if "All" is selected, no filtering is applied)
+
+        # # Apply sector filter (if "All" is selected, no filtering is applied)
         # if "All" not in selected_sectors:  # Only filter if "All" is not selected
-        #     df = df[df["Sector"].isin(selected_sectors)]  # Use isin to support multi-sector selection
+        #     df = df[df["Sector"].isin(selected_sectors)]  # Use isin to support multi-sector selection  
         if ticker:
             df = df[df["Ticker"].str.contains(ticker, case=False, na=False)]
         if name:
             df = df[df["Name"].str.contains(name, case=False, na=False)]
+
+        # Filter by sectors (handling multiple selections)
+        if sectors and "All" not in sectors:
+            df = df[df["Sector"].isin(sectors)]  # Filter to keep rows with sectors in the selected list
+        
         return df.to_dict("records")
+        
+        # # Apply ticker filter (if provided)
+        # if ticker:
+        #     if isinstance(ticker, list):  # If ticker is a list, use vectorized str.contains with OR condition
+        #         ticker_pattern = "|".join([re.escape(t) for t in ticker])  # Create regex pattern
+        #         df = df[df["Ticker"].str.contains(ticker_pattern, case=False, na=False)]
+        #     else:  # Single ticker value
+        #         df = df[df["Ticker"].str.contains(ticker, case=False, na=False)]
+
+        # # Apply name filter (if provided)
+        # if name:
+        #     if isinstance(name, list):  # If name is a list, use vectorized str.contains with OR condition
+        #         name_pattern = "|".join([re.escape(n) for n in name])  # Create regex pattern
+        #         df = df[df["Name"].str.contains(name_pattern, case=False, na=False)]
+        #     else:  # Single name value
+        #         df = df[df["Name"].str.contains(name, case=False, na=False)]
 
     @app.callback(
         Output("stock-table", "style_data_conditional"),

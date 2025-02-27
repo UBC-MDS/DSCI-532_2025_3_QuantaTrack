@@ -312,7 +312,7 @@ def update_sort(sort_by, sort_state, data, original_data):
     # 初始化原始数据
     if not original_data:
         original_data = data
-
+    
     # 决定要操作的排序列
     if sort_by:
         sort_col = sort_by[0]["column_id"]
