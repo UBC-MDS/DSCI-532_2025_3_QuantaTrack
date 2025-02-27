@@ -32,11 +32,11 @@ with updates available every 3 or 10 seconds.
 The search box allows users to find specific tickers or company names in the table, 
 and they can download the data in CSV format based on the current view for further analysis.
 
-### Demo
+#### Demo
 
 [DEMO TO BE ADDED]
 
-### Dashboard
+#### Dashboard
 
 Visit QuantaTrack [ATTACH ON RENDER LINK] for our dashboard directly!
 
