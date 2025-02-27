@@ -49,7 +49,7 @@ def render_pie_chart():
     return chart.render_embed()
 
 
-# 侧边栏 (Sidebar)
+# Sidebar (with multi-select dropdown for sectors)
 sidebar = html.Div(
     [
         html.H5("US", className="text-muted"),
@@ -59,26 +59,33 @@ sidebar = html.Div(
                 #html.Li("S&P 500"),
             ]
         ),
+        html.Hr(),  # Optional line separator
+        html.H6("Select Sectors", className="text-muted"),  # Title for the dropdown
+        dbc.Col(
+            dcc.Dropdown(
+                id="filter-sector",
+                options=[{"label": "All", "value": "All"}] + [{"label": sec, "value": sec} for sec in [
+                    'Information Technology', 'Consumer Discretionary', 'Communication Services',
+                    'Consumer Staples', 'Materials', 'Health Care', 'Industrials', 'Utilities',
+                    'Financials', 'Energy', 'Real Estate'
+                ]],
+                value=["All"],  # Default selection can be 'All'
+                multi=True,  # Make it multi-select
+                clearable=True,  # Allow clearing the selection
+                style={"width": "100%"}  # Make the dropdown full-width
+            ),
+            style={"padding-top": "10px"}
+        ),
     ],
     className="sidebar p-3",
     style={"width": "200px", "height": "100vh", "position": "fixed", "left": "0", "top": "0", "background": "#f8f9fa"},
 )
 
-# 筛选条件 (Filter Criteria)
+# Filter Form (with ticker and name input)
 filter_form = dbc.Row(
     [
         dbc.Col(dcc.Input(id="filter-ticker", type="text", placeholder="Ticker", className="form-control"), width=2),
         dbc.Col(dcc.Input(id="filter-name", type="text", placeholder="Name", className="form-control"), width=2),
-        dbc.Col(dcc.Dropdown(
-            id="filter-sector",
-            options=[{"label": "All", "value": "All"}] + [{"label": sec, "value": sec} for sec in [
-                'Information Technology', 'Consumer Discretionary', 'Communication Services', 
-                'Consumer Staples', 'Materials', 'Health Care', 'Industrials', 'Utilities', 
-                'Financials', 'Energy', 'Real Estate'
-            ]],
-            value="All",
-            clearable=False
-        ), width=3),
     ],
     className="mb-3",
 )
