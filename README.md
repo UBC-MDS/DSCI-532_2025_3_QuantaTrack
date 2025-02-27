@@ -29,8 +29,8 @@ including intraday performance, sector composition, and stock metrics like divid
 
 Below the charts, users can also select their preferred refresh interval for the stock screener table, 
 with updates available every 3 or 10 seconds. 
-The search box allows users to search the table by ticker or company name, 
-and they can download the data in CSV format based on the current filter state for further analysis.
+The search box allows users to find specific tickers or company names in the table, 
+and they can download the data in CSV format based on the current view for further analysis.
 
 ### Demo
 
