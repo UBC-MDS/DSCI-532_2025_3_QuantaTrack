@@ -56,6 +56,7 @@ def render_scatter_plot(selected_sectors):
     _df = getQQQMHolding()
 
     # 2. 如果有筛选的 sectors, 根据它们过滤数据
+    selected_sectors = selected_sectors or ["All"]
     if "All" not in selected_sectors:  # Only filter if "All" is not selected
         _df = _df[_df["Sector"].isin(selected_sectors)]  # Filter by selected sectors
 
@@ -101,6 +102,8 @@ def render_scatter_plot(selected_sectors):
     # 5. Update layout
     fig.update_layout(
         title="Dividend Yield vs. PE",
+        title_font=dict(size=24, color="black", family="Calibri", weight="bold"),
+        title_x=0.5,
         xaxis_title="PE",
         yaxis_title="Dividend Yield",
         hovermode='closest',  # Show the closest points in hover
