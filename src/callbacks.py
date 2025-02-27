@@ -22,7 +22,19 @@ def register_callbacks(app):
             return color
         except:
             return ''
-
+        
+    # Callback for updating pie chart based on sector selection
+    @app.callback(
+        Output("pie-chart-container", "children"),  # Output container for the pie chart
+        Input("filter-sector", "value")  # Input: sector dropdown value
+    )
+    def update_pie_chart(selected_sectors):
+        """Updates the pie chart based on selected sectors"""
+        return html.Iframe(
+            srcDoc=render_pie_chart(selected_sectors),  # Generate pie chart with selected sectors
+            style={"border": "0", "width": "100%", "height": "600px"}  # Styling
+        )
+        
     # Callback for scatter plot based on sector filter
     @app.callback(
         Output("scatter-plot-container", "children"),  # Output container for scatter plot
@@ -34,7 +46,36 @@ def register_callbacks(app):
             srcDoc=render_scatter_plot(selected_sectors),  # Generate the chart with selected sectors
             style={"border": "0", "width": "100%", "height": "600px"}  # Style the iframe
         )
-    
+        
+    # New callback: Update YTD Distribution
+    @app.callback(
+        Output("ytd-dist-container", "children"),
+        Input("filter-sector", "value")
+    )
+    def update_ytd_dist(selected_sectors):
+        # If user clears the dropdown, default to ["All"]
+        if not selected_sectors:
+            selected_sectors = ["All"]
+
+        return html.Iframe(
+            srcDoc=render_ytd_distribution(selected_sectors),
+            style={"border": "0", "width": "100%", "height": "600px"}
+        )
+
+    # New callback: Update Top/Bottom 5 Chart
+    @app.callback(
+        Output("intraday-contribution-top5-bottom5-container", "children"),
+        Input("filter-sector", "value")
+    )
+    def update_intraday_bar(selected_sectors):
+        if not selected_sectors:
+            selected_sectors = ["All"]
+
+        return html.Iframe(
+            srcDoc=render_intraday_contribution_5(selected_sectors),
+            style={"border": "0", "width": "100%", "height": "600px"}
+        )
+        
     # 回调：每 n 秒更新数据，存入 dcc.Store（需在布局中添加 dcc.Store(id="data-store")）
     @app.callback(
         Output("data-store", "data"),
