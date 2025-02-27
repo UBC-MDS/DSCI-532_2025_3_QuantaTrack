@@ -147,8 +147,6 @@ def render_scatter_plot(selected_sectors):
     # 6. Return the figure's HTML
     return fig.to_html(full_html=False)
 
-<<<<<<< HEAD
-=======
 def render_ytd_distribution(selected_sectors=["All"]):
     """
     Renders a histogram with kernel density overlay 
@@ -267,7 +265,6 @@ def render_intraday_contribution_5(selected_sectors=["All"]):
 
     return fig.to_html(full_html=False)
 
->>>>>>> origin/main
 # Sidebar (with multi-select dropdown for sectors)
 sidebar = html.Div(
     [
@@ -396,11 +393,6 @@ content = html.Div(
     [
         html.H1("NASDAQ 100 Companies", className="mt-3"),
         html.A("NASDAQ 100 Index ETF", href="https://www.invesco.com/us/financial-products/etfs/product-detail?audienceType=Investor&productId=ETF-QQQM", className="text-primary"),
-<<<<<<< HEAD
-        # 使用 Iframe 显示 pyecharts 渲染的图表
-        html.Iframe(srcDoc=render_pie_chart(), 
-                    style={"border": "0", "width": "100%", "height": "600px"}),
-=======
         # 使用 Iframe 显示 piecharts 渲染的图表
         html.Div(id="pie-chart-container", children=[
             html.Iframe(
@@ -408,7 +400,6 @@ content = html.Div(
                 style={"border": "0", "width": "100%", "height": "600px"}
             )
         ]),
->>>>>>> origin/main
         # Using Iframe to display the Plotly scatter plot
         html.Div(id="scatter-plot-container", children=[
             html.Iframe(
@@ -416,8 +407,6 @@ content = html.Div(
                 style={"border": "0", "width": "100%", "height": "600px"}
             )
         ]),
-<<<<<<< HEAD
-=======
         html.H3("YTD Return Distribution"),
         html.Div(id="ytd-dist-container", children=[
             html.Iframe(
@@ -433,7 +422,6 @@ content = html.Div(
                 style={"border": "0", "width": "100%", "height": "600px"}
             )
         ]),
->>>>>>> origin/main
         html.Div("Refresh Time", className="text-muted"),
         update_speed_dropdown,  # 新增更新频率选择控件
         html.Div("Filter Criteria", className="text-muted"),
