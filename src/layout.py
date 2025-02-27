@@ -3,6 +3,7 @@ from dash import dcc, html, dash_table, callback, Input, Output, State
 import pandas as pd
 
 from pyecharts.charts import Pie
+import plotly.graph_objects as go
 from pyecharts import options as opts
 from qqqm_data import getQQQMHolding
 
@@ -49,6 +50,56 @@ def render_pie_chart():
     return chart.render_embed()
 
 
+# Function to render the scatter plot based on selected sectors
+def render_scatter_plot(selected_sectors="All"):
+    # 1. 获取并处理数据
+    _df = getQQQMHolding()
+    print(_df)
+
+    # 2. 如果有筛选的 sectors, 根据它们过滤数据
+    if selected_sectors != "All":
+        _df = _df[_df["Sector"].isin(selected_sectors)]  # Filter by selected sectors
+    print(_df)
+
+    # 3. 清洗和准备数据
+    scatter_data = []
+    for index, row in _df.iterrows():
+        if pd.notna(row['DividendYield']) and pd.notna(row['ForwardPE']):  # Only take rows with valid values
+            scatter_data.append(
+                {
+                    "x": row['ForwardPE'],  # X-axis: Forward PE
+                    "y": row['DividendYield'],  # Y-axis: Dividend Yield
+                    "text": f"{row['Ticker']} - {row['Name']}<br>Dividend Yield = {row['DividendYield']}%<br>Forward PE = {row['ForwardPE']}",  # Tooltip text
+                    "name": row['Name'],  # Display company name in legend
+                }
+            )
+
+    # 4. 创建 Plotly 散点图
+    fig = go.Figure()
+
+    # Add data points to the figure
+    for data in scatter_data:
+        fig.add_trace(go.Scatter(
+            x=[data['x']],
+            y=[data['y']],
+            mode='markers',
+            text=data['text'],  # Tooltip content
+            name=data['name'],  # Company name in legend
+            marker=dict(size=10)  # Adjust marker size
+        ))
+
+    # 5. Update layout
+    fig.update_layout(
+        title="Dividend Yield vs. Forward PE",
+        xaxis_title="Forward PE",
+        yaxis_title="Dividend Yield",
+        hovermode='closest',  # Show the closest points in hover
+        showlegend=True,  # Show legend
+    )
+
+    # 6. Return the figure's HTML
+    return fig.to_html(full_html=False)
+
 # Sidebar (with multi-select dropdown for sectors)
 sidebar = html.Div(
     [
@@ -78,7 +129,7 @@ sidebar = html.Div(
         ),
     ],
     className="sidebar p-3",
-    style={"width": "200px", "height": "100vh", "position": "fixed", "left": "0", "top": "0", "background": "#f8f9fa"},
+    style={"width": "300px", "height": "100vh", "position": "fixed", "left": "0", "top": "0", "background": "#f8f9fa"},
 )
 
 # Filter Form (with ticker and name input)
@@ -178,7 +229,15 @@ content = html.Div(
         html.H1("NASDAQ 100 Companies", className="mt-3"),
         html.A("NASDAQ 100 Index ETF", href="https://www.invesco.com/us/financial-products/etfs/product-detail?audienceType=Investor&productId=ETF-QQQM", className="text-primary"),
         # 使用 Iframe 显示 pyecharts 渲染的图表
-        html.Iframe(srcDoc=render_pie_chart(), style={"border": "0", "width": "100%", "height": "600px"}),
+        html.Iframe(srcDoc=render_pie_chart(), 
+                    style={"border": "0", "width": "100%", "height": "600px"}),
+        # Using Iframe to display the Plotly scatter plot
+        html.Div(id="scatter-plot-container", children=[
+            html.Iframe(
+                srcDoc=render_scatter_plot(selected_sectors=["All"]),  # Default to all sectors
+                style={"border": "0", "width": "100%", "height": "600px"}
+            )
+        ]),
         html.Div("Refresh Time", className="text-muted"),
         update_speed_dropdown,  # 新增更新频率选择控件
         html.Div("Filter Criteria", className="text-muted"),
@@ -190,7 +249,7 @@ content = html.Div(
         store_components,  # 添加排序状态与原始数据存储
         data_update_interval  # 新增 Interval 控件，用于周期更新
     ],
-    style={"margin-left": "220px", "padding": "20px"},
+    style={"margin-left": "320px", "padding": "20px"},
 )
 
 # 组合完整布局

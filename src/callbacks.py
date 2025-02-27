@@ -1,12 +1,25 @@
 import pandas as pd
 import plotly.express as px  # 新增导入 Plotly Express
-from dash import Input, Output, dcc
+from dash import html, dcc, Input, Output
 import dash
 
+from layout import *
 from qqqm_data import getQQQMHolding
 
 def register_callbacks(app):
     """注册 Dash 回调函数"""
+    
+    # Callback for scatter plot based on sector filter
+    @app.callback(
+        Output("scatter-plot-container", "children"),  # Output container for scatter plot
+        Input("filter-sector", "value")  # Input: sector dropdown value
+    )
+    def update_scatter_plot(selected_sectors):
+        # Call render_scatter_plot function with the selected sectors and return the HTML
+        return html.Iframe(
+            srcDoc=render_scatter_plot(selected_sectors),  # Generate the chart with selected sectors
+            style={"border": "0", "width": "100%", "height": "600px"}  # Style the iframe
+        )
 
     def highlight_change(val):
         try:
