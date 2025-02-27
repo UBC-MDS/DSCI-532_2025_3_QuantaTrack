@@ -6,7 +6,7 @@ and a histogram that displays year-to-date returns.
 
 The dashboard is fully interactive, with the sector filter controlling all charts. 
 This ensures that when users select a sector, all visualizations and the table update accordingly, offering a cohesive view of market data. 
-Additionally, a **Stock Screener Table** presents key financial data for NASDAQ 100 companies (e.g., market cap, weight, YTD return, etc.) 
+Additionally, a stock screener table presents key financial data for NASDAQ 100 companies (e.g., market cap, weight, YTD return, etc.) 
 and allows users to filter results by ticker or company name.
 
 ## Parts Done Differently
@@ -24,11 +24,22 @@ Given the diversity of sectors in the index, this choice ensures each sector is 
 improving clarity and making comparisons easier for users.
 
 ## Features Still in Development
-Several exciting features are still under development. 
-The search box will soon support multiple tickers or company names, enhancing its flexibility. 
+Several exciting features are still under development.  
+We are working on adding real-time price, intraday price and volume movements cards at the top, 
+providing users immediate access to crucial market data.  
+The search box will soon support multiple tickers or company names, enhancing its flexibility.  
 We are also working on updating the pie chart to show the top companies' weight when not all sectors are selected, 
-providing a more informative perspective on company dominance. 
-The CSV download feature will be enhanced to capture also the sort state. 
+providing a more informative perspective on company dominance.  
+The CSV download feature will be enhanced to capture the sort state as well.  
 Finally, we would like to set up infrastructure for continuous deployment, 
 which will allow QuantaTrack to expand with additional financial datasets, 
 enabling users to track more indices and sectors beyond the NASDAQ 100.
+
+## Limitations and Potential Future Improvements
+
+While QuantaTrack is a real-time dashboard, one potential improvement is the ability to store historical data for time-series comparisons. 
+This would provide valuable insights but could introduce challenges in terms of computation and storage, 
+potentially affecting performance with large datasets. 
+To mitigate this, we plan to implement data aggregation techniques to streamline the dataset without losing important insights. 
+Additionally, we aim to enhance the customizability of visualizations, allowing users to tailor chart appearance and granularity, 
+enabling more personalized and detailed analysis to meet specific needs.
