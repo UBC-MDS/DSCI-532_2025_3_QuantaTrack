@@ -24,13 +24,13 @@ Given the diversity of sectors in the index, this choice ensures each sector is 
 improving clarity and making comparisons easier for users.
 
 ## Features Still in Development
-Several exciting features are still under development.  
+Several exciting features are still under development. 
 We are working on adding real-time price, intraday price and volume movements cards at the top, 
-providing users immediate access to crucial market data.  
-The search box will soon support multiple tickers or company names, enhancing its flexibility.  
+providing users immediate access to crucial market data. 
+The search box will soon support multiple tickers or company names, enhancing its flexibility. 
 We are also working on updating the pie chart to show the top companies' weight when not all sectors are selected, 
-providing a more informative perspective on company dominance.  
-The CSV download feature will be enhanced to capture the sort state as well.  
+providing a more informative perspective on company dominance. 
+The CSV download feature will be enhanced to capture the sort state as well. 
 Finally, we would like to set up infrastructure for continuous deployment, 
 which will allow QuantaTrack to expand with additional financial datasets, 
 enabling users to track more indices and sectors beyond the NASDAQ 100.
