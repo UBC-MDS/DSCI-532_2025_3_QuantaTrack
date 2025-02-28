@@ -1,7 +1,7 @@
 import dash
 import dash_bootstrap_components as dbc
-from layout import layout
-from callbacks import *
+from src.layout import layout
+from src.callbacks import *
 import os
 
 # 初始化 Dash 应用
