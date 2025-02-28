@@ -14,5 +14,6 @@ dependencies:
   - jupyterlab=4.2.6 
   - pip=24.3  
   - pyecharts=2.0.8
+  - statsmodels=0.14.4
   - pip:
       - dash_bootstrap_components==1.7.1
