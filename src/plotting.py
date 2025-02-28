@@ -46,11 +46,11 @@ def render_pie_chart(selected_sectors=["All"]):
 
     # 4. 创建环形图
     chart = (
-        Pie(init_opts=opts.InitOpts(width="500px", height="500px"))
+        Pie(init_opts=opts.InitOpts(width="600px", height="500px"))
         .add(
             series_name="",
             data_pair=data_pairs,
-            radius=["40%", "75%"],  # 环形图的内外半径
+            radius=["30%", "70%"],  # 环形图的内外半径
             center=["50%", "50%"]   # 图表居中
         )
         .set_colors(colors)  # 为每个扇区设置颜色
@@ -82,7 +82,7 @@ def render_scatter_plot(selected_sectors):
                 {
                     "x": row['PE'],  # X-axis: PE (Forward PE or other PE)
                     "y": row['DividendYield'],  # Y-axis: Dividend Yield
-                    "text": f"{row['Ticker']} - {row['Name']}<br>Sector = {row['Sector']}<br>Dividend Yield = {row['DividendYield']}%<br>PE = {row['PE']}",  # Tooltip with Sector
+                    "text": f"{row['Ticker']} - {row['Name']}<br>Sector = {row['Sector']}<br>Dividend Yield = {row['DividendYield'] * 100:.2f}%<br>PE = {row['PE']}",  # Tooltip with Sector
                     "name": row['Name'],  # Display company name in legend (if needed)
                     "sector": row['Sector']  # Store sector information for color coding
                 }
@@ -131,7 +131,7 @@ def render_scatter_plot(selected_sectors):
             gridcolor='rgba(0, 0, 0, 0.1)',  # Light gray grid lines
             showline=True,  # Show outer axis line (border)
             linewidth=1,  # Reduced border thickness for the x-axis
-            linecolor='black'  # Outer line color for the x-axis
+            linecolor='gray'  # Outer line color for the x-axis
         ),
         yaxis=dict(
             showgrid=True,  # Show grid lines
@@ -139,8 +139,8 @@ def render_scatter_plot(selected_sectors):
             gridcolor='rgba(0, 0, 0, 0.1)',  # Light gray grid lines
             showline=True,  # Show outer axis line (border)
             linewidth=1,  # Reduced border thickness for the y-axis
-            linecolor='black',  # Outer line color for the y-axis
-            tickformat=".0%",  # Format the ticks as percentages
+            linecolor='gray',  # Outer line color for the y-axis
+            tickformat=".2%",  # Format the ticks as percentages
         ),
         # Full border around the whole chart
         margin=dict(l=50, r=50, t=50, b=50),  # Add margins to ensure full border
@@ -149,7 +149,7 @@ def render_scatter_plot(selected_sectors):
                 type="rect",  # Shape type is rectangle
                 x0=0, x1=1, y0=0, y1=1,  # Full area of the plot
                 xref="paper", yref="paper",  # Reference to paper coordinates (entire figure)
-                line=dict(color="black", width=1)  # Black border with thinner thickness
+                line=dict(color="gray", width=1)  # Gray border with thinner thickness
             )
         ]
     )
@@ -205,7 +205,20 @@ def render_ytd_distribution(selected_sectors=["All"]):
 
     # Format x-axis as percentage
     fig.update_layout(
-        xaxis=dict(tickformat=".0%", range=[-0.4, 0.4]),
+        title_font=dict(size=24, color="black", family="Calibri", weight="bold"),
+        title_x=0.5,
+        xaxis=dict(
+            showline=True,  # Show outer axis line (border)
+            linewidth=1,  # Reduced border thickness for the x-axis
+            linecolor='gray',  # Outer line color for the x-axis
+            tickformat=".0%", 
+            range=[-0.4, 0.4]
+            ),
+        # yaxis=dict(
+        #     showline=True,  # Show outer axis line (border)
+        #     linewidth=1,  # Reduced border thickness for the y-axis
+        #     linecolor='gray',  # Outer line color for the y-axis
+        #     ),
         margin=dict(l=50, r=50, t=50, b=50),
         plot_bgcolor="rgba(0,0,0,0)",   # Transparent plot area
         paper_bgcolor="rgba(0,0,0,0)"  # Transparent overall figure background
@@ -274,11 +287,20 @@ def render_intraday_contribution_5(selected_sectors=["All"]):
         title="Companies by Intraday Contribution",
         xaxis_title="IntradayContribution",
         yaxis_title="Company",
+        xaxis=dict(
+            showline=True,  # Show outer axis line (border)
+            linewidth=1,  # Reduced border thickness for the x-axis
+            linecolor='gray',  # Outer line color for the x-axis
+            tickformat=".2%"
+            ),
+        # yaxis=dict(
+        #     showline=True,  # Show outer axis line (border)
+        #     linewidth=1,  # Reduced border thickness for the y-axis
+        #     linecolor='gray',  # Outer line color for the y-axis
+        #     ),
         margin=dict(l=150, r=50, t=50, b=50),
         plot_bgcolor="white",
         showlegend=False
     )
-    # Format x-axis as % 
-    fig.update_xaxes(tickformat=".2%")
 
     return fig.to_html(full_html=False)

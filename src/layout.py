@@ -76,13 +76,13 @@ sidebar = [
         [
             dcc.Markdown('''
                 NASDAQ 100 Tracker is developed by Ethan Fang, Jenny Zhang, Kevin Gao, and Ziyuan Zhao.  
-                The application provides dynamic, real-time NASDAQ 100 tracking and visualization to help investors make data-driven decisions with ease.
-                Dashboard latest update on DATE         
+                The application provides dynamic, real-time NASDAQ 100 tracking and visualization to help investors make data-driven decisions with ease.  
+                Latest update on Mar. 1, 2025.  
                 [Link to the Github Repo](https://github.com/UBC-MDS/DSCI-532_2025_3_QuantaTrack)  
             ''', 
             style={
                 "text-align": "left",  # Center the text
-                "font-size": "12px",  # Set appropriate font size
+                "font-size": "16px",  # Set appropriate font size
                 "background-color": "#343a40",  # Dark background color for sidebar
                 "color": "#ffffff",  # Black color for footer text
                 "padding-top": "20px",  # Add some padding on top
@@ -104,7 +104,7 @@ pie_chart = html.Div(
     id="pie-chart-container", children=[
         html.Iframe(
             srcDoc=render_pie_chart(selected_sectors=["All"]), 
-            # style={"border": "0", "width": "50%", "height": "100px"}
+            style={"border": "0", "width": "100%", "height": "100px"}
         )
     ]
 )
@@ -113,7 +113,7 @@ scatter_plot = html.Div(
     id="scatter-plot-container", children=[
         html.Iframe(
             srcDoc=render_scatter_plot(selected_sectors=["All"]),  # Default to all sectors
-            style={"border": "0", "width": "100%", "height": "600px"}
+            style={"border": "0", "width": "100%", "height": "100px"}
         )
     ]
 )
@@ -263,12 +263,18 @@ layout = dbc.Container(
                         dbc.Row([
                             dbc.Col(pie_chart), 
                             dbc.Col(intraday_cont_5)
-                            ]),
+                            ], 
+                            class_name="g-0",
+                            align="start"
+                        ),
                         # Row for Dividend Yield vs PE and YTD Distribution
                         dbc.Row([
                             dbc.Col(scatter_plot), 
                             dbc.Col(ytd_dist)
-                            ]),
+                            ],
+                            class_name="g-0",
+                            align="end"
+                        ),
 
                         # Row for Search box and Download CSV button
                         search_download_row,
@@ -280,6 +286,7 @@ layout = dbc.Container(
                         data_update_interval  # 新增 Interval 控件，用于周期更新
                     ],
                     md=10,
+                    class_name="g-0",
                     style={
                         'margin-left': '16.67%',  # Adjust for sidebar width (md=2 takes 16.67%)
                     }
