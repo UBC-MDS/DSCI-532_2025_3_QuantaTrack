@@ -162,7 +162,7 @@ def register_callbacks(app):
         if sectors and "All" not in sectors:
             df = df[df["Sector"].isin(sectors)]  # Filter to keep rows with sectors in the selected list
         
-        return dcc.send_string(df.to_csv(index=False), "NASDAQ_100.csv")
+        return dcc.send_string(df.to_csv(index=False), "QuantaTrack_Output.csv")
         # def generate_csv_text(_):
         #     return df.to_csv(index=False)
         # return dcc.send_string(generate_csv_text, "QuantaTrack_Output.csv")
