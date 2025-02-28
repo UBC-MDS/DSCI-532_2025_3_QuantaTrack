@@ -285,6 +285,8 @@ def render_intraday_contribution_5(selected_sectors=["All"]):
     # 8. Configure layout
     fig.update_layout(
         title="Companies by Intraday Contribution",
+        title_font=dict(size=24, color="black", family="Calibri", weight="bold"),
+        title_x=0.5,
         xaxis_title="IntradayContribution",
         yaxis_title="Company",
         xaxis=dict(
