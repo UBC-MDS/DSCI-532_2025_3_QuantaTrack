@@ -489,7 +489,7 @@ search_download_row = dbc.Row(
         search_box,
         download_csv
     ],
-    align="center"  # Vertically center the items in the row
+    justify="between",  
 )
 
 
