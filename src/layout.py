@@ -1,12 +1,14 @@
 import dash_bootstrap_components as dbc
 from dash import dcc, html, dash_table, callback, Input, Output, State
 import pandas as pd
+import numpy as np
 
 from pyecharts.charts import Pie
 import plotly.graph_objects as go
 import plotly.express as px
 from pyecharts import options as opts
 from qqqm_data import getQQQMHolding
+from xueqiu_data import getUSStockHistoryByDate
 
 
 def render_pie_chart(selected_sectors=["All"]):
@@ -284,6 +286,64 @@ def render_intraday_contribution_5(selected_sectors=["All"]):
 
     return fig.to_html(full_html=False)
 
+def calculate_beta(stock_returns, index_returns):
+    """计算 Beta 值"""
+    covariance = np.cov(stock_returns, index_returns)[0, 1]
+    variance = np.var(index_returns)
+    beta = covariance / variance
+    return beta
+
+def render_regression_and_trend_graph(selected_stock, start_date, end_date):
+
+        # 加载并处理数据
+        stock_data = getUSStockHistoryByDate(selected_stock, start_date, end_date)
+        stock_data = stock_data[['Timestamp_str', 'percent', 'close']]  # Keep only the desired columns
+        stock_data = stock_data.rename(columns={'Timestamp_str': 'Date', 'percent': 'return', 'close': 'price'})  # Rename columns
+        stock_data['Date'] = pd.to_datetime(stock_data['Date'])  # Parse dates
+        stock_data.set_index('Date', inplace=True)
+        stock_returns = stock_data['return'].dropna() * 100
+        
+        nasdaq_data = getUSStockHistoryByDate('QQQ', start_date, end_date)
+        nasdaq_data = nasdaq_data[['Timestamp_str', 'percent', 'close']]  # Keep only the desired columns
+        nasdaq_data = nasdaq_data.rename(columns={'Timestamp_str': 'Date', 'percent': 'return', 'close': 'price'})  # Rename columns
+        nasdaq_data['Date'] = pd.to_datetime(nasdaq_data['Date'])  # Parse date
+        nasdaq_data.set_index('Date', inplace=True)
+        nasdaq_returns = nasdaq_data['return'].dropna() * 100
+
+        # 计算 Beta 值
+        beta = calculate_beta(stock_returns, nasdaq_returns)
+        
+        # 绘制回归图
+        regression_fig = px.scatter(
+            x=nasdaq_returns,
+            y=stock_returns,
+            trendline="ols",
+            labels={'x': 'NASDAQ 100 Returns', 'y': f'{selected_stock} Returns'},
+            title=f"Regression Analysis: Beta = {beta:.2f}"
+        )
+
+        # 归一化股票和nasdaq100价格
+        stock_price_normalized = stock_data['price'].dropna() / stock_data['price'].iloc[0]
+        nasdaq_price_normalized = nasdaq_data['price'].dropna() / nasdaq_data['price'].iloc[0]
+        combined_data = pd.DataFrame({
+            'Date': stock_price_normalized.index,  # 日期索引
+            'Stock Price': stock_price_normalized,  # 归一化后的股票价格
+            'NASDAQ Price': nasdaq_price_normalized  # 归一化后的指数价格
+        })
+
+        # 绘制价格走势图
+        price_trend_fig = px.line(
+            combined_data,  # 数据
+            x='Date',  # X 轴：日期
+            y=['Stock Price', 'NASDAQ Price'],  # Y 轴：股票和指数价格
+            labels={'value': 'Normalized Price', 'variable': 'Legend'},  # 标签
+            title=f'{selected_stock} and NASDAQ 100 Price Trend (Normalized)'  # 标题
+        )
+        
+        return regression_fig.to_html(full_html=False), price_trend_fig.to_html(full_html=False)
+
+
+
 # Sidebar (with multi-select dropdown for sectors)
 sidebar = html.Div(
     [
@@ -407,6 +467,14 @@ data_update_interval = dcc.Interval(
     n_intervals=0
 )
 
+nasdaq100_tickers = getQQQMHolding()
+# 生成下拉菜单选项
+stock_dropdown_options = [
+    {'label': nasdaq100_tickers.iloc[i]['Name'], 'value': nasdaq100_tickers.iloc[i]['Ticker']}
+    for i in range(len(nasdaq100_tickers))
+]
+
+
 # 页面内容 (Main Content) 修改：使用 html.Iframe 显示 pyecharts 图表
 content = html.Div(
     [
@@ -441,6 +509,67 @@ content = html.Div(
                 style={"border": "0", "width": "100%", "height": "600px"}
             )
         ]),
+
+        # Dropdown 和 DatePickerRange
+        dbc.Row([
+            dbc.Col(
+                dcc.Dropdown(
+                    id='stock-dropdown',
+                    options=stock_dropdown_options,
+                    value='AAPL',  # 默认值
+                    placeholder="Select a stock",  # 提示文本
+                ),
+                width=6,
+            ),
+            dbc.Col(
+                dcc.DatePickerRange(
+                    id='date-picker-range',
+                    start_date=pd.to_datetime('2024-01-01'),
+                    end_date=pd.to_datetime('2025-02-05'),
+                    display_format='YYYY-MM-DD',  # 日期格式
+                    min_date_allowed=pd.to_datetime('2010-01-01'),
+                    max_date_allowed=pd.to_datetime('2025-12-31'),
+                ),
+                width=6,
+            ),
+        ]),
+
+        # 回归图
+        html.H3("Regression Analysis"),
+        html.Div(id="regression-graph-container", children=[
+            html.Iframe(
+                srcDoc=render_regression_and_trend_graph(selected_stock='AAPL', start_date='2024-01-01', end_date='2025-01-01')[0],
+                style={"border": "0", "width": "100%", "height": "600px"}
+            )
+        ]),
+        
+        #html.H3("Regression Analysis"),
+        #dbc.Row([
+        #    dbc.Col(html.Iframe(
+        #        id='regression-graph-container', 
+        #        style={'height': '600px'}, 
+        #        width='100%'  # 设置宽度为 100% 以适应父容器
+        #    )),
+        #]),
+        
+        # 价格趋势图
+        html.H3("Price Trend"),
+        html.Div(id="price-trend-graph-container", children=[
+            html.Iframe(
+                srcDoc=render_regression_and_trend_graph(selected_stock='AAPL', start_date='2024-01-01', end_date='2025-01-01')[1],
+                style={"border": "0", "width": "100%", "height": "600px"}
+            )
+        ]),
+        
+        #html.H3("Price Trend"),
+        #dbc.Row([
+        #    dbc.Col(html.Iframe(
+        #        id='price-trend-graph-container', 
+        #        style={'height': '300px'}, 
+        #        width='100%'  # 设置宽度为 100% 以适应父容器
+        #    )),
+        #]),
+        
         html.Div("Refresh Time", className="text-muted"),
         update_speed_dropdown,  # 新增更新频率选择控件
         html.Div("Filter Criteria", className="text-muted"),

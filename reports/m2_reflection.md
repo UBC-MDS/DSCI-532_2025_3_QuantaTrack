@@ -2,7 +2,7 @@
 We have established the backbone of the QuantaTrack dashboard, providing users with key financial insights on the NASDAQ 100. 
 Key visualizations include a pie chart that shows the sector composition of the index, 
 a horizontal bar chart highlighting intraday performance, a scatter plot that compares dividend yield with PE ratio, 
-and a histogram that displays year-to-date returns.  
+, a histogram that displays year-to-date returns and a regression plot between the selected stock and index as well as their performance trend comparison.  
 
 The dashboard is fully interactive, with the sector filter controlling all charts. 
 This ensures that when users select a sector, all visualizations and the table update accordingly, offering a cohesive view of market data. 

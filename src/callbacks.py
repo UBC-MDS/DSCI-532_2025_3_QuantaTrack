@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import re
 import plotly.express as px  # 新增导入 Plotly Express
 from dash import html, dcc, Input, Output
@@ -6,6 +7,8 @@ import dash
 
 from layout import *
 from qqqm_data import getQQQMHolding
+from xueqiu_data import getUSStockHistoryByDate
+
 
 def register_callbacks(app):
     """注册 Dash 回调函数"""
@@ -75,7 +78,30 @@ def register_callbacks(app):
             srcDoc=render_intraday_contribution_5(selected_sectors),
             style={"border": "0", "width": "100%", "height": "600px"}
         )
-        
+
+    # Callback for updating regression and trnde graph based on stock and time range selection
+    @app.callback(
+        [Output('regression-graph-container', 'children'),
+         Output('price-trend-graph-container', 'children')],
+        [Input('stock-dropdown', 'value'),
+         Input('date-picker-range', 'start_date'),
+         Input('date-picker-range', 'end_date')]
+    )
+    def update_regression_and_trend_graph(selected_stock, start_date, end_date):
+        """Updates the regession and beta value as well as trend based on selected stock and date range"""
+        # 调用图一的 render_regression_and_trend_graph 函数，生成图表
+        regression_fig_html, price_trend_fig_html = render_regression_and_trend_graph(selected_stock, start_date, end_date)
+    
+        # 将生成的图表 HTML 结果嵌入 Iframe 中
+        return html.Iframe(
+            srcDoc=regression_fig_html, style={"border": "0", "width": "100%", "height": "600px"}
+        ), html.Iframe(
+            srcDoc=price_trend_fig_html, style={"border": "0", "width": "100%", "height": "600px"}
+        )
+
+
+
+    
     # 回调：每 n 秒更新数据，存入 dcc.Store（需在布局中添加 dcc.Store(id="data-store")）
     @app.callback(
         Output("data-store", "data"),
