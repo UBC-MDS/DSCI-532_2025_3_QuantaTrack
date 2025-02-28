@@ -104,7 +104,7 @@ pie_chart = html.Div(
     id="pie-chart-container", children=[
         html.Iframe(
             srcDoc=render_pie_chart(selected_sectors=["All"]), 
-            # style={"border": "0", "width": "100%", "height": "100px"}
+            # style={"border": "0", "width": "50%", "height": "100px"}
         )
     ]
 )
@@ -113,7 +113,7 @@ scatter_plot = html.Div(
     id="scatter-plot-container", children=[
         html.Iframe(
             srcDoc=render_scatter_plot(selected_sectors=["All"]),  # Default to all sectors
-            style={"border": "0", "width": "100%", "height": "100px"}
+            style={"border": "0", "width": "100%", "height": "600px"}
         )
     ]
 )
