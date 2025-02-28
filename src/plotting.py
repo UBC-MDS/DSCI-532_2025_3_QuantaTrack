@@ -180,16 +180,16 @@ def render_ytd_distribution(selected_sectors=["All"]):
         x="YTDReturn", 
         nbins=20, 
         title="YTD Return Distribution", 
-        opacity=0.5
+        # opacity=0.5
     )
     fig.update_traces(name="YTDReturn")
-
-    # Add kernel density for smooth curve
-    fig.add_trace(
-        px.histogram(df, x="YTDReturn", nbins=20, histnorm="probability density").data[0]
-    )
-    fig.data[1].marker = dict(opacity=0)  # Hide second histogram bars, keep the curve
-    #fig.data[1].line = dict(color="blue", width=2)
+    
+    # # Add kernel density for smooth curve
+    # fig.add_trace(
+    #     px.histogram(df, x="YTDReturn", nbins=20, histnorm="probability density").data[0]
+    # )
+    # fig.data[1].marker = dict(opacity=0)  # Hide second histogram bars, keep the curve
+    # fig.data[1].line = dict(color="blue", width=2)
 
     # Calculate mean & median
     mean_val = df["YTDReturn"].mean()
@@ -212,7 +212,7 @@ def render_ytd_distribution(selected_sectors=["All"]):
             linewidth=1,  # Reduced border thickness for the x-axis
             linecolor='gray',  # Outer line color for the x-axis
             tickformat=".0%", 
-            range=[-0.4, 0.4]
+            range=[-df["YTDReturn"].max()-0.05, df["YTDReturn"].max()+0.05]
             ),
         # yaxis=dict(
         #     showline=True,  # Show outer axis line (border)
