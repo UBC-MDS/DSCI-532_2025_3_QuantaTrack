@@ -4,9 +4,9 @@ import plotly.express as px  # 新增导入 Plotly Express
 from dash import html, dcc, Input, Output
 import dash
 
-from layout import *
-from plotting import *
-from qqqm_data import getQQQMHolding
+from src.layout import *
+from src.plotting import *
+from src.qqqm_data import getQQQMHolding
 
 def highlight_change(val):
         try:
