@@ -1,11 +1,11 @@
 import dash
 import dash_bootstrap_components as dbc
 from layout import layout
-from callbacks import register_callbacks
+from callbacks import *
 
 # 初始化 Dash 应用
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-app.title = "NASDAQ 100 Companies"
+app.title = "QuantaTrack"
 
 # 绑定布局
 app.layout = layout
