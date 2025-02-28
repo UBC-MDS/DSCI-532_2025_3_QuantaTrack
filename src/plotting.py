@@ -180,7 +180,7 @@ def render_ytd_distribution(selected_sectors=["All"]):
         x="YTDReturn", 
         nbins=20, 
         title="YTD Return Distribution", 
-        # opacity=0.5
+        opacity=0.5
     )
     fig.update_traces(name="YTDReturn")
     
