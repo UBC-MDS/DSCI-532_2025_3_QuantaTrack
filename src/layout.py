@@ -265,38 +265,6 @@ def render_intraday_contribution_5(selected_sectors=["All"]):
 
     return fig.to_html(full_html=False)
 
-# Sidebar (with multi-select dropdown for sectors)
-sidebar = html.Div(
-    [
-        html.H5("US", className="text-muted"),
-        html.Ul(
-            [
-                html.Li(dbc.NavLink("NASDAQ 100", active=True, href="#")),
-                #html.Li("S&P 500"),
-            ]
-        ),
-        html.Hr(),  # Optional line separator
-        html.H6("Select Sectors", className="text-muted"),  # Title for the dropdown
-        dbc.Col(
-            dcc.Dropdown(
-                id="filter-sector",
-                options=[{"label": "All", "value": "All"}] + [{"label": sec, "value": sec} for sec in [
-                    'Information Technology', 'Consumer Discretionary', 'Communication Services',
-                    'Consumer Staples', 'Materials', 'Health Care', 'Industrials', 'Utilities',
-                    'Financials', 'Energy', 'Real Estate'
-                ]],
-                value=["All"],  # Default selection can be 'All'
-                multi=True,  # Make it multi-select
-                clearable=True,  # Allow clearing the selection
-                style={"width": "100%"}  # Make the dropdown full-width
-            ),
-            style={"padding-top": "10px"}
-        ),
-    ],
-    className="sidebar p-3",
-    style={"width": "300px", "height": "100vh", "position": "fixed", "left": "0", "top": "0", "background": "#f8f9fa"},
-)
-
 # Filter Form (with ticker and name input)
 filter_form = dbc.Row(
     [
@@ -318,12 +286,90 @@ update_speed_dropdown = dbc.Row(
             ],
             value="No Update",
             clearable=False,
-            style={"width": "150px"}
+            style={
+                "width": "100%",
+                "background-color": "#ffffff",  # Set dropdown background to white
+                "color": "#000000",  # Set text color to black for the dropdown options
+                }
         ),
-        width="auto"
     ),
     className="mb-3"
 )
+
+sector_filter_dropdown = dbc.Row(
+    dbc.Col(
+        dcc.Dropdown(
+            id="filter-sector",
+            options=[{"label": "All", "value": "All"}] + [{"label": sec, "value": sec} for sec in [
+                'Information Technology', 'Consumer Discretionary', 'Communication Services',
+                'Consumer Staples', 'Materials', 'Health Care', 'Industrials', 'Utilities',
+                'Financials', 'Energy', 'Real Estate'
+            ]],
+            value=["All"],  # Default selection can be 'All'
+            multi=True,  # Make it multi-select
+            clearable=True,  # Allow clearing the selection
+            style={
+                "width": "100%",
+                "background-color": "#ffffff",  # Set dropdown background to white
+                "color": "#000000",  # Set text color to black for the dropdown options
+                }  # Make the dropdown full-width
+        ),
+    ),
+    className="mb-3"
+)
+
+# Sidebar (with multi-select dropdown for sectors and refresh time)
+sidebar = [ 
+    
+    # Title and Link
+    html.H1("QuantaTrack", className="mt-3"),
+    html.H2("NASDAQ 100 Companies", className="mt-3"),
+    html.A(
+        "NASDAQ 100 Index ETF", 
+        href="https://www.invesco.com/us/financial-products/etfs/product-detail?audienceType=Investor&productId=ETF-QQQM", 
+        className="text-primary"
+    ),
+    
+    html.Hr(),  # Optional line separator
+    
+    # Refresh Time Dropdown
+    dbc.Label('Refresh Time'),
+    update_speed_dropdown,  # Assuming this is a dropdown for selecting the refresh time
+
+    html.Hr(),  # Optional line separator
+    
+    # Sector Selector Dropdown
+    dbc.Label("Select Sectors"),
+    sector_filter_dropdown,
+    html.Hr(),  # Optional line separator
+
+    # Footer with Markdown
+    html.Footer(
+        [
+            dcc.Markdown('''
+                NASDAQ 100 Tracker is developed by Ethan Fang, Jenny Zhang, Kevin Gao, and Ziyuan Zhao.  
+                The application provides dynamic, real-time NASDAQ 100 tracking and visualization to help investors make data-driven decisions with ease.
+                Dashboard latest update on DATE         
+                [Link to the Github Repo](https://github.com/UBC-MDS/DSCI-532_2025_3_QuantaTrack)  
+            ''', 
+            style={
+                "text-align": "left",  # Center the text
+                "font-size": "12px",  # Set appropriate font size
+                "background-color": "#343a40",  # Dark background color for sidebar
+                "color": "#ffffff",  # Black color for footer text
+                "padding-top": "20px",  # Add some padding on top
+                "padding-bottom": "10px",  # Add some padding at the bottom
+                "padding-left": "10px",  # Add some padding at the bottom
+                'flexShrink': 0,  # Prevent footer from shrinking
+                'position': 'absolute',  # Position the footer at the bottom
+                'bottom': '0',  # Always stick to the bottom
+                'left': '0',  # Always stick to the left
+                "width": "100%",  # Ensure it takes the full width of the sidebar
+                }
+            )
+        ]
+    ),
+]
 
 # 保存原始列定义（用于恢复原始表头名称）
 original_columns = [
@@ -388,56 +434,121 @@ data_update_interval = dcc.Interval(
     n_intervals=0
 )
 
-# 页面内容 (Main Content) 修改：使用 html.Iframe 显示 pyecharts 图表
-content = html.Div(
-    [
-        html.H1("NASDAQ 100 Companies", className="mt-3"),
-        html.A("NASDAQ 100 Index ETF", href="https://www.invesco.com/us/financial-products/etfs/product-detail?audienceType=Investor&productId=ETF-QQQM", className="text-primary"),
-        # 使用 Iframe 显示 piecharts 渲染的图表
-        html.Div(id="pie-chart-container", children=[
-            html.Iframe(
-                srcDoc=render_pie_chart(selected_sectors=["All"]), 
-                style={"border": "0", "width": "100%", "height": "600px"}
-            )
-        ]),
-        # Using Iframe to display the Plotly scatter plot
-        html.Div(id="scatter-plot-container", children=[
-            html.Iframe(
-                srcDoc=render_scatter_plot(selected_sectors=["All"]),  # Default to all sectors
-                style={"border": "0", "width": "100%", "height": "600px"}
-            )
-        ]),
-        html.H3("YTD Return Distribution"),
-        html.Div(id="ytd-dist-container", children=[
-            html.Iframe(
-                srcDoc=render_ytd_distribution(selected_sectors=["All"]),
-                style={"border": "0", "width": "100%", "height": "600px"}
-            )
-        ]),
-
-        html.H3("Top 5 / Bottom 5 by Intraday Contribution"),
-        html.Div(id="intraday-contribution-top5-bottom5-container", children=[
-            html.Iframe(
-                srcDoc=render_intraday_contribution_5(selected_sectors=["All"]),
-                style={"border": "0", "width": "100%", "height": "600px"}
-            )
-        ]),
-        html.Div("Refresh Time", className="text-muted"),
-        update_speed_dropdown,  # 新增更新频率选择控件
-        html.Div("Filter Criteria", className="text-muted"),
-        filter_form,
-        # 新增下载 CSV 按钮和下载组件
-        dbc.Button("Download CSV", id="download-csv-btn", color="primary", className="mb-3"),
-        dcc.Download(id="download-csv"),
-        table,
-        store_components,  # 添加排序状态与原始数据存储
-        data_update_interval  # 新增 Interval 控件，用于周期更新
-    ],
-    style={"margin-left": "320px", "padding": "20px"},
+pie_chart = html.Div(
+    id="pie-chart-container", children=[
+        html.Iframe(
+            srcDoc=render_pie_chart(selected_sectors=["All"]), 
+            # style={"border": "0", "width": "100%", "height": "100px"}
+        )
+    ]
 )
 
-# 组合完整布局
-layout = html.Div([sidebar, content])
+scatter_plot = html.Div(
+    id="scatter-plot-container", children=[
+        html.Iframe(
+            srcDoc=render_scatter_plot(selected_sectors=["All"]),  # Default to all sectors
+            style={"border": "0", "width": "100%", "height": "100px"}
+        )
+    ]
+)
+
+ytd_dist = html.Div(
+    id="ytd-dist-container", children=[
+        html.Iframe(
+            srcDoc=render_ytd_distribution(selected_sectors=["All"]),
+            style={"border": "0", "width": "100%", "height": "100px"}
+        )
+    ]
+)
+
+intraday_cont_5 = html.Div(
+    id="intraday-contribution-top5-bottom5-container", children=[
+        html.Iframe(
+            srcDoc=render_intraday_contribution_5(selected_sectors=["All"]),
+            style={"border": "0", "width": "100%", "height": "100px"}
+        )
+    ]
+)
+
+# Download CSV button and component
+download_csv = dbc.Col(
+    children=[
+        dbc.Button("Download CSV", id="download-csv-btn", color="primary", className="mb-3"),
+        dcc.Download(id="download-csv")
+    ],
+    md="auto",  # Automatically adjusts the column width
+    className="text-right"  # Right-align the button
+)
+
+# Search box
+search_box = dbc.Col(filter_form, md=10)  # Adjust size as needed
+
+# Row for the search box and download CSV button on the same line
+search_download_row = dbc.Row(
+    [
+        search_box,
+        download_csv
+    ],
+    align="center"  # Vertically center the items in the row
+)
+
+
+# 页面内容 (Main Content) 修改：使用 html.Iframe 显示 pyecharts 图表
+layout = dbc.Container(
+    [
+        # Row for Global Filters (Refresh Time)
+        dbc.Row(
+            [
+                dbc.Col(
+                    sidebar, md=2, 
+                    style={
+                        # 'display': 'flex',
+                        #'flexDirection': 'column',  # Stack children vertically
+                        'position': 'fixed',  # Fix the sidebar on the left
+                        'top': '0',  # Make sure it starts at the top of the page
+                        'left': '0',  # Fix it to the left of the page
+                        'minHeight': '100vh',  # Ensure the sidebar takes full height of the page
+                        'overflowY': 'auto',  # Allow the sidebar to scroll if content exceeds viewport height
+                        'padding-left': 10,
+                        'color': 'white', 
+                        'backgroundColor': "#343a40", 
+                        "box-sizing": "border-box",  # Include padding and borders in element's total width and height
+                        }
+                    ),
+
+                # Row for the graphs (Pie chart, Intraday Contribution, etc.)
+                dbc.Col(
+                    [
+                        # Row for Pie chart and Intraday Contribution
+                        dbc.Row([
+                            dbc.Col(pie_chart), 
+                            dbc.Col(intraday_cont_5)
+                            ]),
+                        # Row for Dividend Yield vs PE and YTD Distribution
+                        dbc.Row([
+                            dbc.Col(scatter_plot), 
+                            dbc.Col(ytd_dist)
+                            ]),
+
+                        # Row for Search box and Download CSV button
+                        search_download_row,
+
+                        # Screener table row at the bottom
+                        dbc.Row(dbc.Col(table)),
+                        
+                        store_components,  # 添加排序状态与原始数据存储
+                        data_update_interval  # 新增 Interval 控件，用于周期更新
+                    ],
+                    md=10,
+                    style={
+                        'margin-left': '16.67%',  # Adjust for sidebar width (md=2 takes 16.67%)
+                    }
+                ),
+            ]    
+        ),
+    ],
+    fluid=True,  # Ensure the layout is fluid and stretches to the full width of the viewport
+)
 
 # 回调函数：根据表头点击循环更新排序状态和箭头显示
 @callback(

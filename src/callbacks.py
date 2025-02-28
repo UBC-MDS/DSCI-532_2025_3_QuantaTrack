@@ -34,19 +34,7 @@ def register_callbacks(app):
             srcDoc=render_pie_chart(selected_sectors),  # Generate pie chart with selected sectors
             style={"border": "0", "width": "100%", "height": "600px"}  # Styling
         )
-        
-    # Callback for scatter plot based on sector filter
-    @app.callback(
-        Output("scatter-plot-container", "children"),  # Output container for scatter plot
-        Input("filter-sector", "value")  # Input: sector dropdown value
-    )
-    def update_scatter_plot(selected_sectors):
-        # Call render_scatter_plot function with the selected sectors and return the HTML
-        return html.Iframe(
-            srcDoc=render_scatter_plot(selected_sectors),  # Generate the chart with selected sectors
-            style={"border": "0", "width": "100%", "height": "600px"}  # Style the iframe
-        )
-        
+
     # New callback: Update YTD Distribution
     @app.callback(
         Output("ytd-dist-container", "children"),
@@ -55,8 +43,13 @@ def register_callbacks(app):
     def update_ytd_dist(selected_sectors):
         # If user clears the dropdown, default to ["All"]
         if not selected_sectors:
-            selected_sectors = ["All"]
-
+            selected_sectors = ["All"]    
+        
+        return html.Iframe(
+            srcDoc=render_ytd_distribution(selected_sectors),
+            style={"border": "0", "width": "100%", "height": "600px"}
+        )
+ 
     # Callback for scatter plot based on sector filter
     @app.callback(
         Output("scatter-plot-container", "children"),  # Output container for scatter plot
@@ -67,11 +60,6 @@ def register_callbacks(app):
         return html.Iframe(
             srcDoc=render_scatter_plot(selected_sectors),  # Generate the chart with selected sectors
             style={"border": "0", "width": "100%", "height": "600px"}  # Style the iframe
-        )
-    
-        return html.Iframe(
-            srcDoc=render_ytd_distribution(selected_sectors),
-            style={"border": "0", "width": "100%", "height": "600px"}
         )
 
     # New callback: Update Top/Bottom 5 Chart
