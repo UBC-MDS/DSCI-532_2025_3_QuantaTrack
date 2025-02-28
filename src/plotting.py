@@ -46,7 +46,7 @@ def render_pie_chart(selected_sectors=["All"]):
 
     # 4. 创建环形图
     chart = (
-        Pie()
+        Pie(init_opts=opts.InitOpts(width="500px", height="500px"))
         .add(
             series_name="",
             data_pair=data_pairs,
@@ -179,7 +179,7 @@ def render_ytd_distribution(selected_sectors=["All"]):
         df, 
         x="YTDReturn", 
         nbins=20, 
-        #title="YTD Return Distribution", 
+        title="YTD Return Distribution", 
         opacity=0.5
     )
     fig.update_traces(name="YTDReturn")
@@ -206,7 +206,9 @@ def render_ytd_distribution(selected_sectors=["All"]):
     # Format x-axis as percentage
     fig.update_layout(
         xaxis=dict(tickformat=".0%", range=[-0.4, 0.4]),
-        margin=dict(l=50, r=50, t=50, b=50)
+        margin=dict(l=50, r=50, t=50, b=50),
+        plot_bgcolor="rgba(0,0,0,0)",   # Transparent plot area
+        paper_bgcolor="rgba(0,0,0,0)"  # Transparent overall figure background
     )
     
     return fig.to_html(full_html=False)
@@ -269,7 +271,7 @@ def render_intraday_contribution_5(selected_sectors=["All"]):
 
     # 8. Configure layout
     fig.update_layout(
-        #title="Top 5 / Bottom 5 Companies by Intraday Contribution",
+        title="Companies by Intraday Contribution",
         xaxis_title="IntradayContribution",
         yaxis_title="Company",
         margin=dict(l=150, r=50, t=50, b=50),
