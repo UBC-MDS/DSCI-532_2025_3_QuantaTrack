@@ -76,18 +76,16 @@ sidebar = [
         [
             dcc.Markdown('''
                 NASDAQ 100 Tracker is developed by Ethan Fang, Jenny Zhang, Kevin Gao, and Ziyuan Zhao.  
-                The application provides dynamic, real-time NASDAQ 100 tracking and visualization to help investors make data-driven decisions with ease.  
+                The application provides dynamic, real-time NASDAQ 100 tracking to help investors make data-driven decisions with ease.  
                 Latest update on Mar. 1, 2025.  
                 [Link to the Github Repo](https://github.com/UBC-MDS/DSCI-532_2025_3_QuantaTrack)  
             ''', 
             style={
                 "text-align": "left",  # Center the text
-                "font-size": "16px",  # Set appropriate font size
+                "font-size": "15px",  # Set appropriate font size
                 "background-color": "#343a40",  # Dark background color for sidebar
                 "color": "#ffffff",  # Black color for footer text
-                "padding-top": "20px",  # Add some padding on top
-                "padding-bottom": "10px",  # Add some padding at the bottom
-                "padding-left": "10px",  # Add some padding at the bottom
+                "padding": "10px",  # Add some padding 
                 'flexShrink': 0,  # Prevent footer from shrinking
                 'position': 'absolute',  # Position the footer at the bottom
                 'bottom': '0',  # Always stick to the bottom
@@ -264,7 +262,7 @@ layout = dbc.Container(
                             dbc.Col(pie_chart), 
                             dbc.Col(intraday_cont_5)
                             ], 
-                            class_name="g-0",
+                            className="g-0",
                             align="start"
                         ),
                         # Row for Dividend Yield vs PE and YTD Distribution
@@ -272,7 +270,7 @@ layout = dbc.Container(
                             dbc.Col(scatter_plot), 
                             dbc.Col(ytd_dist)
                             ],
-                            class_name="g-0",
+                            className="g-0",
                             align="end"
                         ),
 
@@ -286,7 +284,6 @@ layout = dbc.Container(
                         data_update_interval  # 新增 Interval 控件，用于周期更新
                     ],
                     md=10,
-                    class_name="g-0",
                     style={
                         'margin-left': '16.67%',  # Adjust for sidebar width (md=2 takes 16.67%)
                     }
