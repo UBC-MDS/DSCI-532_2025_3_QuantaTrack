@@ -183,13 +183,13 @@ def render_ytd_distribution(selected_sectors=["All"]):
         opacity=0.5
     )
     fig.update_traces(name="YTDReturn")
-
-    # Add kernel density for smooth curve
-    fig.add_trace(
-        px.histogram(df, x="YTDReturn", nbins=20, histnorm="probability density").data[0]
-    )
-    fig.data[1].marker = dict(opacity=0)  # Hide second histogram bars, keep the curve
-    #fig.data[1].line = dict(color="blue", width=2)
+    
+    # # Add kernel density for smooth curve
+    # fig.add_trace(
+    #     px.histogram(df, x="YTDReturn", nbins=20, histnorm="probability density").data[0]
+    # )
+    # fig.data[1].marker = dict(opacity=0)  # Hide second histogram bars, keep the curve
+    # fig.data[1].line = dict(color="blue", width=2)
 
     # Calculate mean & median
     mean_val = df["YTDReturn"].mean()
@@ -212,7 +212,7 @@ def render_ytd_distribution(selected_sectors=["All"]):
             linewidth=1,  # Reduced border thickness for the x-axis
             linecolor='gray',  # Outer line color for the x-axis
             tickformat=".0%", 
-            range=[-0.4, 0.4]
+            range=[-df["YTDReturn"].max()-0.05, df["YTDReturn"].max()+0.05]
             ),
         # yaxis=dict(
         #     showline=True,  # Show outer axis line (border)
@@ -285,6 +285,8 @@ def render_intraday_contribution_5(selected_sectors=["All"]):
     # 8. Configure layout
     fig.update_layout(
         title="Companies by Intraday Contribution",
+        title_font=dict(size=24, color="black", family="Calibri", weight="bold"),
+        title_x=0.5,
         xaxis_title="IntradayContribution",
         yaxis_title="Company",
         xaxis=dict(
