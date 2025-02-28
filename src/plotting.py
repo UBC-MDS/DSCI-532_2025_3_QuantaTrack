@@ -10,18 +10,34 @@ def render_pie_chart(selected_sectors=["All"]):
     # 1. 获取并处理数据
     _df = getQQQMHolding()
     
-    if "All" not in selected_sectors:
-        _df = _df[_df["Sector"].isin(selected_sectors)]  # Apply sector filtering
+    # Treat an empty selection the same as ["All"]
+    if not selected_sectors:
+        selected_sectors = ["All"]
 
-    df_group = _df.groupby('Name', as_index=False).agg({'Weight': 'sum'})
-    df_group = df_group.sort_values(by='Weight', ascending=False)
-    top_10 = df_group.nlargest(10, 'Weight')
-    rest = df_group.iloc[10:]
-    rest_combined = pd.DataFrame({'Name': ['Other Companies'], 'Weight': [rest['Weight'].sum()]})
-    combined_df = pd.concat([top_10, rest_combined], ignore_index=True)
-    
-    # 2. 组装 (名称, 权重) 列表
-    data = list(zip(combined_df['Name'], combined_df['Weight']))
+    if "All" in selected_sectors:
+        df_sector = _df.groupby('Sector', as_index=False)["Weight"].sum()
+        df_sector = df_sector.sort_values("Weight", ascending=False)
+        data_pairs = list(zip(df_sector["Sector"], df_sector["Weight"]))
+        chart_title = "NASDAQ 100 by Sector"
+ 
+    else:
+        # 2) Filter df by the chosen sectors
+        _df = _df[_df["Sector"].isin(selected_sectors)]
+
+        # Sort by weight descending, top 10
+        df_sorted = _df.sort_values("Weight", ascending=False)
+        top_10 = df_sorted.head(10)
+        # Combine the "other" leftover if needed
+        rest = df_sorted.iloc[10:]
+        rest_combined = pd.DataFrame({
+            "Name": ["Other Companies"], 
+            "Weight": [rest["Weight"].sum()]
+        })
+        combined_df = pd.concat([top_10, rest_combined], ignore_index=True)
+        
+        # Convert to a list of (company, weight)
+        data_pairs = list(zip(combined_df["Name"], combined_df["Weight"]))
+        chart_title = "Top 10 Companies (Selected Sectors)"
 
     # 3. 为前 10 项指定不同颜色
     colors= [
@@ -33,16 +49,13 @@ def render_pie_chart(selected_sectors=["All"]):
         Pie()
         .add(
             series_name="",
-            data_pair=data,
+            data_pair=data_pairs,
             radius=["40%", "75%"],  # 环形图的内外半径
             center=["50%", "50%"]   # 图表居中
         )
         .set_colors(colors)  # 为每个扇区设置颜色
         .set_global_opts(
-            title_opts=opts.TitleOpts(
-                title="NASDAQ 100 Companies by Weight", 
-                pos_left="center"
-            ),
+            title_opts=opts.TitleOpts(title=chart_title, pos_left="center"),
             legend_opts=opts.LegendOpts(is_show=False),  # 隐藏图例
             tooltip_opts=opts.TooltipOpts(formatter="{b}: {d}%")
         )
@@ -222,7 +235,13 @@ def render_intraday_contribution_5(selected_sectors=["All"]):
     top_5 = df_sorted.tail(5)
 
     # 5. Combine them into a single DataFrame
-    combined = pd.concat([bottom_5, top_5], ignore_index=True)
+    
+    if len(df_sorted) <= 10:
+        combined = df_sorted
+    else:
+        bottom_5 = df_sorted.head(5)
+        top_5 = df_sorted.tail(5)
+        combined = pd.concat([bottom_5, top_5], ignore_index=True)
 
     # For each row, create a label like: "NVDA (-0.70%)"
     combined["Label"] = combined["Ticker"] + " (" + (combined["IntradayContribution"] * 100).round(2).astype(str) + "%)"
