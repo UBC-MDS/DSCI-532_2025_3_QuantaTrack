@@ -1,4 +1,5 @@
 ## Parts Implemented So Far
+
 We have established the backbone of the QuantaTrack dashboard, providing users with key financial insights on the NASDAQ 100. 
 Key visualizations include a pie chart that shows the sector composition of the index, 
 a horizontal bar chart highlighting intraday performance, a scatter plot that compares dividend yield with PE ratio, 
@@ -11,6 +12,7 @@ to allow users to carry out downstream analysis by filtering results through tic
 and sorting each feature in ascending or descending order.
 
 ## Parts Done Differently
+
 We addressed several challenges to improve usability. One key improvement was ensuring that the dropdown filters for sectors 
 and tickers work seamlessly together, preventing errors when incompatible filters are applied. 
 Additionally, we implemented real-time data refresh, updating the dashboard every 3 or 10 seconds to provide the latest market data.  
@@ -19,12 +21,14 @@ To enhance clarity, we repositioned the search bar above the table, ensuring use
 and not the charts. We also added a download CSV button, enabling users to export data based on the current filter state.
 
 ## Intentional Deviations from Visualization Practices
+
 While industry best practices recommend using no more than five colors in a chart, 
 we are required to use 10+ colors in order to represent the various sectors in the NASDAQ 100. 
 Given the diversity of sectors in the index, this choice ensures each sector is clearly distinguishable, 
 improving clarity and making comparisons easier for users.
 
 ## Features Still in Development
+
 Several exciting features are currently in development. 
 We're working on adding real-time QQQ price updates and intraday volume movement cards at the top, 
 giving users immediate access to essential market data. 

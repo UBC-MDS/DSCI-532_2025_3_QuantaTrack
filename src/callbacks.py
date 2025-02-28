@@ -5,12 +5,10 @@ from dash import html, dcc, Input, Output
 import dash
 
 from layout import *
+from plotting import *
 from qqqm_data import getQQQMHolding
 
-def register_callbacks(app):
-    """注册 Dash 回调函数"""
-
-    def highlight_change(val):
+def highlight_change(val):
         try:
             val = float(val)
             if val < 0:
@@ -23,6 +21,38 @@ def register_callbacks(app):
         except:
             return ''
 
+def register_callbacks(app):
+    """注册 Dash 回调函数"""    
+        
+    # Callback for updating pie chart based on sector selection
+    @app.callback(
+        Output("pie-chart-container", "children"),  # Output container for the pie chart
+        Input("filter-sector", "value")  # Input: sector dropdown value
+    )
+    def update_pie_chart(selected_sectors):
+        """Updates the pie chart based on selected sectors"""
+        return html.Iframe(
+            srcDoc=render_pie_chart(selected_sectors),  # Generate pie chart with selected sectors
+            style={"border": "0", "width": "100%", "height": "600px"}  # Styling
+        )
+
+
+    # New callback: Update YTD Distribution
+    @app.callback(
+        Output("ytd-dist-container", "children"),
+        Input("filter-sector", "value")
+    )
+    def update_ytd_dist(selected_sectors):
+        # If user clears the dropdown, default to ["All"]
+        if not selected_sectors:
+            selected_sectors = ["All"]    
+        
+        return html.Iframe(
+            srcDoc=render_ytd_distribution(selected_sectors),
+            style={"border": "0", "width": "100%", "height": "600px"}
+        )
+
+
     # Callback for scatter plot based on sector filter
     @app.callback(
         Output("scatter-plot-container", "children"),  # Output container for scatter plot
@@ -34,7 +64,22 @@ def register_callbacks(app):
             srcDoc=render_scatter_plot(selected_sectors),  # Generate the chart with selected sectors
             style={"border": "0", "width": "100%", "height": "600px"}  # Style the iframe
         )
-    
+
+    # New callback: Update Top/Bottom 5 Chart
+    @app.callback(
+        Output("intraday-contribution-top5-bottom5-container", "children"),
+        Input("filter-sector", "value")
+    )
+    def update_intraday_bar(selected_sectors):
+        if not selected_sectors:
+            selected_sectors = ["All"]
+
+        return html.Iframe(
+            srcDoc=render_intraday_contribution_5(selected_sectors),
+            style={"border": "0", "width": "100%", "height": "600px"}
+        )
+
+
     # 回调：每 n 秒更新数据，存入 dcc.Store（需在布局中添加 dcc.Store(id="data-store")）
     @app.callback(
         Output("data-store", "data"),
@@ -55,6 +100,7 @@ def register_callbacks(app):
             return False, 10000
         else:  # "不更新"
             return True, 1000  # interval 值无关紧要
+
 
     @app.callback(
         Output("stock-table", "data"),
@@ -94,24 +140,6 @@ def register_callbacks(app):
         #     else:  # Single name value
         #         df = df[df["Name"].str.contains(name, case=False, na=False)]
 
-    @app.callback(
-        Output("stock-table", "style_data_conditional"),
-        Input("stock-table", "data")
-    )
-    def update_intraday_return_styles(data):
-        """应用 highlight_change 至 IntradayReturn 列"""
-        styles = []
-        if data:
-            for i, row in enumerate(data):
-                val = row.get("IntradayReturn")
-                if val is None:
-                    continue
-                color = highlight_change(val)
-                styles.append({
-                    "if": { "row_index": i, "column_id": "IntradayReturn" },
-                    "backgroundColor": color
-                })
-        return styles
 
     @app.callback(
         Output("download-csv", "data"),
@@ -138,3 +166,86 @@ def register_callbacks(app):
         # def generate_csv_text(_):
         #     return df.to_csv(index=False)
         # return dcc.send_string(generate_csv_text, "QuantaTrack_Output.csv")
+
+
+    @app.callback(
+        Output("stock-table", "style_data_conditional"),
+        Input("stock-table", "data")
+    )
+    def update_intraday_return_styles(data):
+        """应用 highlight_change 至 IntradayReturn 列"""
+        styles = []
+        if data:
+            for i, row in enumerate(data):
+                val = row.get("IntradayReturn")
+                if val is None:
+                    continue
+                color = highlight_change(val)
+                styles.append({
+                    "if": { "row_index": i, "column_id": "IntradayReturn" },
+                    "backgroundColor": color
+                })
+        return styles
+
+
+    # 回调函数：根据表头点击循环更新排序状态和箭头显示
+    @callback(
+        Output("stock-table", "data", allow_duplicate=True),
+        Output("stock-table", "columns", allow_duplicate=True),
+        Output("sort-state", "data", allow_duplicate=True),
+        Output("original-data", "data", allow_duplicate=True),
+        Output("stock-table", "sort_by", allow_duplicate=True),
+        Input("stock-table", "sort_by"),
+        State("sort-state", "data"),
+        State("stock-table", "data"),
+        State("original-data", "data"),
+        prevent_initial_call=True
+    )
+    def update_sort(sort_by, sort_state, data, original_data):
+        # 初始化原始数据
+        if not original_data:
+            original_data = data
+        
+        # 决定要操作的排序列
+        if sort_by:
+            sort_col = sort_by[0]["column_id"]
+        else:
+            # 如果没有新的 sort_by，但已有上次点击记录，则使用它
+            sort_col = sort_state.get("last_sorted")
+            if not sort_col:
+                return data, original_columns, sort_state, original_data, sort_by
+
+        # 根据上一次状态计算新的排序方向
+        prev = sort_state.get(sort_col, "none")
+        if prev == "none":
+            new_direction = "asc"
+        elif prev == "asc":
+            new_direction = "desc"
+        else:
+            new_direction = "none"
+        # 重置排序状态，并记录当前点击列
+        sort_state = {col_def["id"]: "none" for col_def in original_columns}
+        sort_state["last_sorted"] = sort_col
+        sort_state[sort_col] = new_direction
+
+        # 更新列标题，添加箭头提示
+        new_columns = []
+        for col_def in original_columns:
+            cid = col_def["id"]
+            base_name = col_def["name"].split(" ")[0]
+            arrow = ""
+            if sort_state.get(cid, "asc") == "asc":
+                arrow = " ↑"
+            elif sort_state.get(cid, "desc") == "desc":
+                arrow = " ↓"
+            new_columns.append({**col_def, "name": base_name + arrow})
+
+        # 更新数据：若方向为 "none" 恢复原始，否则排序数据
+        if new_direction == "none":
+            sorted_data = original_data
+            sort_by = []  # 清空排序状态
+        else:
+            reverse = True if new_direction == "desc" else False
+            sorted_data = sorted(data, key=lambda row: row.get(sort_col, None), reverse=reverse)
+
+        return sorted_data, new_columns, sort_state, original_data, sort_by
