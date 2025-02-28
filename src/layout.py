@@ -238,6 +238,7 @@ def render_intraday_contribution_5(selected_sectors=["All"]):
     top_5 = df_sorted.tail(5)
 
     # 5. Combine them into a single DataFrame
+    
     if len(df_sorted) <= 10:
         combined = df_sorted
     else:
