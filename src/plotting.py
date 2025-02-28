@@ -4,7 +4,7 @@ from pyecharts.charts import Pie
 import plotly.graph_objects as go
 import plotly.express as px
 from pyecharts import options as opts
-from qqqm_data import getQQQMHolding
+from src.qqqm_data import getQQQMHolding
 
 def render_pie_chart(selected_sectors=["All"]):
     # 1. 获取并处理数据
