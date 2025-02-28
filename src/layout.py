@@ -262,7 +262,7 @@ layout = dbc.Container(
                             dbc.Col(pie_chart), 
                             dbc.Col(intraday_cont_5)
                             ], 
-                            className="g-0",
+                            class_name="g-0",
                             align="start"
                         ),
                         # Row for Dividend Yield vs PE and YTD Distribution
@@ -270,7 +270,7 @@ layout = dbc.Container(
                             dbc.Col(scatter_plot), 
                             dbc.Col(ytd_dist)
                             ],
-                            className="g-0",
+                            class_name="g-0",
                             align="end"
                         ),
 
@@ -284,6 +284,7 @@ layout = dbc.Container(
                         data_update_interval  # 新增 Interval 控件，用于周期更新
                     ],
                     md=10,
+                    class_name="g-0",
                     style={
                         'margin-left': '16.67%',  # Adjust for sidebar width (md=2 takes 16.67%)
                     }
