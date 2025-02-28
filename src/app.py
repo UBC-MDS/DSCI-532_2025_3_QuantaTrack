@@ -16,4 +16,5 @@ register_callbacks(app)
 
 # 运行应用
 if __name__ == "__main__":
-    app.run_server(debug=False)
+    port = int(os.environ.get("PORT", 8080))  # 使用 Render 提供的端口
+    app.run_server(debug=False, host="0.0.0.0", port=port)
