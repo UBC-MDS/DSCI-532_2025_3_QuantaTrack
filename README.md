@@ -34,11 +34,11 @@ and they can download the data in CSV format based on the current view for furth
 
 #### Demo
 
-[DEMO TO BE ADDED]
+![QuantaTrack Demo](./img/demo.gif)
 
 #### Dashboard
 
-Visit QuantaTrack [ATTACH ON RENDER LINK] for our dashboard directly!
+Visit On-Render for our [QuantaTrack Dashboard](https://dsci-532-2025-3-quantatrack.onrender.com/) for our dashboard directly!
 
 ### Developer Guide
 
