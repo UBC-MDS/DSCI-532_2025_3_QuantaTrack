@@ -167,7 +167,7 @@ search_download_row = dbc.Row(
 )
 
 # Table components
-# 保存原始列定义（用于恢复原始表头名称）
+# Save original column definitions (used for restoring the original table header names)
 original_columns = [
     {"name": col, "id": col, "type": "numeric", "format": {"specifier": ".2%"}}
     if col in [
@@ -187,20 +187,20 @@ original_columns = [
     ]
 ]
 
-# 数据表格 (Table) 修改：添加自定义排序属性
+# Data table (Table) modification: Add custom sorting properties
 table = dash_table.DataTable(
     id="stock-table",
     columns=original_columns,
-    sort_action="custom",       # 启用自定义排序
-    sort_mode="single",         # 单列排序
+    sort_action="custom",       # Enable custom sorting
+    sort_mode="single",         # Single column sorting
     style_table={
         "overflowX": "auto",
         "margin": "20px",
         "boxShadow": "0 4px 6px rgba(0, 0, 0, 0.1)"
     },
     style_cell={
-        "textAlign": "left",       # 修改为左对齐
-        "padding": "12px",         # 增加内边距
+        "textAlign": "left",       # Change to left alignment
+        "padding": "12px",         # Add padding
         "fontFamily": "Arial, sans-serif",
         "fontSize": "14px",
     },
@@ -213,25 +213,25 @@ table = dash_table.DataTable(
         "backgroundColor": "white",
         "border": "1px solid #ccc"
     },
-    style_data_conditional=[],  # 回调将更新该属性
+    style_data_conditional=[],  # This will be updated by the callback
 )
 
-# 修改 store_components，新增 data-store 用于存放更新数据
+# Modify store_components, add data-store to store updated data
 store_components = html.Div([
     dcc.Store(id="sort-state", data={}),
     dcc.Store(id="original-data"),
     dcc.Store(id="data-store")
 ])
 
-# 新增 dcc.Interval 用于触发数据更新（隐藏组件）
+# Add dcc.Interval to trigger data updates (hidden component)
 data_update_interval = dcc.Interval(
     id="data-update-interval",
-    interval=1000,  # 默认 1秒
+    interval=1000,  # Default 1 second
     n_intervals=0
 )
 
 
-# 页面内容 (Main Content) 修改：使用 html.Iframe 显示 pyecharts 图表
+# Main content container
 layout = dbc.Container(
     [
         # Row for Global Filters (Refresh Time)
@@ -280,8 +280,8 @@ layout = dbc.Container(
                         # Screener table row at the bottom
                         dbc.Row(dbc.Col(table)),
                         
-                        store_components,  # 添加排序状态与原始数据存储
-                        data_update_interval  # 新增 Interval 控件，用于周期更新
+                        store_components,  # Add sorting state and original data storage
+                        data_update_interval  # Add Interval component for periodic updates
                     ],
                     md=10,
                     class_name="g-0",
