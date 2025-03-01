@@ -3,7 +3,7 @@
 This project is about making a dynamic dashboard of NASDAQ100 tracking.
 
 ## 📖 The Problem
-
+  
 Investors often struggle with navigating complex and overwhelming market data to identify key trends and make informed investment decisions. 
 With an abundance of financial information, tracking performance metrics and staying updated with real-time insights becomes challenging, 
 especially when dealing with fast-evolving markets like the NASDAQ 100. 
