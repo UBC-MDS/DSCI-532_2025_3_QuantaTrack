@@ -4,10 +4,14 @@ from pyecharts.charts import Pie
 import plotly.graph_objects as go
 import plotly.express as px
 from pyecharts import options as opts
-from qqqm_data import getQQQMHolding
+from src.qqqm_data import getQQQMHolding
 
 def render_pie_chart(selected_sectors=["All"]):
-    # 1. 获取并处理数据
+    """
+    Generates a doughnut chart displaying the weight distribution 
+    of companies in the selected sectors.
+    """
+    # 1. Get and process data
     _df = getQQQMHolding()
     
     # Treat an empty selection the same as ["All"]
@@ -39,42 +43,46 @@ def render_pie_chart(selected_sectors=["All"]):
         data_pairs = list(zip(combined_df["Name"], combined_df["Weight"]))
         chart_title = "Top 10 Companies (Selected Sectors)"
 
-    # 3. 为前 10 项指定不同颜色
+    # 3. Assign different colors for the top 10
     colors= [
         "#08306b", "#08519c", "#2171b5", "#4292c6", "#6baed6",
         "#9ecae1", "#c6dbef", "#deebf7", "#f7fbff", "#cccccc"]
 
-    # 4. 创建环形图
+    # 4. Create a doughnut chart
     chart = (
         Pie(init_opts=opts.InitOpts(width="600px", height="500px"))
         .add(
             series_name="",
             data_pair=data_pairs,
-            radius=["30%", "70%"],  # 环形图的内外半径
-            center=["50%", "50%"]   # 图表居中
+            radius=["30%", "70%"],  # Inner and outer radius of the doughnut chart
+            center=["50%", "50%"]   # Center the chart
         )
-        .set_colors(colors)  # 为每个扇区设置颜色
+        .set_colors(colors)  # Set colors for each sector
         .set_global_opts(
             title_opts=opts.TitleOpts(title=chart_title, pos_left="center"),
-            legend_opts=opts.LegendOpts(is_show=False),  # 隐藏图例
+            legend_opts=opts.LegendOpts(is_show=False),  # Hide legend
             tooltip_opts=opts.TooltipOpts(formatter="{b}: {d}%")
         )
     )
 
-    # 5. 返回嵌入式 HTML
+    # 5. Return embedded HTML
     return chart.render_embed()
 
 # Function to render the scatter plot based on selected sectors
 def render_scatter_plot(selected_sectors):
-    # 1. 获取并处理数据
+    """
+    Renders a scatter plot of Dividend Yield vs. PE for selected sectors, 
+    color-coded by sector, with tooltips displaying company details.
+    """
+    # 1. Get and process data
     _df = getQQQMHolding()
 
-    # 2. 如果有筛选的 sectors, 根据它们过滤数据
+    # 2. If there are selected sectors, filter data based on them
     selected_sectors = selected_sectors or ["All"]
     if "All" not in selected_sectors:  # Only filter if "All" is not selected
         _df = _df[_df["Sector"].isin(selected_sectors)]  # Filter by selected sectors
 
-    # 3. 清洗和准备数据
+    # 3. Clean and prepare data
     scatter_data = []
     for index, row in _df.iterrows():
         if pd.notna(row['DividendYield']) and pd.notna(row['PE']):  # Only take rows with valid values
@@ -88,7 +96,7 @@ def render_scatter_plot(selected_sectors):
                 }
             )
 
-    # 4. 创建 Plotly 散点图
+    # 4. Create Plotly scatter plot
     fig = go.Figure()
 
     # Create a color map for sectors
@@ -96,7 +104,7 @@ def render_scatter_plot(selected_sectors):
     sector_to_color = {sector: px.colors.qualitative.Set1[i % len(px.colors.qualitative.Set1)] 
                        for i, sector in enumerate(unique_sectors)}  # Map sector to a color using a color palette
 
-    # 5. 创建 Plotly 散点图
+    # 5. Create Plotly scatter plot
     fig = go.Figure()
 
     # Add data points to the figure, color by sector

@@ -53,10 +53,18 @@ conda env create -f environment.yml
 conda activate quantatrack
 ```
 
-3.  Render the dashboard
+3. Activate debug mode and switch to local server in `src/app.py`
+``` bash
+if __name__ == "__main__":
+    app.run_server(debug=True)
+    # port = int(os.environ.get("PORT", 8080))  # Use port provided by Render
+    # app.run_server(debug=False, host="0.0.0.0", port=port)
+```
+
+4.  Render the dashboard locally
 
 ``` bash
-make run
+python -m src.app
 ```
 
 ## 👥 Contributors

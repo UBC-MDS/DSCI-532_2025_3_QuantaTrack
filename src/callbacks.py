@@ -1,28 +1,26 @@
 import pandas as pd
-import re
-import plotly.express as px  # 新增导入 Plotly Express
-from dash import html, dcc, Input, Output
+from dash import html, dcc, Input, Output, State
 import dash
 
-from layout import *
-from plotting import *
-from qqqm_data import getQQQMHolding
+from src.layout import *
+from src.plotting import *
+from src.qqqm_data import getQQQMHolding
 
 def highlight_change(val):
         try:
             val = float(val)
             if val < 0:
                 opacity = min(abs(val) / 0.1, 1)
-                color = f'rgba(255, 0, 0, {opacity})'  # 红色渐变
+                color = f'rgba(255, 0, 0, {opacity})'  # Red gradient
             else:
                 opacity = min(val / 0.1, 1)
-                color = f'rgba(0, 255, 0, {opacity})'  # 绿色渐变
+                color = f'rgba(0, 255, 0, {opacity})'  # Green gradient
             return color
         except:
             return ''
 
 def register_callbacks(app):
-    """注册 Dash 回调函数"""    
+    """Register Dash callback functions""" 
         
     # Callback for updating pie chart based on sector selection
     @app.callback(
@@ -80,7 +78,7 @@ def register_callbacks(app):
         )
 
 
-    # 回调：每 n 秒更新数据，存入 dcc.Store（需在布局中添加 dcc.Store(id="data-store")）
+    # Callback: Update data every n seconds and store it in dcc.Store (requires adding dcc.Store(id="data-store") in the layout)
     @app.callback(
         Output("data-store", "data"),
         Input("data-update-interval", "n_intervals")
@@ -88,7 +86,8 @@ def register_callbacks(app):
     def update_data(n_intervals):
         return getQQQMHolding().to_dict("records")
 
-    # 回调：根据下拉菜单选择更新频率，修改 Interval 组件属性（需在布局中添加 dcc.Interval(id="data-update-interval")和 dcc.Dropdown(id="update-speed")）
+    # Callback: Update the interval frequency based on the dropdown selection, modifying the Interval component's properties 
+    # (requires adding dcc.Interval(id="data-update-interval") and dcc.Dropdown(id="update-speed") in the layout)
     @app.callback(
         [Output("data-update-interval", "disabled"), Output("data-update-interval", "interval")],
         Input("update-speed", "value")
@@ -98,8 +97,8 @@ def register_callbacks(app):
             return False, 3000
         elif value == "10s":
             return False, 10000
-        else:  # "不更新"
-            return True, 1000  # interval 值无关紧要
+        else:  # "No update"
+            return True, 1000  # interval value doesn't matter
 
 
     @app.callback(
@@ -188,8 +187,8 @@ def register_callbacks(app):
         return styles
 
 
-    # 回调函数：根据表头点击循环更新排序状态和箭头显示
-    @callback(
+    # Callback function: Update the sorting status and arrow display based on header clicks in a loop
+    @app.callback(
         Output("stock-table", "data", allow_duplicate=True),
         Output("stock-table", "columns", allow_duplicate=True),
         Output("sort-state", "data", allow_duplicate=True),
@@ -202,20 +201,20 @@ def register_callbacks(app):
         prevent_initial_call=True
     )
     def update_sort(sort_by, sort_state, data, original_data):
-        # 初始化原始数据
+        # Initialize original data
         if not original_data:
             original_data = data
         
-        # 决定要操作的排序列
+        # Determine the column to be sorted
         if sort_by:
             sort_col = sort_by[0]["column_id"]
         else:
-            # 如果没有新的 sort_by，但已有上次点击记录，则使用它
+            # Use existing click record if no new sort_by
             sort_col = sort_state.get("last_sorted")
             if not sort_col:
                 return data, original_columns, sort_state, original_data, sort_by
 
-        # 根据上一次状态计算新的排序方向
+        # Calculate the new sort direction based on the previous state
         prev = sort_state.get(sort_col, "none")
         if prev == "none":
             new_direction = "asc"
@@ -223,12 +222,12 @@ def register_callbacks(app):
             new_direction = "desc"
         else:
             new_direction = "none"
-        # 重置排序状态，并记录当前点击列
+        # Reset sort state and record the current clicked column
         sort_state = {col_def["id"]: "none" for col_def in original_columns}
         sort_state["last_sorted"] = sort_col
         sort_state[sort_col] = new_direction
 
-        # 更新列标题，添加箭头提示
+        # Update column headers and add arrow indicators
         new_columns = []
         for col_def in original_columns:
             cid = col_def["id"]
@@ -240,10 +239,10 @@ def register_callbacks(app):
                 arrow = " ↓"
             new_columns.append({**col_def, "name": base_name + arrow})
 
-        # 更新数据：若方向为 "none" 恢复原始，否则排序数据
+        # Update data: if direction is "none", restore original, otherwise sort the data
         if new_direction == "none":
             sorted_data = original_data
-            sort_by = []  # 清空排序状态
+            sort_by = []  # Clear sort state
         else:
             reverse = True if new_direction == "desc" else False
             sorted_data = sorted(data, key=lambda row: row.get(sort_col, None), reverse=reverse)
