@@ -1,6 +1,6 @@
 import dash_bootstrap_components as dbc
 from dash import dcc, html, dash_table, callback, Input, Output, State
-from plotting import *
+from src.plotting import *
 
 # 修改更新频率选择 Dropdown：选项改为 "3秒"、"10秒" 和 "不更新"，默认值为 "不更新"
 update_speed_dropdown = dbc.Row(

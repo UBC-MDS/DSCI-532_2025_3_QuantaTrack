@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 from io import BytesIO
 
-from xueqiu_data import getBatchQuote
+from src.xueqiu_data import getBatchQuote
 # 添加缓存变量
 _ndx_holding_cache = None
 
@@ -30,53 +30,57 @@ def downloadQQQMHolding():
 
 # 清理df
 def getQQQMHolding():
-    df = downloadQQQMHolding()
-    df = df.rename(columns={'Holding Ticker': 'Ticker'})
-    df['Ticker'] = df['Ticker'].str.strip()
+    try:
+        df = downloadQQQMHolding()
+        df = df.rename(columns={'Holding Ticker': 'Ticker'})
+        df['Ticker'] = df['Ticker'].str.strip()
 
-    valid_classes = ['Common Stock', 'American Depository Receipt', 'American Depository Receipt - NY']
-    df = df[df['Class of Shares'].isin(valid_classes)]
+        valid_classes = ['Common Stock', 'American Depository Receipt', 'American Depository Receipt - NY']
+        df = df[df['Class of Shares'].isin(valid_classes)]
 
-    filter_column = ['Ticker', 'Name', 'Weight', 'Sector', 'Class of Shares']
-    df = df[filter_column]
+        filter_column = ['Ticker', 'Name', 'Weight', 'Sector', 'Class of Shares']
+        df = df[filter_column]
 
-    # 将 Weight 列转换为数值类型
-    df['Weight'] = pd.to_numeric(df['Weight'], errors='coerce')
-    df["Weight"] = df["Weight"] / df["Weight"].sum()
+        # 将 Weight 列转换为数值类型
+        df['Weight'] = pd.to_numeric(df['Weight'], errors='coerce')
+        df["Weight"] = df["Weight"] / df["Weight"].sum()
 
-    xueqiu_df= getBatchQuote(df['Ticker'])
+        xueqiu_df= getBatchQuote(df['Ticker'])
 
-    # 在 Ticker 列上进行合并
-    merged_df = pd.merge(df,xueqiu_df,left_on='Ticker',right_on = 'symbol')
-    
-    # 排序
+        # 在 Ticker 列上进行合并
+        merged_df = pd.merge(df,xueqiu_df,left_on='Ticker',right_on = 'symbol')
+        
+        # 排序
 
-    merged_df = merged_df.rename(columns={
-        'current': 'Price',
-        'percent': 'IntradayReturn',
-        'exchange': 'Exchange',
-        'volume': 'Volume',
-        'amount': 'Amount',
-        'market_capital': 'MarketCap',
-        'current_year_percent': 'YTDReturn',
-        'total_shares': 'SharesOutstanding',
-        'pe_ttm': 'PE',
-        'pe_forecast': 'ForwardPE',
-        'pb': 'PB',
-        'dividend': 'Dividend',
-        'dividend_yield': 'DividendYield',
-        'profit_four':'Profit_TTM',
-        'Timestamp_str':'Date',
-    })
-    merged_df['IntradayContribution'] = merged_df['Weight'] * merged_df['IntradayReturn']
-    merged_df['YTDContribution'] = merged_df['Weight'] * merged_df['YTDReturn']
+        merged_df = merged_df.rename(columns={
+            'current': 'Price',
+            'percent': 'IntradayReturn',
+            'exchange': 'Exchange',
+            'volume': 'Volume',
+            'amount': 'Amount',
+            'market_capital': 'MarketCap',
+            'current_year_percent': 'YTDReturn',
+            'total_shares': 'SharesOutstanding',
+            'pe_ttm': 'PE',
+            'pe_forecast': 'ForwardPE',
+            'pb': 'PB',
+            'dividend': 'Dividend',
+            'dividend_yield': 'DividendYield',
+            'profit_four':'Profit_TTM',
+            'Timestamp_str':'Date',
+        })
+        merged_df['IntradayContribution'] = merged_df['Weight'] * merged_df['IntradayReturn']
+        merged_df['YTDContribution'] = merged_df['Weight'] * merged_df['YTDReturn']
 
-    output_columns = ['Ticker', 'Name', 'Weight', 'Price','IntradayReturn',
-                      'Volume','Amount','IntradayContribution',
-                        'MarketCap', 'YTDReturn','YTDContribution',
-                        'PE','PB','Profit_TTM', 'DividendYield','Dividend',
-                        'SharesOutstanding','Sector','Date']
-    merged_df = merged_df[output_columns]
+        output_columns = ['Ticker', 'Name', 'Weight', 'Price','IntradayReturn',
+                        'Volume','Amount','IntradayContribution',
+                            'MarketCap', 'YTDReturn','YTDContribution',
+                            'PE','PB','Profit_TTM', 'DividendYield','Dividend',
+                            'SharesOutstanding','Sector','Date']
+        merged_df = merged_df[output_columns]
+    except:
+        print("Network issue detected.")
+        merged_df = pd.read_csv("data/raw/QQQM_Data.csv")
 
     return merged_df
 
