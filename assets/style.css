@@ -6,7 +6,8 @@ body {
 
 /* 侧边栏样式 */
 .sidebar {
-    background-color: #ffffff;
+    background-color: #343a40;
+    color: #ffffff;
     border-right: 1px solid #ddd;
     padding: 20px;
 }
