@@ -36,7 +36,7 @@ and they can download the data in CSV format based on the current view for furth
 
 #### Dashboard
 
-Visit On-Render for our [QuantaTrack Dashboard](https://dsci-532-2025-3-quantatrack.onrender.com/) for our dashboard directly!
+Visit On-Render for our [QuantaTrack Dashboard](https://dsci-532-2025-3-quantatrack.onrender.com/) dashboard directly!
 
 ### Developer Guide
 
