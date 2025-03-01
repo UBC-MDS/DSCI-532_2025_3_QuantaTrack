@@ -1,6 +1,6 @@
 import pandas as pd
-# import re
-# import plotly.express as px  # 新增导入 Plotly Express
+import re
+import plotly.express as px  # 新增导入 Plotly Express
 from dash import html, dcc, Input, Output
 import dash
 
