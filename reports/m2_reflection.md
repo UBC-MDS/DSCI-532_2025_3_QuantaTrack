@@ -30,7 +30,7 @@ improving clarity and making comparisons easier for users.
 ## Features Still in Development
 
 Several exciting features are currently in development. 
-We're working on adding real-time QQQ price updates and intraday volume movement cards at the top, 
+We're working on adding real-time QQQM price updates and intraday volume movement cards at the top, 
 giving users immediate access to essential market data. 
 The search box will soon support multiple tickers or company names, offering greater flexibility. 
 Another potential feature under consideration is the ability to store historical data for time-series comparisons, such as beta analysis. 

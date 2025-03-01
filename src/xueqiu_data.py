@@ -1,4 +1,3 @@
-# %%
 import requests
 import pandas as pd
 from datetime import datetime
@@ -7,7 +6,7 @@ import pytz
 import requests
 
 
-# 提取 headers
+# Extract headers
 headers = {
     "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
     "accept-language": "zh-CN,zh;q=0.9,en;q=0.8",
@@ -24,7 +23,7 @@ headers = {
     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
 }
 
-# 提取 cookies
+# Extract cookies
 cookies = {
     "cookiesu": "501716971730603",
     "device_id": "b466cc5fe5c41c2cf5113e1dc9758e94",
@@ -43,19 +42,20 @@ cookies = {
     "Hm_lpvt_1db88642e346389874251b5a1eded6e3": "1740036370",
 }
 
-
-
-
 def getMinuteData(ticker):
+    """
+    Fetches minute-level stock data for a given ticker from Xueqiu API, processes it into a DataFrame,
+    and fills missing values. Adds the last close price and ticker to the DataFrame.
+    """
     url = 'https://stock.xueqiu.com/v5/stock/chart/minute.json?symbol='+ ticker +'&period=1d'
 
     response = requests.get(url, headers=headers, cookies=cookies)
     response_json = response.json()
     last_close = response_json['data']['last_close']
-    # 提取所有字段并转换为DataFrame
+    # Extract all fields and convert them into DataFrame
     data_items = response_json['data']['items']
 
-    # 移除不需要的字段
+    # Remove unnecessary fields
     for item in data_items:
         item.pop('macd', None)
         item.pop('kdj', None)
@@ -65,7 +65,7 @@ def getMinuteData(ticker):
 
     df = pd.DataFrame(data_items)
 
-    # 填充缺失值
+    # Fill missing values
     df.fillna({'high': df['current'], 'low': df['current']}, inplace=True)
     df['amount_total'] = df['amount_total'].ffill()
     df['volume_total'] = df['volume_total'].ffill()
@@ -79,7 +79,7 @@ def getMinuteData(ticker):
     # # 以字符串格式存储
     # df['Timestamp_str'] = df['Timestamp_str'].dt.strftime('%Y-%m-%d %H:%M:%S %z')
 
-    # 加入 Ticker 列
+    # Add Ticker column
     df['Ticker'] = ticker
 
     df['LastClose']=last_close
@@ -87,6 +87,9 @@ def getMinuteData(ticker):
     return df
 
 def getJson(symbols):
+    """
+    Fetches batch stock quote data for the given symbols from Xueqiu API and returns the quote data as a list.
+    """
     symbols_str = ','.join(symbols)
     url = 'https://stock.xueqiu.com/v5/stock/batch/quote.json?symbol=' + symbols_str + '&extend=detail&is_delay_hk=false'
 
@@ -98,6 +101,10 @@ def getJson(symbols):
 
 
 def getBatchQuote(symbols):
+    """
+    Fetches batch stock quote data for the given symbols from Xueqiu API and processes it into a DataFrame.
+    Converts timestamps, fills missing values, and scales percentage values.
+    """
     symbols_str = ','.join(symbols)
     url = 'https://stock.xueqiu.com/v5/stock/batch/quote.json?symbol=' + symbols_str + '&extend=detail'
 
@@ -105,7 +112,7 @@ def getBatchQuote(symbols):
     response_json = response.json()
     quote_data_list = [item['quote'] for item in response_json['data']['items']]
 
-    # 将所有 quote 数据转换为 DataFrame，每个 quote 数据占一行
+    # Convert all quote data into DataFrame, with each quote data occupying one row
     df = pd.DataFrame(quote_data_list)
     """
     output_colnames=['symbol', 'code', 'exchange', 'name', 'type', 'sub_type', 'status',
@@ -121,7 +128,7 @@ def getBatchQuote(symbols):
        'profit_forecast', 'profit', 'profit_four', 'pledge_ratio',
        'goodwill_in_net_assets', 'shareholder_funds']
     """
-    # 将 timestamp 转换为 pandas 的 datetime 对象
+    # Convert timestamp to pandas datetime object
     df['Timestamp_str'] = (
         pd.to_datetime(df['timestamp'].to_list(), unit='ms')
         .tz_localize('UTC')
@@ -129,7 +136,7 @@ def getBatchQuote(symbols):
         .strftime('%Y-%m-%d %H:%M:%S %z')
     )
 
-    # 填充缺失值
+    # Fill missing values
     df.fillna({'dividend': 0, 'dividend_yield': 0}, inplace=True)
 
     df['percent'] = df['percent'].div(100)
@@ -139,10 +146,13 @@ def getBatchQuote(symbols):
     except:
         pass
     
-
     return df
 
+
 def getBondQuote(symbols):
+    """
+    Fetches bond quote data for the given symbols from Xueqiu API and returns it as a DataFrame.
+    """
     symbols_str = ','.join(symbols)
     url = 'https://stock.xueqiu.com/v5/stock/batch/quote.json?symbol=' + symbols_str + '&extend=detail'
 
@@ -151,7 +161,7 @@ def getBondQuote(symbols):
     response_json = response.json()
     quote_data_list = [item['quote'] for item in response_json['data']['items']]
 
-    # 将所有 quote 数据转换为 DataFrame，每个 quote 数据占一行
+    # Convert all quote data into DataFrame, with each quote data occupying one row
     df = pd.DataFrame(quote_data_list)
     """
     output_colnames=['symbol', 'code', 'exchange', 'name', 'type', 'sub_type', 'status',
@@ -167,7 +177,7 @@ def getBondQuote(symbols):
        'variety_type', 'new_issue_rating', 'credit_rating', 'rating',
        'Timestamp_str']
     """
-    # 将 timestamp 转换为 pandas 的 datetime 对象
+    # Convert timestamp to pandas datetime object
     df['Timestamp_str'] = (
         pd.to_datetime(df['timestamp'].to_list(), unit='ms')
         .tz_localize('UTC')
@@ -196,6 +206,9 @@ def getBondQuote(symbols):
     return df
 
 def getETFQuote(symbols):
+    """
+    Fetches ETF quote data for the given symbols from Xueqiu API and returns it as a DataFrame.
+    """
     symbols_str = ','.join(symbols)
     url = 'https://stock.xueqiu.com/v5/stock/batch/quote.json?symbol=' + symbols_str + '&extend=detail'
 
@@ -215,7 +228,7 @@ def getETFQuote(symbols):
        'expiration_date', 'nav_date', 'iopv']
     '''
 
-    # 将 timestamp 转换为 pandas 的 datetime 对象
+    # Convert timestamp to pandas datetime object
     df['Timestamp_str'] = (
         pd.to_datetime(df['timestamp'].to_list(), unit='ms')
         .tz_localize('UTC')
@@ -240,7 +253,9 @@ def getETFQuote(symbols):
 
 
 def getUSETFQuote(symbols):
-
+    """
+    Fetches US ETF quote data for the given symbols from Xueqiu API and returns it as a DataFrame.
+    """
     symbols_str = ','.join(symbols)
     url = 'https://stock.xueqiu.com/v5/stock/batch/quote.json?symbol=' + symbols_str + '&extend=detail'
 
@@ -249,7 +264,7 @@ def getUSETFQuote(symbols):
     quote_data_list = [item['quote'] for item in response_json['data']['items']]
     df = pd.DataFrame(quote_data_list)
 
-    # 将 timestamp 转换为 pandas 的 datetime 对象
+    # Convert timestamp to pandas datetime object
     df['Timestamp_str'] = (
         pd.to_datetime(df['timestamp'].to_list(), unit='ms')
         .tz_localize('UTC')
@@ -265,25 +280,127 @@ def getUSETFQuote(symbols):
     return df
 
 def get_current_beijing_time():
-    # 获取当前UTC时间
+    """
+    Returns the current time in Beijing as a milliseconds timestamp.
+    """
+    # Get current UTC time
     utc_now = datetime.now(pytz.utc)
-    # 将UTC时间转换为北京时间
+    # Convert UTC time to Beijing time
     beijing_tz = pytz.timezone('Asia/Shanghai')
     beijing_now = utc_now.astimezone(beijing_tz)
-    # 将北京时间转换为毫秒时间戳
+    # Convert Beijing time to milliseconds timestamp
     milliseconds = int(beijing_now.timestamp() * 1000)
     return milliseconds
 
 def get_current_newyork_time():
-    # 获取当前UTC时间
+    """
+    Returns the current time in New York as a milliseconds timestamp.
+    """
+    # Get current UTC time
     utc_now = datetime.now(pytz.utc)
-    # 将UTC时间转换为北京时间
+    # Convert UTC time to New York time
     beijing_tz = pytz.timezone('America/New_York')
     beijing_now = utc_now.astimezone(beijing_tz)
-    # 将北京时间转换为毫秒时间戳
+    # Convert New York time to milliseconds timestamp
     milliseconds = int(beijing_now.timestamp() * 1000)
     return milliseconds
 
+def calculate_date_difference(date_str, timezone_str):
+    """
+    Calculates the difference in days between the current date and the given date for a specified timezone.
+    """
+    # Convert the string date to a datetime object with the specified timezone
+    date = pd.to_datetime(date_str).tz_localize(timezone_str)
+    
+    # Get current date and time in the given timezone
+    current_date = datetime.now(pytz.timezone(timezone_str))
+    
+    # Calculate the difference between the current date and the given date
+    date_diff = current_date - date
+    
+    # Return the difference in days
+    return date_diff.days
+
+def getUSStockHistoryByDate(symbol, start_date = '2025-01-01', end_date = '9999-12-31'):
+    """
+    Fetches historical stock data for a US symbol within the specified date range, including moving averages.
+    """
+    timezone = 'America/New_York'
+    begin = get_current_newyork_time()
+
+    days = calculate_date_difference(start_date, timezone) + 120
+    
+    url = f'https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol={symbol}&begin={begin}&period=day&type=before&count=-{days}'
+
+    response = requests.get(url, headers=headers, cookies=cookies)
+    response_json = response.json()
+    
+    # Extract column names and data items
+    columns = response_json['data']['column']
+    items = response_json['data']['item']
+
+    # Convert data items to DataFrame and set column names
+    df = pd.DataFrame(items, columns=columns)
+
+    # Calculate 60-day moving average (MA60)
+    df['MA60'] = df['close'].rolling(window=60).mean()
+    # Calculate 120-day moving average (MA120)
+    df['MA120'] = df['close'].rolling(window=120).mean()
+    
+    # Convert timestamp to pandas datetime object and filter
+    df['Timestamp_str'] = pd.to_datetime(df['timestamp'], unit='ms', utc=True).dt.tz_convert(timezone)
+    df = df[df['Timestamp_str'] >= start_date]
+    df = df[df['Timestamp_str'] <= end_date]
+
+    # Convert filtered timestamps to string format
+    df['Timestamp_str'] = df['Timestamp_str'].dt.strftime('%Y-%m-%d')
+    
+    df['percent'] = df['percent'].div(100)
+    df['turnoverrate'] = df['turnoverrate'].div(100)
+    # Add Ticker column
+    df['Ticker'] = symbol
+
+    return df
+
+def getChinaStockHistoryByDate(symbol, start_date = '2025-01-01', end_date = '9999-12-31'):
+    """Fetches historical stock data for a China symbol within the specified date range, including moving averages.
+    """
+    timezone = 'Asia/Shanghai'
+    begin = get_current_beijing_time()
+
+    days = calculate_date_difference(start_date, timezone) + 120
+    
+    url = f'https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol={symbol}&begin={begin}&period=day&type=before&count=-{days}'
+
+    response = requests.get(url, headers=headers, cookies=cookies)
+    response_json = response.json()
+    
+    # Extract column names and data items
+    columns = response_json['data']['column']
+    items = response_json['data']['item']
+
+    # Convert data items to DataFrame and set column names
+    df = pd.DataFrame(items, columns=columns)
+
+    # Calculate 60-day moving average (MA60)
+    df['MA60'] = df['close'].rolling(window=60).mean()
+    # Calculate 120-day moving average (MA120)
+    df['MA120'] = df['close'].rolling(window=120).mean()
+    
+    # Convert timestamp to pandas datetime object and filter
+    df['Timestamp_str'] = pd.to_datetime(df['timestamp'], unit='ms', utc=True).dt.tz_convert(timezone)
+    df = df[df['Timestamp_str'] >= start_date]
+    df = df[df['Timestamp_str'] <= end_date]
+
+    # Convert filtered timestamps to string format
+    df['Timestamp_str'] = df['Timestamp_str'].dt.strftime('%Y-%m-%d')
+    
+    df['percent'] = df['percent'].div(100)
+    df['turnoverrate'] = df['turnoverrate'].div(100)
+    # Add Ticker column
+    df['Ticker'] = symbol
+
+    return df
 
 # def getStockHistory(symbol,days = 30, timezone = 'Asia/Shanghai'):
 #     """
@@ -345,99 +462,6 @@ def get_current_newyork_time():
 #     """
 #     return df
 
-def calculate_date_difference(date_str, timezone_str):
-    # 将字符串转换为日期对象，并指定时区
-    date = pd.to_datetime(date_str).tz_localize(timezone_str)
-    
-    # 获取当前时间，并指定时区
-    current_date = datetime.now(pytz.timezone(timezone_str))
-    
-    # 计算日期差距
-    date_diff = current_date - date
-    
-    # 输出日期差距（以天为单位）
-    return date_diff.days
-
-def getUSStockHistoryByDate(symbol, start_date = '2025-01-01', end_date = '9999-12-31'):
-
-    timezone = 'America/New_York'
-    begin = get_current_newyork_time()
-
-    days = calculate_date_difference(start_date, timezone) + 120
-    
-    url = f'https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol={symbol}&begin={begin}&period=day&type=before&count=-{days}'
-
-    response = requests.get(url, headers=headers, cookies=cookies)
-    response_json = response.json()
-    
-    # 提取列名和数据项
-    columns = response_json['data']['column']
-    items = response_json['data']['item']
-
-    # 将数据项转换为 DataFrame，并设置列名
-    df = pd.DataFrame(items, columns=columns)
-
-    # 计算 60 日移动均线（MA60）
-    df['MA60'] = df['close'].rolling(window=60).mean()
-    # 计算 120 日移动均线（MA120）
-    df['MA120'] = df['close'].rolling(window=120).mean()
-    
-    # 将 timestamp 转换为 pandas 的 datetime 对象并筛选
-    df['Timestamp_str'] = pd.to_datetime(df['timestamp'], unit='ms', utc=True).dt.tz_convert(timezone)
-    df = df[df['Timestamp_str'] >= start_date]
-    df = df[df['Timestamp_str'] <= end_date]
-
-    # 将筛选后的 timestamp 转换为字符串格式
-    df['Timestamp_str'] = df['Timestamp_str'].dt.strftime('%Y-%m-%d')
-    
-    df['percent'] = df['percent'].div(100)
-    df['turnoverrate'] = df['turnoverrate'].div(100)
-    # 加入 Ticker 列
-    df['Ticker'] = symbol
-
-    return df
-
-
-def getChinaStockHistoryByDate(symbol, start_date = '2025-01-01', end_date = '9999-12-31'):
-
-    timezone = 'Asia/Shanghai'
-    begin = get_current_beijing_time()
-
-    days = calculate_date_difference(start_date, timezone) + 120
-    
-    url = f'https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol={symbol}&begin={begin}&period=day&type=before&count=-{days}'
-
-    response = requests.get(url, headers=headers, cookies=cookies)
-    response_json = response.json()
-    
-    # 提取列名和数据项
-    columns = response_json['data']['column']
-    items = response_json['data']['item']
-
-    # 将数据项转换为 DataFrame，并设置列名
-    df = pd.DataFrame(items, columns=columns)
-
-    # 计算 60 日移动均线（MA60）
-    df['MA60'] = df['close'].rolling(window=60).mean()
-    # 计算 120 日移动均线（MA120）
-    df['MA120'] = df['close'].rolling(window=120).mean()
-    
-    # 将 timestamp 转换为 pandas 的 datetime 对象并筛选
-    df['Timestamp_str'] = pd.to_datetime(df['timestamp'], unit='ms', utc=True).dt.tz_convert(timezone)
-    df = df[df['Timestamp_str'] >= start_date]
-    df = df[df['Timestamp_str'] <= end_date]
-
-    # 将筛选后的 timestamp 转换为字符串格式
-    df['Timestamp_str'] = df['Timestamp_str'].dt.strftime('%Y-%m-%d')
-    
-    df['percent'] = df['percent'].div(100)
-    df['turnoverrate'] = df['turnoverrate'].div(100)
-    # 加入 Ticker 列
-    df['Ticker'] = symbol
-
-    return df
-
-# %%
 if __name__ == "__main__":
     pass
     #df = getMinuteData('GOOG')
@@ -458,9 +482,4 @@ if __name__ == "__main__":
     #df = getUSStockHistoryByDate(symbol = 'GOOGL', start_date = '2025-02-03')
     # symbols = ['SPY','QQQ']
     # df = getUSETFQuote(symbols)
-    df = getMinuteData('SZ161128')
-# %%
-
-
-
-# %%
+    # df = getMinuteData('SZ161128')

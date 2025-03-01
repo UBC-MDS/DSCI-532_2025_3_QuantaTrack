@@ -1,10 +1,10 @@
-/* 设置页面背景颜色 */
+/* Set page background color */
 body {
     background-color: #f8f9fa;
     font-family: Arial, sans-serif;
 }
 
-/* 侧边栏样式 */
+/* Sidebar style */
 .sidebar {
     background-color: #343a40;
     color: #ffffff;
@@ -12,20 +12,20 @@ body {
     padding: 20px;
 }
 
-/* 高亮导航项 */
+/* Highlight active navigation item */
 .sidebar .nav-link.active {
     font-weight: bold;
     color: #007bff !important;
 }
 
-/* 标题样式 */
+/* Title style */
 h2 {
     font-weight: bold;
 }
 
-/* 表格样式 */
+/* Table style */
 .dash-table-container {
     margin-top: 20px;
 }
 
-/* 筛
+/* Filter */
