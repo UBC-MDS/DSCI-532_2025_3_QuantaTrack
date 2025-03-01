@@ -1,7 +1,5 @@
 import pandas as pd
-import re
-import plotly.express as px  # 新增导入 Plotly Express
-from dash import html, dcc, Input, Output
+from dash import html, dcc, Input, Output, State
 import dash
 
 from src.layout import *
@@ -190,7 +188,7 @@ def register_callbacks(app):
 
 
     # Callback function: Update the sorting status and arrow display based on header clicks in a loop
-    @callback(
+    @app.callback(
         Output("stock-table", "data", allow_duplicate=True),
         Output("stock-table", "columns", allow_duplicate=True),
         Output("sort-state", "data", allow_duplicate=True),

@@ -64,7 +64,7 @@ if __name__ == "__main__":
 4.  Render the dashboard locally
 
 ``` bash
-make run
+python -m src.app
 ```
 
 ## 👥 Contributors
