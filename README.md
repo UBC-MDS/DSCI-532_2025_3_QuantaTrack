@@ -3,7 +3,7 @@
 This project is about making a dynamic dashboard of NASDAQ100 tracking.
 
 ## 📖 The Problem
-
+  
 Investors often struggle with navigating complex and overwhelming market data to identify key trends and make informed investment decisions. 
 With an abundance of financial information, tracking performance metrics and staying updated with real-time insights becomes challenging, 
 especially when dealing with fast-evolving markets like the NASDAQ 100. 
@@ -36,7 +36,7 @@ and they can download the data in CSV format based on the current view for furth
 
 #### Dashboard
 
-Visit On-Render for our [QuantaTrack Dashboard](https://dsci-532-2025-3-quantatrack.onrender.com/) for our dashboard directly!
+Visit On-Render for our [QuantaTrack Dashboard](https://dsci-532-2025-3-quantatrack.onrender.com/) dashboard directly!
 
 ### Developer Guide
 
