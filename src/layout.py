@@ -212,12 +212,15 @@ ag_columns = [
     {"field": "Date"},
 ]
 
+
+
 # 替换原来的 dash_table.DataTable 为 dash ag grid 的 AgGrid 组件
 table = AgGrid(
     id="stock-table",
     columnDefs=ag_columns,
     rowData=[],  # 初始数据为空，后续由回调更新
-    # ...可添加其他 AgGrid 配置选项...
+    defaultColDef={'filter': True},  # 默认启用列过滤
+    style={"height": 800,}
 )
 
 # Modify store_components, add data-store to store updated data
@@ -234,15 +237,35 @@ data_update_interval = dcc.Interval(
     n_intervals=0
 )
 
+tabs = dbc.Tabs([
+    dbc.Tab(
+        [
+            dbc.Row([
+                dbc.Col(pie_chart), 
+                dbc.Col(intraday_cont_5)
+            ], class_name="g-0", align="start"),
+            dbc.Row([
+                dbc.Col(scatter_plot), 
+                dbc.Col(ytd_dist)
+            ], class_name="g-0", align="end"),
+        ],
+        label="Overview"
+    ),
+    dbc.Tab(
+        [
+            search_download_row,
+            dbc.Row(dbc.Col(table)),
+        ],
+        label="Data"
+    )
+])
 
-# Main content container
 layout = dbc.Container(
     [
-        # Row for Global Filters (Refresh Time)
         dbc.Row(
             [
                 dbc.Col(
-                    sidebar, md=2, 
+                    sidebar, md=2,
                     style={
                         # 'display': 'flex',
                         #'flexDirection': 'column',  # Stack children vertically
@@ -257,45 +280,21 @@ layout = dbc.Container(
                         "box-sizing": "border-box",  # Include padding and borders in element's total width and height
                         }
                     ),
-
-                # Row for the graphs (Pie chart, Intraday Contribution, etc.)
                 dbc.Col(
                     [
-                        # Row for Pie chart and Intraday Contribution
-                        dbc.Row([
-                            dbc.Col(pie_chart), 
-                            dbc.Col(intraday_cont_5)
-                            ], 
-                            class_name="g-0",
-                            align="start"
-                        ),
-                        # Row for Dividend Yield vs PE and YTD Distribution
-                        dbc.Row([
-                            dbc.Col(scatter_plot), 
-                            dbc.Col(ytd_dist)
-                            ],
-                            class_name="g-0",
-                            align="end"
-                        ),
-
-                        # Row for Search box and Download CSV button
-                        search_download_row,
-
-                        # Screener table row at the bottom
-                        dbc.Row(dbc.Col(table)),
-                        
-                        store_components,  # Add sorting state and original data storage
-                        data_update_interval  # Add Interval component for periodic updates
+                        tabs, 
+                        store_components,
+                        data_update_interval
                     ],
                     md=10,
                     class_name="g-0",
                     style={
-                        'margin-left': '16.67%',  # Adjust for sidebar width (md=2 takes 16.67%)
+                        'margin-left': '16.67%',
                     }
                 ),
             ]    
         ),
     ],
-    fluid=True,  # Ensure the layout is fluid and stretches to the full width of the viewport
+    fluid=True
 )
 
