@@ -220,7 +220,7 @@ table = AgGrid(
     columnDefs=ag_columns,
     rowData=[],  # 初始数据为空，后续由回调更新
     defaultColDef={'filter': True},  # 默认启用列过滤
-    style={"height": 800,}
+    style={"height": 800},
 )
 
 # Modify store_components, add data-store to store updated data
