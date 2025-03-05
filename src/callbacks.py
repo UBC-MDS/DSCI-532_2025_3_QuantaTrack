@@ -1,5 +1,5 @@
 import pandas as pd
-from dash import html, dcc, Input, Output, State
+from dash import html, dcc, Input, Output
 import dash
 
 from src.layout import *

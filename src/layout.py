@@ -1,5 +1,5 @@
 import dash_bootstrap_components as dbc
-from dash import dcc, html, dash_table
+from dash import dcc, html
 from dash_ag_grid import AgGrid
 from src.plotting import *
 
@@ -175,12 +175,30 @@ ag_columns = [
     {"field": "Name"},
     {"field": "Weight", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
     {"field": "Price", "valueFormatter": {"function": "params.value.toFixed(2)" }},
-    {"field": "IntradayReturn", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
+    #{"field": "IntradayReturn", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
+    {
+        "field": "IntradayReturn",
+        "valueFormatter": {
+            "function": "(params.value * 100).toFixed(2) + '%'"
+        },
+        "cellStyle": {
+            "function": "params.value ? {'backgroundColor': 'rgba(' + (params.value < 0 ? '255,0,0' : '0,255,0') + ',' + Math.min(Math.abs(params.value) / 0.1, 1) + ')'} : null"
+        }
+    },
     {"field": "Volume", "valueFormatter": {"function": "(params.value / 1e6).toFixed(2) + 'M'" }},
     {"field": "Amount", "valueFormatter": {"function": "(params.value / 1e9).toFixed(2) + 'B'" }},
     {"field": "IntradayContribution", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
     {"field": "MarketCap", "valueFormatter": {"function": "(params.value / 1e9).toFixed(2) + 'B'" }},
-    {"field": "YTDReturn", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
+    #{"field": "YTDReturn", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
+    {
+        "field": "YTDReturn",
+        "valueFormatter": {
+            "function": "(params.value * 100).toFixed(2) + '%'"
+        },
+        "cellStyle": {
+            "function": "params.value ? {'backgroundColor': 'rgba(' + (params.value < 0 ? '255,0,0' : '0,255,0') + ',' + Math.min(Math.abs(params.value) / 0.5, 1) + ')'} : null"
+        }
+    },
     {"field": "YTDContribution", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
     {"field": "PE", "valueFormatter": {"function": "params.value.toFixed(2)" }},
     {"field": "PB", "valueFormatter": {"function": "params.value.toFixed(2)" }},
@@ -191,6 +209,7 @@ ag_columns = [
     {"field": "Sector"},
     {"field": "Date"},
 ]
+
 
 
 
