@@ -1,5 +1,6 @@
 import dash_bootstrap_components as dbc
 from dash import dcc, html, dash_table
+from dash_ag_grid import AgGrid
 from src.plotting import *
 
 # Modify the update frequency selection dropdown: Change the options to '3 seconds', '10 seconds', and 'No update', 
@@ -188,33 +189,35 @@ original_columns = [
     ]
 ]
 
-# Data table (Table) modification: Add custom sorting properties
-table = dash_table.DataTable(
+# 转换为 dash ag grid 的列定义
+ag_columns = [
+    {"field": "Ticker"},
+    {"field": "Name"},
+    {"field": "Weight", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
+    {"field": "Price"},
+    {"field": "IntradayReturn", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
+    {"field": "Volume"},
+    {"field": "Amount"},
+    {"field": "IntradayContribution", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
+    {"field": "MarketCap"},
+    {"field": "YTDReturn", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
+    {"field": "YTDContribution", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
+    {"field": "PE"},
+    {"field": "PB"},
+    {"field": "Profit_TTM"},
+    {"field": "DividendYield", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
+    {"field": "Dividend"},
+    {"field": "SharesOutstanding"},
+    {"field": "Sector"},
+    {"field": "Date"},
+]
+
+# 替换原来的 dash_table.DataTable 为 dash ag grid 的 AgGrid 组件
+table = AgGrid(
     id="stock-table",
-    columns=original_columns,
-    sort_action="custom",       # Enable custom sorting
-    sort_mode="single",         # Single column sorting
-    style_table={
-        "overflowX": "auto",
-        "margin": "20px",
-        "boxShadow": "0 4px 6px rgba(0, 0, 0, 0.1)"
-    },
-    style_cell={
-        "textAlign": "left",       # Change to left alignment
-        "padding": "12px",         # Add padding
-        "fontFamily": "Arial, sans-serif",
-        "fontSize": "14px",
-    },
-    style_header={
-        "backgroundColor": "#f0f0f0",
-        "fontWeight": "bold",
-        "border": "1px solid #ccc"
-    },
-    style_data={
-        "backgroundColor": "white",
-        "border": "1px solid #ccc"
-    },
-    style_data_conditional=[],  # This will be updated by the callback
+    columnDefs=ag_columns,
+    rowData=[],  # 初始数据为空，后续由回调更新
+    # ...可添加其他 AgGrid 配置选项...
 )
 
 # Modify store_components, add data-store to store updated data
