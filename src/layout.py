@@ -168,28 +168,8 @@ search_download_row = dbc.Row(
     justify="between",  
 )
 
-# Table components
-# Save original column definitions (used for restoring the original table header names)
-original_columns = [
-    {"name": col, "id": col, "type": "numeric", "format": {"specifier": ".2%"}}
-    if col in [
-        'Weight', 'IntradayReturn', 'IntradayContribution','DividendYield', 
-        'YTDReturn', 'YTDContribution'
-    ]
-    else {"name": col, "id": col, "type": "numeric", "format": {"specifier": ".2f"}}
-    if col in [
-        'Price', 'PE', 'PB', 'Dividend'
-    ]
-    else {"name": col, "id": col}
-    for col in [
-        'Ticker', 'Name', 'Weight', 'Price', 'IntradayReturn', 'Volume', 'Amount', 
-        'IntradayContribution', 'MarketCap', 'YTDReturn', 'YTDContribution', 'PE', 
-        'PB', 'Profit_TTM', 'DividendYield', 'Dividend', 'SharesOutstanding', 
-        'Sector', 'Date'
-    ]
-]
 
-# 转换为 dash ag grid 的列定义
+# dash ag grid 的列定义
 ag_columns = [
     {"field": "Ticker"},
     {"field": "Name"},
@@ -225,8 +205,6 @@ table = AgGrid(
 
 # Modify store_components, add data-store to store updated data
 store_components = html.Div([
-    dcc.Store(id="sort-state", data={}),
-    dcc.Store(id="original-data"),
     dcc.Store(id="data-store")
 ])
 

@@ -123,21 +123,6 @@ def register_callbacks(app):
         
         return df.to_dict("records")
         
-        # # Apply ticker filter (if provided)
-        # if ticker:
-        #     if isinstance(ticker, list):  # If ticker is a list, use vectorized str.contains with OR condition
-        #         ticker_pattern = "|".join([re.escape(t) for t in ticker])  # Create regex pattern
-        #         df = df[df["Ticker"].str.contains(ticker_pattern, case=False, na=False)]
-        #     else:  # Single ticker value
-        #         df = df[df["Ticker"].str.contains(ticker, case=False, na=False)]
-
-        # # Apply name filter (if provided)
-        # if name:
-        #     if isinstance(name, list):  # If name is a list, use vectorized str.contains with OR condition
-        #         name_pattern = "|".join([re.escape(n) for n in name])  # Create regex pattern
-        #         df = df[df["Name"].str.contains(name_pattern, case=False, na=False)]
-        #     else:  # Single name value
-        #         df = df[df["Name"].str.contains(name, case=False, na=False)]
 
 
     @app.callback(
