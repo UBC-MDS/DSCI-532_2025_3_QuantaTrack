@@ -1,5 +1,5 @@
 import pandas as pd
-from dash import html, dcc, Input, Output, State
+from dash import html, dcc, Input, Output
 import dash
 
 from src.layout import *
@@ -102,7 +102,7 @@ def register_callbacks(app):
 
 
     @app.callback(
-        Output("stock-table", "data"),
+        Output("stock-table", "rowData"),
         [Input("filter-ticker", "value"),
          Input("filter-name", "value"),
          Input("filter-sector", "value"),
@@ -123,21 +123,6 @@ def register_callbacks(app):
         
         return df.to_dict("records")
         
-        # # Apply ticker filter (if provided)
-        # if ticker:
-        #     if isinstance(ticker, list):  # If ticker is a list, use vectorized str.contains with OR condition
-        #         ticker_pattern = "|".join([re.escape(t) for t in ticker])  # Create regex pattern
-        #         df = df[df["Ticker"].str.contains(ticker_pattern, case=False, na=False)]
-        #     else:  # Single ticker value
-        #         df = df[df["Ticker"].str.contains(ticker, case=False, na=False)]
-
-        # # Apply name filter (if provided)
-        # if name:
-        #     if isinstance(name, list):  # If name is a list, use vectorized str.contains with OR condition
-        #         name_pattern = "|".join([re.escape(n) for n in name])  # Create regex pattern
-        #         df = df[df["Name"].str.contains(name_pattern, case=False, na=False)]
-        #     else:  # Single name value
-        #         df = df[df["Name"].str.contains(name, case=False, na=False)]
 
 
     @app.callback(
@@ -165,86 +150,3 @@ def register_callbacks(app):
         # def generate_csv_text(_):
         #     return df.to_csv(index=False)
         # return dcc.send_string(generate_csv_text, "QuantaTrack_Output.csv")
-
-
-    @app.callback(
-        Output("stock-table", "style_data_conditional"),
-        Input("stock-table", "data")
-    )
-    def update_intraday_return_styles(data):
-        """应用 highlight_change 至 IntradayReturn 列"""
-        styles = []
-        if data:
-            for i, row in enumerate(data):
-                val = row.get("IntradayReturn")
-                if val is None:
-                    continue
-                color = highlight_change(val)
-                styles.append({
-                    "if": { "row_index": i, "column_id": "IntradayReturn" },
-                    "backgroundColor": color
-                })
-        return styles
-
-
-    # Callback function: Update the sorting status and arrow display based on header clicks in a loop
-    @app.callback(
-        Output("stock-table", "data", allow_duplicate=True),
-        Output("stock-table", "columns", allow_duplicate=True),
-        Output("sort-state", "data", allow_duplicate=True),
-        Output("original-data", "data", allow_duplicate=True),
-        Output("stock-table", "sort_by", allow_duplicate=True),
-        Input("stock-table", "sort_by"),
-        State("sort-state", "data"),
-        State("stock-table", "data"),
-        State("original-data", "data"),
-        prevent_initial_call=True
-    )
-    def update_sort(sort_by, sort_state, data, original_data):
-        # Initialize original data
-        if not original_data:
-            original_data = data
-        
-        # Determine the column to be sorted
-        if sort_by:
-            sort_col = sort_by[0]["column_id"]
-        else:
-            # Use existing click record if no new sort_by
-            sort_col = sort_state.get("last_sorted")
-            if not sort_col:
-                return data, original_columns, sort_state, original_data, sort_by
-
-        # Calculate the new sort direction based on the previous state
-        prev = sort_state.get(sort_col, "none")
-        if prev == "none":
-            new_direction = "asc"
-        elif prev == "asc":
-            new_direction = "desc"
-        else:
-            new_direction = "none"
-        # Reset sort state and record the current clicked column
-        sort_state = {col_def["id"]: "none" for col_def in original_columns}
-        sort_state["last_sorted"] = sort_col
-        sort_state[sort_col] = new_direction
-
-        # Update column headers and add arrow indicators
-        new_columns = []
-        for col_def in original_columns:
-            cid = col_def["id"]
-            base_name = col_def["name"].split(" ")[0]
-            arrow = ""
-            if sort_state.get(cid, "asc") == "asc":
-                arrow = " ↑"
-            elif sort_state.get(cid, "desc") == "desc":
-                arrow = " ↓"
-            new_columns.append({**col_def, "name": base_name + arrow})
-
-        # Update data: if direction is "none", restore original, otherwise sort the data
-        if new_direction == "none":
-            sorted_data = original_data
-            sort_by = []  # Clear sort state
-        else:
-            reverse = True if new_direction == "desc" else False
-            sorted_data = sorted(data, key=lambda row: row.get(sort_col, None), reverse=reverse)
-
-        return sorted_data, new_columns, sort_state, original_data, sort_by

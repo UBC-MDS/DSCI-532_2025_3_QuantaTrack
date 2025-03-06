@@ -1,5 +1,6 @@
 import dash_bootstrap_components as dbc
-from dash import dcc, html, dash_table
+from dash import dcc, html
+from dash_ag_grid import AgGrid
 from src.plotting import *
 
 # Modify the update frequency selection dropdown: Change the options to '3 seconds', '10 seconds', and 'No update', 
@@ -167,60 +168,62 @@ search_download_row = dbc.Row(
     justify="between",  
 )
 
-# Table components
-# Save original column definitions (used for restoring the original table header names)
-original_columns = [
-    {"name": col, "id": col, "type": "numeric", "format": {"specifier": ".2%"}}
-    if col in [
-        'Weight', 'IntradayReturn', 'IntradayContribution','DividendYield', 
-        'YTDReturn', 'YTDContribution'
-    ]
-    else {"name": col, "id": col, "type": "numeric", "format": {"specifier": ".2f"}}
-    if col in [
-        'Price', 'PE', 'PB', 'Dividend'
-    ]
-    else {"name": col, "id": col}
-    for col in [
-        'Ticker', 'Name', 'Weight', 'Price', 'IntradayReturn', 'Volume', 'Amount', 
-        'IntradayContribution', 'MarketCap', 'YTDReturn', 'YTDContribution', 'PE', 
-        'PB', 'Profit_TTM', 'DividendYield', 'Dividend', 'SharesOutstanding', 
-        'Sector', 'Date'
-    ]
+
+# dash ag grid 的列定义
+ag_columns = [
+    {"field": "Ticker"},
+    {"field": "Name"},
+    {"field": "Weight", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
+    {"field": "Price", "valueFormatter": {"function": "params.value.toFixed(2)" }},
+    #{"field": "IntradayReturn", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
+    {
+        "field": "IntradayReturn",
+        "valueFormatter": {
+            "function": "(params.value * 100).toFixed(2) + '%'"
+        },
+        "cellStyle": {
+            "function": "params.value ? {'backgroundColor': 'rgba(' + (params.value < 0 ? '255,0,0' : '0,255,0') + ',' + Math.min(Math.abs(params.value) / 0.1, 1) + ')'} : null"
+        }
+    },
+    {"field": "Volume", "valueFormatter": {"function": "(params.value / 1e6).toFixed(2) + 'M'" }},
+    {"field": "Amount", "valueFormatter": {"function": "(params.value / 1e9).toFixed(2) + 'B'" }},
+    {"field": "IntradayContribution", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
+    {"field": "MarketCap", "valueFormatter": {"function": "(params.value / 1e9).toFixed(2) + 'B'" }},
+    #{"field": "YTDReturn", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
+    {
+        "field": "YTDReturn",
+        "valueFormatter": {
+            "function": "(params.value * 100).toFixed(2) + '%'"
+        },
+        "cellStyle": {
+            "function": "params.value ? {'backgroundColor': 'rgba(' + (params.value < 0 ? '255,0,0' : '0,255,0') + ',' + Math.min(Math.abs(params.value) / 0.5, 1) + ')'} : null"
+        }
+    },
+    {"field": "YTDContribution", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
+    {"field": "PE", "valueFormatter": {"function": "params.value.toFixed(2)" }},
+    {"field": "PB", "valueFormatter": {"function": "params.value.toFixed(2)" }},
+    {"field": "Profit_TTM", "valueFormatter": {"function": "(params.value / 1e9).toFixed(2) + 'B'" }},
+    {"field": "DividendYield", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
+    {"field": "Dividend", "valueFormatter": {"function": "params.value.toFixed(2)" }},
+    {"field": "SharesOutstanding", "valueFormatter": {"function": "(params.value / 1e9).toFixed(2) + 'B'" }},
+    {"field": "Sector"},
+    {"field": "Date"},
 ]
 
-# Data table (Table) modification: Add custom sorting properties
-table = dash_table.DataTable(
+
+
+
+# 替换原来的 dash_table.DataTable 为 dash ag grid 的 AgGrid 组件
+table = AgGrid(
     id="stock-table",
-    columns=original_columns,
-    sort_action="custom",       # Enable custom sorting
-    sort_mode="single",         # Single column sorting
-    style_table={
-        "overflowX": "auto",
-        "margin": "20px",
-        "boxShadow": "0 4px 6px rgba(0, 0, 0, 0.1)"
-    },
-    style_cell={
-        "textAlign": "left",       # Change to left alignment
-        "padding": "12px",         # Add padding
-        "fontFamily": "Arial, sans-serif",
-        "fontSize": "14px",
-    },
-    style_header={
-        "backgroundColor": "#f0f0f0",
-        "fontWeight": "bold",
-        "border": "1px solid #ccc"
-    },
-    style_data={
-        "backgroundColor": "white",
-        "border": "1px solid #ccc"
-    },
-    style_data_conditional=[],  # This will be updated by the callback
+    columnDefs=ag_columns,
+    rowData=[],  # 初始数据为空，后续由回调更新
+    defaultColDef={'filter': True},  # 默认启用列过滤
+    style={"height": 600},
 )
 
 # Modify store_components, add data-store to store updated data
 store_components = html.Div([
-    dcc.Store(id="sort-state", data={}),
-    dcc.Store(id="original-data"),
     dcc.Store(id="data-store")
 ])
 
@@ -231,15 +234,35 @@ data_update_interval = dcc.Interval(
     n_intervals=0
 )
 
+tabs = dbc.Tabs([
+    dbc.Tab(
+        [
+            dbc.Row([
+                dbc.Col(pie_chart), 
+                dbc.Col(intraday_cont_5)
+            ], class_name="g-0", align="start"),
+            dbc.Row([
+                dbc.Col(scatter_plot), 
+                dbc.Col(ytd_dist)
+            ], class_name="g-0", align="end"),
+        ],
+        label="Overview"
+    ),
+    dbc.Tab(
+        [
+            search_download_row,
+            dbc.Row(dbc.Col(table)),
+        ],
+        label="Data"
+    )
+])
 
-# Main content container
 layout = dbc.Container(
     [
-        # Row for Global Filters (Refresh Time)
         dbc.Row(
             [
                 dbc.Col(
-                    sidebar, md=2, 
+                    sidebar, md=2,
                     style={
                         # 'display': 'flex',
                         #'flexDirection': 'column',  # Stack children vertically
@@ -254,45 +277,21 @@ layout = dbc.Container(
                         "box-sizing": "border-box",  # Include padding and borders in element's total width and height
                         }
                     ),
-
-                # Row for the graphs (Pie chart, Intraday Contribution, etc.)
                 dbc.Col(
                     [
-                        # Row for Pie chart and Intraday Contribution
-                        dbc.Row([
-                            dbc.Col(pie_chart), 
-                            dbc.Col(intraday_cont_5)
-                            ], 
-                            class_name="g-0",
-                            align="start"
-                        ),
-                        # Row for Dividend Yield vs PE and YTD Distribution
-                        dbc.Row([
-                            dbc.Col(scatter_plot), 
-                            dbc.Col(ytd_dist)
-                            ],
-                            class_name="g-0",
-                            align="end"
-                        ),
-
-                        # Row for Search box and Download CSV button
-                        search_download_row,
-
-                        # Screener table row at the bottom
-                        dbc.Row(dbc.Col(table)),
-                        
-                        store_components,  # Add sorting state and original data storage
-                        data_update_interval  # Add Interval component for periodic updates
+                        tabs, 
+                        store_components,
+                        data_update_interval
                     ],
                     md=10,
                     class_name="g-0",
                     style={
-                        'margin-left': '16.67%',  # Adjust for sidebar width (md=2 takes 16.67%)
+                        'margin-left': '16.67%',
                     }
                 ),
             ]    
         ),
     ],
-    fluid=True,  # Ensure the layout is fluid and stretches to the full width of the viewport
+    fluid=True
 )
 
