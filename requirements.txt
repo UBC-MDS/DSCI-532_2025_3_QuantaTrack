@@ -8,4 +8,4 @@ dash_bootstrap_components==1.7.1
 gunicorn==23.0.0
 requests==2.32.3
 dash-ag-grid==31.3.0
-
+statsmodels==0.14.4

@@ -2,6 +2,7 @@ import dash_bootstrap_components as dbc
 from dash import dcc, html
 from dash_ag_grid import AgGrid
 from src.plotting import *
+from src.qqqm_data import getQQQMHolding
 
 # Modify the update frequency selection dropdown: Change the options to '3 seconds', '10 seconds', and 'No update', 
 # with the default value set to 'No update'
@@ -136,6 +137,27 @@ intraday_cont_5 = html.Div(
     ]
 )
 
+# Components for stock analysis
+regression_graph = html.Div(
+    id="regression-graph-container", children=[
+        html.Iframe(
+            srcDoc=render_regression_graph(selected_stock='AAPL', start_date='2024-01-01', end_date='2025-01-01'), 
+            style={"border": "0", "width": "100%", "height": "350px"}
+        )
+    ]
+)
+
+price_trend_graph = html.Div(
+    id="price-trend-graph-container", children=[
+        html.Iframe(
+            srcDoc=render_trend_graph(selected_stock='AAPL', start_date='2024-01-01', end_date='2025-01-01'), 
+            style={"border": "0", "width": "100%", "height": "350px"}
+        )
+    ]
+)
+
+
+
 
 # Filter Form (with ticker and name input)
 filter_form = dbc.Row(
@@ -234,6 +256,13 @@ data_update_interval = dcc.Interval(
     n_intervals=0
 )
 
+nasdaq100_tickers = getQQQMHolding()
+# 生成下拉菜单选项
+stock_dropdown_options = [
+    {'label': nasdaq100_tickers.iloc[i]['Name'], 'value': nasdaq100_tickers.iloc[i]['Ticker']}
+    for i in range(len(nasdaq100_tickers))
+]
+
 tabs = dbc.Tabs([
     dbc.Tab(
         [
@@ -248,6 +277,39 @@ tabs = dbc.Tabs([
         ],
         label="Overview"
     ),
+
+    dbc.Tab(
+        [
+            dbc.Row([
+            dbc.Col(
+                dcc.Dropdown(
+                    id='stock-dropdown',
+                    options=stock_dropdown_options,
+                    value='AAPL',  # 默认值
+                    placeholder="Select a stock",  # 提示文本
+                ),
+                width=6,
+            ),
+            dbc.Col(
+                dcc.DatePickerRange(
+                    id='date-picker-range',
+                    start_date=pd.to_datetime('2024-01-01'),
+                    end_date=pd.to_datetime('2025-02-05'),
+                    display_format='YYYY-MM-DD',  # 日期格式
+                    min_date_allowed=pd.to_datetime('2010-01-01'),
+                    max_date_allowed=pd.to_datetime('2025-12-31'),
+                ),
+                width=6,
+            ),
+        ]),
+            dbc.Row([
+                dbc.Col(regression_graph),
+                dbc.Col(price_trend_graph)
+            ], class_name="g-0", style={"marginTop": "20px"}),
+        ],
+        label="Stock"
+    ),
+    
     dbc.Tab(
         [
             search_download_row,
