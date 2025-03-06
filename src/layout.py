@@ -104,7 +104,7 @@ pie_chart = html.Div(
     id="pie-chart-container", children=[
         html.Iframe(
             srcDoc=render_pie_chart(selected_sectors=["All"]), 
-            style={"border": "0", "width": "100%", "height": "100px"}
+            style={"border": "0", "width": "100%", "height": "350px"}
         )
     ]
 )
@@ -113,7 +113,7 @@ scatter_plot = html.Div(
     id="scatter-plot-container", children=[
         html.Iframe(
             srcDoc=render_scatter_plot(selected_sectors=["All"]),  # Default to all sectors
-            style={"border": "0", "width": "100%", "height": "100px"}
+            style={"border": "0", "width": "100%", "height": "350px"}
         )
     ]
 )
@@ -122,7 +122,7 @@ ytd_dist = html.Div(
     id="ytd-dist-container", children=[
         html.Iframe(
             srcDoc=render_ytd_distribution(selected_sectors=["All"]),
-            style={"border": "0", "width": "100%", "height": "100px"}
+            style={"border": "0", "width": "100%", "height": "350px"}
         )
     ]
 )
@@ -131,7 +131,7 @@ intraday_cont_5 = html.Div(
     id="intraday-contribution-top5-bottom5-container", children=[
         html.Iframe(
             srcDoc=render_intraday_contribution_5(selected_sectors=["All"]),
-            style={"border": "0", "width": "100%", "height": "100px"}
+            style={"border": "0", "width": "100%", "height": "350px"}
         )
     ]
 )
@@ -240,11 +240,11 @@ tabs = dbc.Tabs([
             dbc.Row([
                 dbc.Col(pie_chart), 
                 dbc.Col(intraday_cont_5)
-            ], class_name="g-0", align="start"),
+            ], class_name="g-0", style={"marginTop": "20px"}),
             dbc.Row([
-                dbc.Col(scatter_plot), 
-                dbc.Col(ytd_dist)
-            ], class_name="g-0", align="end"),
+                dbc.Col(ytd_dist), 
+                dbc.Col(scatter_plot)
+            ], class_name="g-0"),
         ],
         label="Overview"
     ),
