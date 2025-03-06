@@ -1,10 +1,12 @@
 import pandas as pd
+import numpy as np
 
 from pyecharts.charts import Pie
 import plotly.graph_objects as go
 import plotly.express as px
 from pyecharts import options as opts
 from src.qqqm_data import getQQQMHolding
+from src.xueqiu_data import getUSStockHistoryByDate
 
 def render_pie_chart(selected_sectors=["All"]):
     """
@@ -354,3 +356,67 @@ def render_intraday_contribution_5(selected_sectors=["All"]):
     )
 
     return fig.to_html(full_html=False)
+
+def calculate_beta(stock_returns, index_returns):
+    """Calculate the beta value"""
+    covariance = np.cov(stock_returns, index_returns)[0, 1]
+    variance = np.var(index_returns)
+    beta = covariance / variance
+    return beta
+
+
+def fetch_stock_data(selected_stock, start_date, end_date):
+
+    stock_data = getUSStockHistoryByDate(selected_stock, start_date, end_date)
+    stock_data = stock_data[['Timestamp_str', 'percent', 'close']]  # Keep only the desired columns
+    stock_data = stock_data.rename(columns={'Timestamp_str': 'Date', 'percent': 'return', 'close': 'price'})  # Rename columns
+    stock_data['Date'] = pd.to_datetime(stock_data['Date'])  # Parse dates
+    stock_data.set_index('Date', inplace=True)
+    stock_returns = stock_data['return'].dropna() * 100
+        
+    nasdaq_data = getUSStockHistoryByDate('QQQ', start_date, end_date)
+    nasdaq_data = nasdaq_data[['Timestamp_str', 'percent', 'close']]  # Keep only the desired columns
+    nasdaq_data = nasdaq_data.rename(columns={'Timestamp_str': 'Date', 'percent': 'return', 'close': 'price'})  # Rename columns
+    nasdaq_data['Date'] = pd.to_datetime(nasdaq_data['Date'])  # Parse date
+    nasdaq_data.set_index('Date', inplace=True)
+    nasdaq_returns = nasdaq_data['return'].dropna() * 100
+
+    return stock_data, nasdaq_data, stock_returns, nasdaq_returns
+
+def render_regression_graph(selected_stock, start_date, end_date):
+
+    stock_data, nasdaq_data, stock_returns, nasdaq_returns = fetch_stock_data(selected_stock, start_date, end_date)
+
+    beta = calculate_beta(stock_returns, nasdaq_returns)
+
+    regression_fig = px.scatter(
+            x=nasdaq_returns,
+            y=stock_returns,
+            trendline="ols",
+            labels={'x': 'NASDAQ 100 Returns', 'y': f'{selected_stock} Returns'},
+            title=f"Regression Analysis: Beta = {beta:.2f}"
+        )
+
+    return regression_fig.to_html(full_html=False)
+
+def render_trend_graph(selected_stock, start_date, end_date):
+
+    stock_data, nasdaq_data, stock_returns, nasdaq_returns = fetch_stock_data(selected_stock, start_date, end_date)
+    stock_price_normalized = stock_data['price'].dropna() / stock_data['price'].iloc[0]
+    nasdaq_price_normalized = nasdaq_data['price'].dropna() / nasdaq_data['price'].iloc[0]
+    combined_data = pd.DataFrame({
+        'Date': stock_price_normalized.index,  # 日期索引
+        'Stock Price': stock_price_normalized,  # 归一化后的股票价格
+        'NASDAQ Price': nasdaq_price_normalized  # 归一化后的指数价格
+    })
+
+        # 绘制价格走势图
+    price_trend_fig = px.line(
+        combined_data,  # 数据
+        x='Date',  # X 轴：日期
+        y=['Stock Price', 'NASDAQ Price'],  # Y 轴：股票和指数价格
+        labels={'value': 'Normalized Price', 'variable': 'Legend'},  # 标签
+        title=f'{selected_stock} and NASDAQ 100 Price Trend (Normalized)'  # 标题
+    )
+
+    return price_trend_fig.to_html(full_html=False)

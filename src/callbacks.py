@@ -77,6 +77,42 @@ def register_callbacks(app):
             style={"border": "0", "width": "100%", "height": "350px"}
         )
 
+    # Callback for updating regression graph based on stock and time range selection
+    @app.callback(
+        Output('regression-graph-container', 'children'),
+        [Input('stock-dropdown', 'value'),
+         Input('date-picker-range', 'start_date'),
+         Input('date-picker-range', 'end_date')]
+    )
+    def update_regression_graph(selected_stock, start_date, end_date):
+        """Updates the regession and beta value based on selected stock and date range"""
+        # 调用 render_regression_graph 函数，生成图表
+        regression_fig_html = render_regression_graph(selected_stock, start_date, end_date)
+    
+        # 将生成的图表 HTML 结果嵌入 Iframe 中
+        return html.Iframe(
+            srcDoc=regression_fig_html, style={"border": "0", "width": "100%", "height": "600px"}
+        )
+
+    # Callback for updating trend graph based on stock and time range selection
+    @app.callback(
+        Output('price-trend-graph-container', 'children'),
+        [Input('stock-dropdown', 'value'),
+         Input('date-picker-range', 'start_date'),
+         Input('date-picker-range', 'end_date')]
+    )
+    def update_trend_graph(selected_stock, start_date, end_date):
+        """Updates the trend graph based on selected stock and date range"""
+        # 调用 render_trend_graph 函数，生成图表
+        price_trend_fig_html = render_trend_graph(selected_stock, start_date, end_date)
+    
+        # 将生成的图表 HTML 结果嵌入 Iframe 中
+        return html.Iframe(
+            srcDoc=price_trend_fig_html, style={"border": "0", "width": "100%", "height": "600px"}
+        )
+    
+
+    
 
     # Callback: Update data every n seconds and store it in dcc.Store (requires adding dcc.Store(id="data-store") in the layout)
     @app.callback(
