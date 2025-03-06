@@ -31,7 +31,7 @@ def register_callbacks(app):
         """Updates the pie chart based on selected sectors"""
         return html.Iframe(
             srcDoc=render_pie_chart(selected_sectors),  # Generate pie chart with selected sectors
-            style={"border": "0", "width": "100%", "height": "600px"}  # Styling
+            style={"border": "0", "width": "100%", "height": "350px"}  # Styling
         )
 
 
@@ -47,7 +47,7 @@ def register_callbacks(app):
         
         return html.Iframe(
             srcDoc=render_ytd_distribution(selected_sectors),
-            style={"border": "0", "width": "100%", "height": "600px"}
+            style={"border": "0", "width": "100%", "height": "350px"}
         )
 
 
@@ -60,7 +60,7 @@ def register_callbacks(app):
         # Call render_scatter_plot function with the selected sectors and return the HTML
         return html.Iframe(
             srcDoc=render_scatter_plot(selected_sectors),  # Generate the chart with selected sectors
-            style={"border": "0", "width": "100%", "height": "600px"}  # Style the iframe
+            style={"border": "0", "width": "100%", "height": "350px"}  # Style the iframe
         )
 
     # New callback: Update Top/Bottom 5 Chart
@@ -74,7 +74,7 @@ def register_callbacks(app):
 
         return html.Iframe(
             srcDoc=render_intraday_contribution_5(selected_sectors),
-            style={"border": "0", "width": "100%", "height": "600px"}
+            style={"border": "0", "width": "100%", "height": "350px"}
         )
 
 

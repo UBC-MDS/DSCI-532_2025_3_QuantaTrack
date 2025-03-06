@@ -50,7 +50,7 @@ def render_pie_chart(selected_sectors=["All"]):
 
     # 4. Create a doughnut chart
     chart = (
-        Pie(init_opts=opts.InitOpts(width="600px", height="500px"))
+        Pie(init_opts=opts.InitOpts(width="590px", height="300px"))
         .add(
             series_name="",
             data_pair=data_pairs,
@@ -59,7 +59,17 @@ def render_pie_chart(selected_sectors=["All"]):
         )
         .set_colors(colors)  # Set colors for each sector
         .set_global_opts(
-            title_opts=opts.TitleOpts(title=chart_title, pos_left="center"),
+            title_opts=opts.TitleOpts(
+            title=chart_title,
+            pos_left="center",
+            # Add text style for the title
+            title_textstyle_opts=opts.TextStyleOpts(
+                font_size=18,
+                color="black",
+                font_family="Calibri",
+                font_weight="bold"
+            )
+        ),
             legend_opts=opts.LegendOpts(is_show=False),  # Hide legend
             tooltip_opts=opts.TooltipOpts(formatter="{b}: {d}%")
         )
@@ -123,8 +133,10 @@ def render_scatter_plot(selected_sectors):
 
     # 5. Update layout
     fig.update_layout(
+        width=590,
+        height=300,
         title="Dividend Yield vs. PE",
-        title_font=dict(size=24, color="black", family="Calibri", weight="bold"),
+        title_font=dict(size=18, color="black", family="Calibri", weight="bold"),
         title_x=0.5,
         xaxis_title="PE",
         yaxis_title="Dividend Yield",
@@ -151,7 +163,7 @@ def render_scatter_plot(selected_sectors):
             tickformat=".2%",  # Format the ticks as percentages
         ),
         # Full border around the whole chart
-        margin=dict(l=50, r=50, t=50, b=50),  # Add margins to ensure full border
+        margin=dict(l=50, r=50, t=40, b=10),  # Add margins to ensure full border
         shapes=[
             dict(
                 type="rect",  # Shape type is rectangle
@@ -204,32 +216,58 @@ def render_ytd_distribution(selected_sectors=["All"]):
     median_val = df["YTDReturn"].median()
 
     # Add lines for mean (green) & median (red)
-    fig.add_vline(x=mean_val, line_width=2, line_dash="solid", line_color="green",
-                  annotation_text=f"Mean: {mean_val:.2%}",
-                  annotation_position="top right")
-    fig.add_vline(x=median_val, line_width=2, line_dash="solid", line_color="red",
-                  annotation_text=f"Median: {median_val:.2%}",
-                  annotation_position="top left")
+    fig.add_vline(x=mean_val, line_width=2, line_dash="solid", line_color="green")
+    fig.add_vline(x=median_val, line_width=2, line_dash="solid", line_color="red")
+
+    max_count = 0
+    if fig.data and hasattr(fig.data[0], "y") and fig.data[0].y is not None:
+        max_count = max(fig.data[0].y)
+
+    # 4) Add two line traces for Mean & Median
+    #    (These lines will appear in the legend)
+    fig.add_trace(
+        go.Scatter(
+            x=[mean_val, mean_val],
+            y=[0, max_count],
+            mode='lines',
+            line=dict(color='green', width=2),
+            name=f"Mean: {mean_val:.2%}"
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=[median_val, median_val],
+            y=[0, max_count],
+            mode='lines',
+            line=dict(color='red', width=2),
+            name=f"Median: {median_val:.2%}"
+        )
+    )
 
     # Format x-axis as percentage
     fig.update_layout(
-        title_font=dict(size=24, color="black", family="Calibri", weight="bold"),
+        width=590,
+        height=300,
+        title_font=dict(size=18, color="black", family="Calibri", weight="bold"),
         title_x=0.5,
+        showlegend=True,
+        legend=dict(
+            x=0,
+            y=1,
+            xanchor='left',
+            yanchor='top',
+            bgcolor='rgba(255,255,255,0.8)'  # optional: white background behind legend
+        ),
         xaxis=dict(
-            showline=True,  # Show outer axis line (border)
-            linewidth=1,  # Reduced border thickness for the x-axis
-            linecolor='gray',  # Outer line color for the x-axis
-            tickformat=".0%", 
-            range=[-df["YTDReturn"].max()-0.05, df["YTDReturn"].max()+0.05]
-            ),
-        # yaxis=dict(
-        #     showline=True,  # Show outer axis line (border)
-        #     linewidth=1,  # Reduced border thickness for the y-axis
-        #     linecolor='gray',  # Outer line color for the y-axis
-        #     ),
-        margin=dict(l=50, r=50, t=50, b=50),
-        plot_bgcolor="rgba(0,0,0,0)",   # Transparent plot area
-        paper_bgcolor="rgba(0,0,0,0)"  # Transparent overall figure background
+            showline=True,
+            linewidth=1,
+            linecolor='gray',
+            tickformat=".0%",
+        ),
+        barmode='overlay',
+        margin=dict(l=50, r=50, t=40, b=10),
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)"
     )
     
     return fig.to_html(full_html=False)
@@ -292,8 +330,10 @@ def render_intraday_contribution_5(selected_sectors=["All"]):
 
     # 8. Configure layout
     fig.update_layout(
+        width=590,
+        height=300,
         title="Companies by Intraday Contribution",
-        title_font=dict(size=24, color="black", family="Calibri", weight="bold"),
+        title_font=dict(size=18, color="black", family="Calibri", weight="bold"),
         title_x=0.5,
         xaxis_title="IntradayContribution",
         yaxis_title="Company",
@@ -308,7 +348,7 @@ def render_intraday_contribution_5(selected_sectors=["All"]):
         #     linewidth=1,  # Reduced border thickness for the y-axis
         #     linecolor='gray',  # Outer line color for the y-axis
         #     ),
-        margin=dict(l=150, r=50, t=50, b=50),
+        margin=dict(l=150, r=50, t=40, b=10),
         plot_bgcolor="white",
         showlegend=False
     )

@@ -16,3 +16,4 @@ dependencies:
   - pyecharts=2.0.8
   - pip:
       - dash_bootstrap_components==1.7.1
+      - dash-ag-grid
