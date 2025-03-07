@@ -114,6 +114,75 @@ def register_callbacks(app):
 
     
 
+    @app.callback(
+    Output('stock-dropdown', 'options'),     # 输出到 stock-dropdown 的 options
+    Output('stock-dropdown', 'value'),       # 也可以顺便更新一下默认选中的 value
+    Input('filter-sector', 'value')          # 以 filter-sector 的 value 作为输入
+    )
+    def update_stock_dropdown(selected_sector):
+        
+        nasdaq100_tickers = getQQQMHolding()
+        # 如果没有选或者选了 'All'，那就把全部股票都显示出来
+        if not selected_sector or 'All' in selected_sector:
+            filtered_df = nasdaq100_tickers
+        else:
+            # 如果 sector 是单选：用 == 过滤
+            # 如果 sector 是多选：用 isin 过滤
+            # 假设多选，这里写成 isin
+            filtered_df = nasdaq100_tickers[nasdaq100_tickers['Sector'].isin(selected_sector)]
+    
+        # 生成新的 options
+        new_options = [
+            {'label': row['Name'], 'value': row['Ticker']}
+            for _, row in filtered_df.iterrows()
+        ]
+        
+        # 设定一个新的默认选项（比如取过滤后第一行）也可以不设置，设成 None
+        new_value = None
+        if len(filtered_df) > 0:
+            new_value = filtered_df.iloc[0]['Ticker']
+        
+        return new_options, new_value
+
+
+    
+    # Callback for updating regression graph based on stock and time range selection
+    @app.callback(
+        Output('regression-graph-container', 'children'),
+        [Input('stock-dropdown', 'value'),
+         Input('date-picker-range', 'start_date'),
+         Input('date-picker-range', 'end_date')]
+    )
+    def update_regression_graph(selected_stock, start_date, end_date):
+        """Updates the regession and beta value based on selected stock and date range"""
+        # 调用 render_regression_graph 函数，生成图表
+        regression_fig_html = render_regression_graph(selected_stock, start_date, end_date)
+    
+        # 将生成的图表 HTML 结果嵌入 Iframe 中
+        return html.Iframe(
+            srcDoc=regression_fig_html, style={"border": "0", "width": "100%", "height": "600px"}
+        )
+
+    # Callback for updating trend graph based on stock and time range selection
+    @app.callback(
+        Output('price-trend-graph-container', 'children'),
+        [Input('stock-dropdown', 'value'),
+         Input('date-picker-range', 'start_date'),
+         Input('date-picker-range', 'end_date')]
+    )
+    def update_trend_graph(selected_stock, start_date, end_date):
+        """Updates the trend graph based on selected stock and date range"""
+        # 调用 render_trend_graph 函数，生成图表
+        price_trend_fig_html = render_trend_graph(selected_stock, start_date, end_date)
+    
+        # 将生成的图表 HTML 结果嵌入 Iframe 中
+        return html.Iframe(
+            srcDoc=price_trend_fig_html, style={"border": "0", "width": "100%", "height": "600px"}
+        )
+    
+
+    
+
     # Callback: Update data every n seconds and store it in dcc.Store (requires adding dcc.Store(id="data-store") in the layout)
     @app.callback(
         Output("data-store", "data"),
