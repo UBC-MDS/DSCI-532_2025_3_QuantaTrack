@@ -218,8 +218,8 @@ def render_ytd_distribution(selected_sectors=["All"]):
     median_val = df["YTDReturn"].median()
 
     # Add lines for mean (green) & median (red)
-    fig.add_vline(x=mean_val, line_width=2, line_dash="solid", line_color="green")
-    fig.add_vline(x=median_val, line_width=2, line_dash="solid", line_color="red")
+    fig.add_vline(x=mean_val, line_width=2, line_dash="dash", line_color="darkblue")
+    fig.add_vline(x=median_val, line_width=2, line_dash="solid", line_color="darkblue")
 
     max_count = 0
     if fig.data and hasattr(fig.data[0], "y") and fig.data[0].y is not None:
@@ -232,7 +232,7 @@ def render_ytd_distribution(selected_sectors=["All"]):
             x=[mean_val, mean_val],
             y=[0, max_count],
             mode='lines',
-            line=dict(color='green', width=2),
+            line=dict(color='darkblue', width=2, dash='dash'),
             name=f"Mean: {mean_val:.2%}"
         )
     )
@@ -241,7 +241,7 @@ def render_ytd_distribution(selected_sectors=["All"]):
             x=[median_val, median_val],
             y=[0, max_count],
             mode='lines',
-            line=dict(color='red', width=2),
+            line=dict(color='darkblue', width=2, dash='solid'),
             name=f"Median: {median_val:.2%}"
         )
     )
@@ -313,9 +313,9 @@ def render_intraday_contribution_5(selected_sectors=["All"]):
     bar_colors = []
     for val in combined["IntradayContribution"]:
         if val < 0:
-            bar_colors.append("#e74c3c")
+            bar_colors.append("#BB4444")
         else:
-            bar_colors.append("#2ecc71")
+            bar_colors.append("#A8C089")
 
     # 7. Build a horizontal bar chart
     fig = go.Figure(
@@ -394,7 +394,7 @@ def render_regression_graph(selected_stock, start_date, end_date):
             y=stock_returns,
             trendline="ols",
             labels={'x': 'NASDAQ 100 Returns', 'y': f'{selected_stock} Returns'},
-            title=f"Regression Analysis: Beta = {beta:.2f}"
+            title=f"Regression Analysis: <b>Beta = {beta:.2f}<b>"
         )
 
     return regression_fig.to_html(full_html=False)
