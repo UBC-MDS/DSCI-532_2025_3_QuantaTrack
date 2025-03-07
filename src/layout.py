@@ -257,7 +257,7 @@ data_update_interval = dcc.Interval(
 )
 
 nasdaq100_tickers = getQQQMHolding()
-# 生成下拉菜单选项
+## 生成下拉菜单选项
 stock_dropdown_options = [
     {'label': nasdaq100_tickers.iloc[i]['Name'], 'value': nasdaq100_tickers.iloc[i]['Ticker']}
     for i in range(len(nasdaq100_tickers))
@@ -284,8 +284,8 @@ tabs = dbc.Tabs([
             dbc.Col(
                 dcc.Dropdown(
                     id='stock-dropdown',
-                    options=stock_dropdown_options,
-                    value='AAPL',  # 默认值
+                    options=[],
+                    value=None,  # 默认值
                     placeholder="Select a stock",  # 提示文本
                 ),
                 width=6,

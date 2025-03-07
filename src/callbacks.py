@@ -77,6 +77,39 @@ def register_callbacks(app):
             style={"border": "0", "width": "100%", "height": "350px"}
         )
 
+
+    @app.callback(
+    Output('stock-dropdown', 'options'),     # 输出到 stock-dropdown 的 options
+    Output('stock-dropdown', 'value'),       # 也可以顺便更新一下默认选中的 value
+    Input('filter-sector', 'value')          # 以 filter-sector 的 value 作为输入
+    )
+    def update_stock_dropdown(selected_sector):
+        
+        nasdaq100_tickers = getQQQMHolding()
+        # 如果没有选或者选了 'All'，那就把全部股票都显示出来
+        if not selected_sector or 'All' in selected_sector:
+            filtered_df = nasdaq100_tickers
+        else:
+            # 如果 sector 是单选：用 == 过滤
+            # 如果 sector 是多选：用 isin 过滤
+            # 假设多选，这里写成 isin
+            filtered_df = nasdaq100_tickers[nasdaq100_tickers['Sector'].isin(selected_sector)]
+    
+        # 生成新的 options
+        new_options = [
+            {'label': row['Name'], 'value': row['Ticker']}
+            for _, row in filtered_df.iterrows()
+        ]
+        
+        # 设定一个新的默认选项（比如取过滤后第一行）也可以不设置，设成 None
+        new_value = None
+        if len(filtered_df) > 0:
+            new_value = filtered_df.iloc[0]['Ticker']
+        
+        return new_options, new_value
+
+
+    
     # Callback for updating regression graph based on stock and time range selection
     @app.callback(
         Output('regression-graph-container', 'children'),
