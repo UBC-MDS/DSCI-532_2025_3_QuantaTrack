@@ -265,6 +265,10 @@ def render_ytd_distribution(selected_sectors=["All"]):
             linewidth=1,
             linecolor='gray',
             tickformat=".0%",
+            title="YTD Return"
+        ),
+        yaxis=dict(
+        title="Count"
         ),
         barmode='overlay',
         margin=dict(l=50, r=50, t=40, b=10),
@@ -337,7 +341,7 @@ def render_intraday_contribution_5(selected_sectors=["All"]):
         title="Companies by Intraday Contribution",
         title_font=dict(size=18, color="black", family="Calibri", weight="bold"),
         title_x=0.5,
-        xaxis_title="IntradayContribution",
+        xaxis_title="Intraday Contribution",
         yaxis_title="Company",
         xaxis=dict(
             showline=True,  # Show outer axis line (border)
