@@ -58,8 +58,8 @@ sidebar = [
     html.A(
         "NASDAQ 100 Index ETF", 
         href="https://www.invesco.com/us/financial-products/etfs/product-detail?audienceType=Investor&productId=ETF-QQQM", 
-        className="text-primary", 
-        style={"color": "red"}
+        # className="text-primary", 
+        style={"color": "yellow"}
     ),
     
     html.Hr(),  # Optional line separator
