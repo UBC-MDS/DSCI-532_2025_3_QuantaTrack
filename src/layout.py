@@ -157,8 +157,6 @@ price_trend_graph = html.Div(
 )
 
 
-
-
 # Filter Form (with ticker and name input)
 filter_form = dbc.Row(
     [
@@ -231,8 +229,6 @@ ag_columns = [
     {"field": "Sector"},
     {"field": "Date"},
 ]
-
-
 
 
 # 替换原来的 dash_table.DataTable 为 dash ag grid 的 AgGrid 组件
