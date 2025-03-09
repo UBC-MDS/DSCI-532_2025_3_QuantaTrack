@@ -1,7 +1,7 @@
 import dash_bootstrap_components as dbc
 from dash import dcc, html
 from dash_ag_grid import AgGrid
-from src.plotting import *
+from src.components import *
 from src.qqqm_data import getQQQMHolding
 
 # Modify the update frequency selection dropdown: Change the options to '3 seconds', '10 seconds', and 'No update', 
@@ -58,7 +58,8 @@ sidebar = [
     html.A(
         "NASDAQ 100 Index ETF", 
         href="https://www.invesco.com/us/financial-products/etfs/product-detail?audienceType=Investor&productId=ETF-QQQM", 
-        className="text-primary"
+        # className="text-primary", 
+        style={"color": "yellow"}
     ),
     
     html.Hr(),  # Optional line separator
@@ -157,8 +158,6 @@ price_trend_graph = html.Div(
 )
 
 
-
-
 # Filter Form (with ticker and name input)
 filter_form = dbc.Row(
     [
@@ -231,8 +230,6 @@ ag_columns = [
     {"field": "Sector"},
     {"field": "Date"},
 ]
-
-
 
 
 # 替换原来的 dash_table.DataTable 为 dash ag grid 的 AgGrid 组件
