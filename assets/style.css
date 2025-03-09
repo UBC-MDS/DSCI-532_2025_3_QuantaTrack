@@ -28,4 +28,9 @@ h2 {
     margin-top: 20px;
 }
 
+/* href color */
+.custom-link {
+    color: white;  /* Change 'red' to any color */
+}
+
 /* Filter */

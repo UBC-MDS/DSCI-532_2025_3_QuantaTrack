@@ -1,7 +1,7 @@
 import dash_bootstrap_components as dbc
 from dash import dcc, html
 from dash_ag_grid import AgGrid
-from src.plotting import *
+from src.components import *
 from src.qqqm_data import getQQQMHolding
 
 # Modify the update frequency selection dropdown: Change the options to '3 seconds', '10 seconds', and 'No update', 

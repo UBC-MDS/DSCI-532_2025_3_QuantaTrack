@@ -3,7 +3,7 @@ from dash import html, dcc, Input, Output
 import dash
 
 from src.layout import *
-from src.plotting import *
+from src.components import *
 from src.qqqm_data import getQQQMHolding
 
 def highlight_change(val):
