@@ -67,6 +67,10 @@ if __name__ == "__main__":
 python -m src.app
 ```
 
+## 🔎 Financial Terminology Help
+
+This project involves financial terms that may require some explanation. For assistance in understanding these terms, please refer to the **[Glossary of Financial Terms](./HELP.md)** file. The terms are listed in alphabetical order for easy reference.
+
 ## 👥 Contributors
 
 Ethan Fang ([\@ethanfang08](https://github.com/ethanfang08)), Jenny Zhang ([\@JennyonOort](https://github.com/JennyonOort)), Kevin Gao ([\@kegao1995](https://github.com/kegao1995)), Ziyuan Zhao ([\@cherylziunzhao](https://github.com/cherylziunzhao))
