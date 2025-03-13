@@ -67,7 +67,19 @@ sidebar = [
     # Refresh Time Dropdown
     dbc.Label('Refresh Time'),
     update_speed_dropdown,  # Assuming this is a dropdown for selecting the refresh time
-
+    
+    # Last Refresh Time Message (using html.Div for consistency)
+    html.P(
+        id="footer-refresh-time",  # This ID is used to update the refresh time dynamically
+        style={
+            "textAlign": "left",
+            "fontStyle": "italic",
+            "marginTop": "10px",
+            "fontSize": "14px",
+            "color": "#ffffff",  # White color for the text
+            "background-color": "#343a40",  # Keep the same background as the footer
+        }
+    ),
     html.Hr(),  # Optional line separator
     
     # Sector Selector Dropdown
@@ -96,7 +108,7 @@ sidebar = [
                 'left': '0',  # Always stick to the left
                 "width": "100%",  # Ensure it takes the full width of the sidebar
                 }
-            )
+            ),
         ]
     ),
 ]

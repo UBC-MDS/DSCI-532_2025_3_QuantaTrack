@@ -202,22 +202,18 @@ def register_callbacks(app):
         else:  # "No update"
             return True, 1000  # interval value doesn't matter
 
-
     @app.callback(
-        Output("stock-table", "rowData"),
+        [Output("stock-table", "rowData"),
+        Output("footer-refresh-time", "children")],  # Add output for the footer refresh time
         [Input("filter-ticker", "value"),
-         Input("filter-name", "value"),
-         Input("filter-sector", "value"),
-         Input("data-store", "data")]
+        Input("filter-name", "value"),
+        Input("filter-sector", "value"),
+        Input("data-store", "data")]
     )
     def update_table(ticker, name, sectors, data):
         """
         Updates the data displayed in the stock table based on filters for ticker, 
-        name, and sector.
-
-        This callback is triggered when the user applies any of the filters (ticker, 
-        name, or sector). It filters the data accordingly and returns the filtered 
-        results to the `stock-table` component for display.
+        name, and sector, and also updates the refresh time in the footer.
 
         Args:
             ticker (str): The ticker symbol to filter by (optional).
@@ -227,6 +223,7 @@ def register_callbacks(app):
 
         Returns:
             list: A list of filtered records suitable for use in the stock table.
+            str: The latest refresh time to display in the footer.
         """
         df = pd.DataFrame(data) if data else pd.DataFrame()
 
@@ -238,8 +235,58 @@ def register_callbacks(app):
         # Filter by sectors (handling multiple selections)
         if sectors and "All" not in sectors:
             df = df[df["Sector"].isin(sectors)]  # Filter to keep rows with sectors in the selected list
+
+        # Extract the most recent refresh time from the 'Date' column (assuming 'Date' is in a proper datetime format)
+        if not df.empty:
+            df["Date"] = pd.to_datetime(df["Date"], errors='coerce')  # This will handle any invalid date entries by setting them to NaT (Not a Time)
+            latest_refresh_time = df["Date"].max()  # Get the most recent date
+            if pd.isna(latest_refresh_time):
+                refresh_time_str = "Last Refresh Time Not Available"  # If no valid dates are available
+            else:
+                refresh_time_str = f"Latest Data Refresh on {latest_refresh_time.strftime('%Y-%m-%d %H:%M:%S')}"
+        else:
+            refresh_time_str = "Awaiting Data Refresh"  # If no data is available
+
+        # Return both the filtered data and the refresh time for the footer
+        return df.to_dict("records"), refresh_time_str
+
+    # @app.callback(
+    #     Output("stock-table", "rowData"),
+    #     [Input("filter-ticker", "value"),
+    #      Input("filter-name", "value"),
+    #      Input("filter-sector", "value"),
+    #      Input("data-store", "data")]
+    # )
+    # def update_table(ticker, name, sectors, data):
+    #     """
+    #     Updates the data displayed in the stock table based on filters for ticker, 
+    #     name, and sector.
+
+    #     This callback is triggered when the user applies any of the filters (ticker, 
+    #     name, or sector). It filters the data accordingly and returns the filtered 
+    #     results to the `stock-table` component for display.
+
+    #     Args:
+    #         ticker (str): The ticker symbol to filter by (optional).
+    #         name (str): The company name to filter by (optional).
+    #         sectors (list): A list of selected sectors to filter by (optional).
+    #         data (list): The full dataset to filter.
+
+    #     Returns:
+    #         list: A list of filtered records suitable for use in the stock table.
+    #     """
+    #     df = pd.DataFrame(data) if data else pd.DataFrame()
+
+    #     if ticker:
+    #         df = df[df["Ticker"].str.contains(ticker, case=False, na=False)]
+    #     if name:
+    #         df = df[df["Name"].str.contains(name, case=False, na=False)]
+
+    #     # Filter by sectors (handling multiple selections)
+    #     if sectors and "All" not in sectors:
+    #         df = df[df["Sector"].isin(sectors)]  # Filter to keep rows with sectors in the selected list
         
-        return df.to_dict("records")
+    #     return df.to_dict("records")
         
 
 
