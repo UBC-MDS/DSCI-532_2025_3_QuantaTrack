@@ -154,6 +154,20 @@ def register_callbacks(app):
         Input("data-update-interval", "n_intervals")
     )
     def update_data(n_intervals):
+        """
+        Updates and stores the latest data from `getQQQMHolding()` into `dcc.Store`.
+
+        This callback is triggered periodically by the `dcc.Interval` component to 
+        fetch and store the latest data every time the interval elapses. The data
+        fetched is returned as a list of dictionaries which is suitable for 
+        use in Dash components such as tables.
+
+        Args:
+            n_intervals (int): The number of times the interval has been triggered.
+
+        Returns:
+            list: A list of records containing the latest data from `getQQQMHolding()`.
+        """
         return getQQQMHolding().to_dict("records")
 
     # Callback: Update the interval frequency based on the dropdown selection, modifying the Interval component's properties 
@@ -163,6 +177,24 @@ def register_callbacks(app):
         Input("update-speed", "value")
     )
     def update_interval_speed(value):
+        """
+        Updates the interval speed and enables or disables the `dcc.Interval` 
+        component based on the value selected in the `update-speed` dropdown.
+
+        This callback modifies the `interval` property of the `dcc.Interval` component 
+        based on the user selection (e.g., "3s", "10s", "No update"). It also updates 
+        the `disabled` property of the interval, which controls whether or not 
+        the interval is active.
+
+        Args:
+            value (str): The value selected from the `update-speed` dropdown. 
+                        Can be "3s", "10s", or "No update".
+
+        Returns:
+            tuple: A tuple containing two values:
+                1. A boolean indicating whether the `dcc.Interval` should be disabled.
+                2. The interval time in milliseconds.
+        """
         if value == "3s":
             return False, 3000
         elif value == "10s":
@@ -179,7 +211,23 @@ def register_callbacks(app):
          Input("data-store", "data")]
     )
     def update_table(ticker, name, sectors, data):
-        """更新表格数据"""
+        """
+        Updates the data displayed in the stock table based on filters for ticker, 
+        name, and sector.
+
+        This callback is triggered when the user applies any of the filters (ticker, 
+        name, or sector). It filters the data accordingly and returns the filtered 
+        results to the `stock-table` component for display.
+
+        Args:
+            ticker (str): The ticker symbol to filter by (optional).
+            name (str): The company name to filter by (optional).
+            sectors (list): A list of selected sectors to filter by (optional).
+            data (list): The full dataset to filter.
+
+        Returns:
+            list: A list of filtered records suitable for use in the stock table.
+        """
         df = pd.DataFrame(data) if data else pd.DataFrame()
 
         if ticker:
@@ -203,10 +251,25 @@ def register_callbacks(app):
         prevent_initial_call=True
     )
     def download_csv(n_clicks, data, sectors):
-        """当点击按钮时将数据导出为 CSV 文件下载"""
+        """
+        Exports the current filtered data as a CSV file when the download button is clicked.
+
+        This callback is triggered when the user clicks the "Download CSV" button. 
+        It filters the data based on the selected sectors and then returns a downloadable 
+        CSV file containing the filtered data.
+
+        Args:
+            n_clicks (int): The number of times the "Download CSV" button has been clicked.
+            data (list): The current dataset to export.
+            sectors (list): A list of selected sectors used to filter the dataset.
+
+        Returns:
+            dict: A dictionary containing the CSV data and the file name, which is passed 
+                to `dcc.send_string()` to trigger the download.
+        """
         ctx = dash.callback_context
         if not ctx.triggered or ctx.triggered[0]["prop_id"] != "download-csv-btn.n_clicks":
-            # 如果不是按钮触发，则不进行下载
+            # Do not proceed with the download unless triggered by the button
             from dash.exceptions import PreventUpdate
             raise PreventUpdate
         
