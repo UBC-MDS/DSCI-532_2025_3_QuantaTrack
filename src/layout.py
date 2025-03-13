@@ -236,7 +236,7 @@ table = AgGrid(
     columnDefs=all_columns,
     rowData=[],  # 初始数据为空
     defaultColDef={'filter': True},
-    style={"height": 600},
+    style={"height": 590},
     dashGridOptions={"pagination": True, "paginationAutoPageSize": True},
 )
 
@@ -271,7 +271,11 @@ tabs = dbc.Tabs([
                 dbc.Col(scatter_plot)
             ], class_name="g-0"),
         ],
-        label="Overview"
+        label="Overview",
+        # style={
+        #     'height': '100%',  # Ensures the height fills the container
+        #     'overflow': 'hidden',  # Prevent scrolling
+        # }
     ),
 
     dbc.Tab(
@@ -303,7 +307,11 @@ tabs = dbc.Tabs([
                 dbc.Col(price_trend_graph)
             ], class_name="g-0", style={"marginTop": "20px"}),
         ],
-        label="Stock"
+        label="Stock",
+        # style={
+        #     'height': '100%',  # Ensures the height fills the container
+        #     'overflow': 'hidden',  # Prevent scrolling
+        # }
     ),
     
     dbc.Tab(
@@ -312,8 +320,28 @@ tabs = dbc.Tabs([
             column_selector,
             search_download_row,
             dbc.Row(dbc.Col(table)),
+            # Add a row at the bottom with the updated interactivity message
+            dbc.Row(
+                dbc.Col(
+                    html.Div(
+                        "Disclaimer: Refresh Time Interactivity is only available during trading hours, from 9:30 AM - 4:00 PM (Eastern Daylight Time, GMT-04:00), Monday to Friday.",
+                        style={
+                            "textAlign": "center",
+                            "fontStyle": "italic",
+                            "marginTop": "10px",
+                            "fontSize": "14px",
+                            "color": "#888",  # Gray text color
+                        }
+                    ),
+                    width=12,
+                ),
+            ),
         ],
-        label="Data"
+        label="Data",
+        style={
+            'height': '100%',  # Ensures the height fills the container
+            'overflow': 'hidden',  # Prevent scrolling
+        }
     )
 ])
 
