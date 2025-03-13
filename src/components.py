@@ -85,6 +85,25 @@ def render_scatter_plot(selected_sectors):
     """
     Renders a scatter plot of Dividend Yield vs. PE for selected sectors, 
     color-coded by sector, with tooltips displaying company details.
+
+    Parameters
+    ----------
+    selected_sectors : list of str
+        A list of sectors to filter the data by. If empty or "All" is provided, 
+        no filtering is applied and all sectors are included.
+
+    Returns
+    -------
+    str
+        HTML representation of the Plotly scatter plot figure.
+    
+    Notes
+    -----
+    - The plot will display the Dividend Yield vs. PE for each company.
+    - The colors of the points are determined by the sector of the company.
+    - Tooltips will show detailed information for each company such as its ticker, name, 
+      sector, Dividend Yield, and PE ratio.
+    - If no sectors are provided, all sectors are included by default.
     """
     # 1. Get and process data
     _df = getQQQMHolding()
