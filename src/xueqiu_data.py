@@ -1,3 +1,14 @@
+"""This module is used to fetch and process stock data from the Xueqiu API,
+including batch quote data and historical US stock data, as well as perform time conversion and data calculations.
+
+Main functions:
+    - getBatchQuote: Fetches batch stock quotes and returns a DataFrame.
+    - get_current_beijing_time: Returns the current Beijing time in milliseconds.
+    - get_current_newyork_time: Returns the current New York time in milliseconds.
+    - calculate_date_difference: Calculates the difference in days between the current date and a specified date.
+    - getUSStockHistoryByDate: Fetches historical US stock data within a given date range and computes moving averages.
+"""
+
 import requests
 import pandas as pd
 from datetime import datetime
@@ -41,68 +52,15 @@ cookies = {
 }
 
 
-def getMinuteData(ticker):
-    """
-    Fetches minute-level stock data for a given ticker from Xueqiu API, processes it into a DataFrame,
-    and fills missing values. Adds the last close price and ticker to the DataFrame.
-    """
-    url = 'https://stock.xueqiu.com/v5/stock/chart/minute.json?symbol='+ ticker +'&period=1d'
-
-    response = requests.get(url, headers=headers, cookies=cookies)
-    response_json = response.json()
-    last_close = response_json['data']['last_close']
-    # Extract all fields and convert them into DataFrame
-    data_items = response_json['data']['items']
-
-    # Remove unnecessary fields
-    for item in data_items:
-        item.pop('macd', None)
-        item.pop('kdj', None)
-        item.pop('ratio', None)
-        item.pop('capital', None)
-        item.pop('volume_compare', None)
-
-    df = pd.DataFrame(data_items)
-
-    # Fill missing values
-    df.fillna({'high': df['current'], 'low': df['current']}, inplace=True)
-    df['amount_total'] = df['amount_total'].ffill()
-    df['volume_total'] = df['volume_total'].ffill()
-
-    # # 转换为 datetime 类型（毫秒级时间戳）
-    # df['Timestamp_str'] = pd.to_datetime(df['timestamp'], unit='ms', utc=True)
-
-    # # 确保转换后的 datetime 列是 DatetimeIndex
-    # df['Timestamp_str'] = df['Timestamp_str'].dt.tz_convert('America/New_York')
-
-    # # 以字符串格式存储
-    # df['Timestamp_str'] = df['Timestamp_str'].dt.strftime('%Y-%m-%d %H:%M:%S %z')
-
-    # Add Ticker column
-    df['Ticker'] = ticker
-
-    df['LastClose']=last_close
-
-    return df
-
-def getJson(symbols):
-    """
-    Fetches batch stock quote data for the given symbols from Xueqiu API and returns the quote data as a list.
-    """
-    symbols_str = ','.join(symbols)
-    url = 'https://stock.xueqiu.com/v5/stock/batch/quote.json?symbol=' + symbols_str + '&extend=detail&is_delay_hk=false'
-
-    response = requests.get(url, headers=headers, cookies=cookies)
-    response_json = response.json()
-    quote_data_list = [item['quote'] for item in response_json['data']['items']]
-
-    return quote_data_list
-
-
 def getBatchQuote(symbols):
     """
-    Fetches batch stock quote data for the given symbols from Xueqiu API and processes it into a DataFrame.
-    Converts timestamps, fills missing values, and scales percentage values.
+    Fetches batch stock quote data for the given symbols from the Xueqiu API and processes it into a DataFrame.
+    
+    Parameters:
+        symbols (list): A list of stock symbol strings.
+        
+    Returns:
+        DataFrame: A pandas DataFrame containing the stock quote data with processed timestamps and scaled percentages.
     """
     symbols_str = ','.join(symbols)
     url = 'https://stock.xueqiu.com/v5/stock/batch/quote.json?symbol=' + symbols_str + '&extend=detail'
@@ -147,140 +105,12 @@ def getBatchQuote(symbols):
     
     return df
 
-
-def getBondQuote(symbols):
-    """
-    Fetches bond quote data for the given symbols from Xueqiu API and returns it as a DataFrame.
-    """
-    symbols_str = ','.join(symbols)
-    url = 'https://stock.xueqiu.com/v5/stock/batch/quote.json?symbol=' + symbols_str + '&extend=detail'
-
-
-    response = requests.get(url, headers=headers, cookies=cookies)
-    response_json = response.json()
-    quote_data_list = [item['quote'] for item in response_json['data']['items']]
-
-    # Convert all quote data into DataFrame, with each quote data occupying one row
-    df = pd.DataFrame(quote_data_list)
-    """
-    output_colnames=['symbol', 'code', 'exchange', 'name', 'type', 'sub_type', 'status',
-       'current', 'currency', 'percent', 'chg', 'timestamp', 'time',
-       'lot_size', 'tick_size', 'open', 'last_close', 'high', 'low',
-       'avg_price', 'volume', 'amount', 'turnover_rate', 'amplitude',
-       'market_capital', 'float_market_capital', 'total_shares',
-       'float_shares', 'issue_date', 'lock_set', 'current_year_percent',
-       'high52w', 'low52w', 'limit_up', 'limit_down', 'volume_ratio',
-       'par_value', 'circulation', 'close_dirty_price', 'coupon_rate',
-       'list_date', 'maturity_date', 'value_dates', 'termtomaturity',
-       'accrued_interest', 'dis_next_pay_date', 'convert_rate', 'payment_mode',
-       'variety_type', 'new_issue_rating', 'credit_rating', 'rating',
-       'Timestamp_str']
-    """
-    # Convert timestamp to pandas datetime object
-    df['Timestamp_str'] = (
-        pd.to_datetime(df['timestamp'].to_list(), unit='ms')
-        .tz_localize('UTC')
-        .tz_convert('Asia/Shanghai')
-        .strftime('%Y-%m-%d %H:%M:%S %z')
-    )
-    df['list_date_str'] = (
-        pd.to_datetime(df['list_date'].to_list(), unit='ms')
-        .tz_localize('UTC')
-        .tz_convert('Asia/Shanghai')
-        .strftime('%Y-%m-%d')
-    )
-    df['maturity_date_str'] = (
-        pd.to_datetime(df['maturity_date'].to_list(), unit='ms')
-        .tz_localize('UTC')
-        .tz_convert('Asia/Shanghai')
-        .strftime('%Y-%m-%d')
-    )
-    # 填充缺失值
-    #df.fillna({'dividend': 0, 'dividend_yield': 0}, inplace=True)
-
-    df['percent'] = df['percent'].div(100)
-    df['current_year_percent'] = df['current_year_percent'].div(100)
-
-    df['coupon_rate'] = df['coupon_rate'].div(100)
-    return df
-
-def getETFQuote(symbols):
-    """
-    Fetches ETF quote data for the given symbols from Xueqiu API and returns it as a DataFrame.
-    """
-    symbols_str = ','.join(symbols)
-    url = 'https://stock.xueqiu.com/v5/stock/batch/quote.json?symbol=' + symbols_str + '&extend=detail'
-
-    response = requests.get(url, headers=headers, cookies=cookies)
-    response_json = response.json()
-    quote_data_list = [item['quote'] for item in response_json['data']['items']]
-    df = pd.DataFrame(quote_data_list)
-    '''
-    output_colnames=['symbol', 'code', 'exchange', 'name', 'type', 'sub_type', 'status',
-       'current', 'currency', 'percent', 'chg', 'timestamp', 'time',
-       'lot_size', 'tick_size', 'open', 'last_close', 'high', 'low',
-       'avg_price', 'volume', 'amount', 'turnover_rate', 'amplitude',
-       'market_capital', 'float_market_capital', 'total_shares',
-       'float_shares', 'issue_date', 'lock_set', 'current_year_percent',
-       'high52w', 'low52w', 'limit_up', 'limit_down', 'volume_ratio',
-       'unit_nav', 'acc_unit_nav', 'premium_rate', 'found_date',
-       'expiration_date', 'nav_date', 'iopv']
-    '''
-
-    # Convert timestamp to pandas datetime object
-    df['Timestamp_str'] = (
-        pd.to_datetime(df['timestamp'].to_list(), unit='ms')
-        .tz_localize('UTC')
-        .tz_convert('Asia/Shanghai')
-        .strftime('%Y-%m-%d %H:%M:%S %z')
-    )
-    df['NAV_Date_str'] = (
-        pd.to_datetime(df['nav_date'].to_list(), unit='ms')
-        .tz_localize('UTC')
-        .tz_convert('Asia/Shanghai')
-        .strftime('%Y-%m-%d')
-    )
-    # 填充缺失值
-    #df.fillna({'dividend': 0, 'dividend_yield': 0}, inplace=True)
-
-    df['percent'] = df['percent'].div(100)
-    df['current_year_percent'] = df['current_year_percent'].div(100)
-
-    df['premium_rate'] = df['premium_rate'].div(100)
-
-    return df
-
-
-def getUSETFQuote(symbols):
-    """
-    Fetches US ETF quote data for the given symbols from Xueqiu API and returns it as a DataFrame.
-    """
-    symbols_str = ','.join(symbols)
-    url = 'https://stock.xueqiu.com/v5/stock/batch/quote.json?symbol=' + symbols_str + '&extend=detail'
-
-    response = requests.get(url, headers=headers, cookies=cookies)
-    response_json = response.json()
-    quote_data_list = [item['quote'] for item in response_json['data']['items']]
-    df = pd.DataFrame(quote_data_list)
-
-    # Convert timestamp to pandas datetime object
-    df['Timestamp_str'] = (
-        pd.to_datetime(df['timestamp'].to_list(), unit='ms')
-        .tz_localize('UTC')
-        .tz_convert('America/New_York')
-        .strftime('%Y-%m-%d %H:%M:%S %z')
-    )
-
-    # 填充缺失值
-    #df.fillna({'dividend': 0, 'dividend_yield': 0}, inplace=True)
-
-    df['percent'] = df['percent'].div(100)
-    df['current_year_percent'] = df['current_year_percent'].div(100)
-    return df
-
 def get_current_beijing_time():
     """
-    Returns the current time in Beijing as a milliseconds timestamp.
+    Returns the current Beijing time as a timestamp in milliseconds.
+    
+    Returns:
+        int: The current Beijing time in milliseconds.
     """
     # Get current UTC time
     utc_now = datetime.now(pytz.utc)
@@ -293,7 +123,10 @@ def get_current_beijing_time():
 
 def get_current_newyork_time():
     """
-    Returns the current time in New York as a milliseconds timestamp.
+    Returns the current New York time as a timestamp in milliseconds.
+    
+    Returns:
+        int: The current New York time in milliseconds.
     """
     # Get current UTC time
     utc_now = datetime.now(pytz.utc)
@@ -306,7 +139,14 @@ def get_current_newyork_time():
 
 def calculate_date_difference(date_str, timezone_str):
     """
-    Calculates the difference in days between the current date and the given date for a specified timezone.
+    Calculates the difference in days between the current date and the specified date using the given timezone.
+    
+    Parameters:
+        date_str (str): The date string to compare.
+        timezone_str (str): The timezone string (e.g., 'America/New_York').
+        
+    Returns:
+        int: The difference in days between the current date and the specified date.
     """
     # Convert the string date to a datetime object with the specified timezone
     date = pd.to_datetime(date_str).tz_localize(timezone_str)
@@ -320,9 +160,17 @@ def calculate_date_difference(date_str, timezone_str):
     # Return the difference in days
     return date_diff.days
 
-def getUSStockHistoryByDate(symbol, start_date = '2025-01-01', end_date = '9999-12-31'):
+def getUSStockHistoryByDate(symbol, start_date='2025-01-01', end_date='9999-12-31'):
     """
     Fetches historical stock data for a US symbol within the specified date range, including moving averages.
+    
+    Parameters:
+        symbol (str): The US stock symbol.
+        start_date (str, optional): The start date in 'YYYY-MM-DD' format. Defaults to '2025-01-01'.
+        end_date (str, optional): The end date in 'YYYY-MM-DD' format. Defaults to '9999-12-31'.
+        
+    Returns:
+        DataFrame: A pandas DataFrame containing historical data with 60-day and 120-day moving averages, formatted timestamps, and other processed columns.
     """
     timezone = 'America/New_York'
     begin = get_current_newyork_time()
@@ -361,105 +209,6 @@ def getUSStockHistoryByDate(symbol, start_date = '2025-01-01', end_date = '9999-
 
     return df
 
-def getChinaStockHistoryByDate(symbol, start_date = '2025-01-01', end_date = '9999-12-31'):
-    """Fetches historical stock data for a China symbol within the specified date range, including moving averages.
-    """
-    timezone = 'Asia/Shanghai'
-    begin = get_current_beijing_time()
-
-    days = calculate_date_difference(start_date, timezone) + 120
-    
-    url = f'https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol={symbol}&begin={begin}&period=day&type=before&count=-{days}'
-
-    response = requests.get(url, headers=headers, cookies=cookies)
-    response_json = response.json()
-    
-    # Extract column names and data items
-    columns = response_json['data']['column']
-    items = response_json['data']['item']
-
-    # Convert data items to DataFrame and set column names
-    df = pd.DataFrame(items, columns=columns)
-
-    # Calculate 60-day moving average (MA60)
-    df['MA60'] = df['close'].rolling(window=60).mean()
-    # Calculate 120-day moving average (MA120)
-    df['MA120'] = df['close'].rolling(window=120).mean()
-    
-    # Convert timestamp to pandas datetime object and filter
-    df['Timestamp_str'] = pd.to_datetime(df['timestamp'], unit='ms', utc=True).dt.tz_convert(timezone)
-    df = df[df['Timestamp_str'] >= start_date]
-    df = df[df['Timestamp_str'] <= end_date]
-
-    # Convert filtered timestamps to string format
-    df['Timestamp_str'] = df['Timestamp_str'].dt.strftime('%Y-%m-%d')
-    
-    df['percent'] = df['percent'].div(100)
-    df['turnoverrate'] = df['turnoverrate'].div(100)
-    # Add Ticker column
-    df['Ticker'] = symbol
-
-    return df
-
-# def getStockHistory(symbol,days = 30, timezone = 'Asia/Shanghai'):
-#     """
-#     获取一个股票的日线历史数据。
-
-#     参数:
-#     symbol (str): 股票代码。
-#     days (int): 前推日数，默认为30天。
-#     begin (int): 开始前推的时间，默认为当前北京时间的毫秒时间戳。
-
-#     返回:
-#     pd.DataFrame: 包含股票日线历史数据的DataFrame。
-
-#     数据列:
-#     - timestamp: 时间戳（毫秒）
-#     - volume: 成交量
-#     - open: 开盘价
-#     - high: 最高价
-#     - low: 最低价
-#     - close: 收盘价
-#     - chg: 涨跌额
-#     - percent: 涨跌幅
-#     - turnoverrate: 换手率
-#     - amount: 成交额
-#     - volume_post: 盘后成交量
-#     - amount_post: 盘后成交额
-#     - Timestamp_str: 格式化的北京时间字符串
-#     - Ticker: 股票代码
-#     """
-#     if timezone == 'Asia/Shanghai':
-#         begin = get_current_beijing_time()
-#     elif timezone == 'America/New_York':
-#         begin  =get_current_newyork_time()
-
-#     url = f'https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol={symbol}&begin={begin}&period=day&type=before&count=-{days}'
-
-#     response = requests.get(url, headers=headers, cookies=cookies)
-#     response_json = response.json()
-    
-#     # 提取列名和数据项
-#     columns = response_json['data']['column']
-#     items = response_json['data']['item']
-
-#     # 将数据项转换为 DataFrame，并设置列名
-#     df = pd.DataFrame(items, columns=columns)
-
-#     # 将 timestamp 转换为 pandas 的 datetime 对象
-#     df['Timestamp_str'] = pd.to_datetime(df['timestamp'], unit='ms', utc=True)\
-#                            .dt.tz_convert(timezone)\
-#                            .dt.strftime('%Y-%m-%d %H:%M:%S %z')
-
-#     df['percent'] = df['percent'].div(100)
-#     # 加入 Ticker 列
-#     df['Ticker'] = symbol
-#     """
-#     df.columns = ['timestamp', 'volume', 'open', 'high', 'low', 'close', 'chg', 'percent',
-#        'turnoverrate', 'amount', 'volume_post', 'amount_post',
-#        'Timestamp_str','Ticker']
-#     """
-#     return df
 
 if __name__ == "__main__":
     pass
