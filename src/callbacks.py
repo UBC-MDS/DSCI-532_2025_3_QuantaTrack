@@ -1,7 +1,7 @@
 import pandas as pd
 from dash import html, dcc, Input, Output
 import dash
-
+from src.layout import all_columns  # 导入全局所有列定义
 from src.layout import *
 from src.components import *
 from src.qqqm_data import getQQQMHolding
@@ -241,6 +241,18 @@ def register_callbacks(app):
         
         return df.to_dict("records")
         
+
+    # 新回调：根据用户选择更新自定义表格列
+    @app.callback(
+        Output("stock-table", "columnDefs"),
+        Input("column-selector", "value")
+    )
+    def update_table_columns(selected_columns):
+        # 如果未选择任何列，返回全部列
+        if not selected_columns:
+            return all_columns
+        filtered_columns = [col for col in all_columns if col["field"] in selected_columns]
+        return filtered_columns
 
 
     @app.callback(

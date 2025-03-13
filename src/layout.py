@@ -4,8 +4,45 @@ from dash_ag_grid import AgGrid
 from src.components import *
 from src.qqqm_data import getQQQMHolding
 
-# Modify the update frequency selection dropdown: Change the options to '3 seconds', '10 seconds', and 'No update', 
-# with the default value set to 'No update'
+nasdaq100_tickers = getQQQMHolding()
+latest_update_date = nasdaq100_tickers['Date'].iloc[0] if not nasdaq100_tickers.empty else "N/A"
+
+# 定义所有表格列配置，供表格和下拉菜单使用
+all_columns = [
+    {"field": "Ticker"},
+    {"field": "Name"},
+    {"field": "Weight", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
+    {"field": "Price", "valueFormatter": {"function": "params.value.toFixed(2)"}},
+    {
+        "field": "IntradayReturn",
+        "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"},
+        "cellStyle": {
+            "function": "params.value ? {'backgroundColor': 'rgba(' + (params.value < 0 ? '255,0,0' : '0,255,0') + ',' + Math.min(Math.abs(params.value) / 0.1, 1) + ')'} : null"
+        }
+    },
+    {"field": "Volume", "valueFormatter": {"function": "(params.value / 1e6).toFixed(2) + 'M'"}},
+    {"field": "Amount", "valueFormatter": {"function": "(params.value / 1e9).toFixed(2) + 'B'"}},
+    {"field": "IntradayContribution", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'" }},
+    {"field": "MarketCap", "valueFormatter": {"function": "(params.value / 1e9).toFixed(2) + 'B'"}},
+    {
+        "field": "YTDReturn",
+        "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"},
+        "cellStyle": {
+            "function": "params.value ? {'backgroundColor': 'rgba(' + (params.value < 0 ? '255,0,0' : '0,255,0') + ',' + Math.min(Math.abs(params.value) / 0.5, 1) + ')'} : null"
+        }
+    },
+    {"field": "YTDContribution", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'" }},
+    {"field": "PE", "valueFormatter": {"function": "params.value.toFixed(2)"}},
+    {"field": "PB", "valueFormatter": {"function": "params.value.toFixed(2)"}},
+    {"field": "Profit_TTM", "valueFormatter": {"function": "(params.value / 1e9).toFixed(2) + 'B'"}},
+    {"field": "DividendYield", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'" }},
+    {"field": "Dividend", "valueFormatter": {"function": "params.value.toFixed(2)"}},
+    {"field": "SharesOutstanding", "valueFormatter": {"function": "(params.value / 1e9).toFixed(2) + 'B'"}},
+    {"field": "Sector"},
+    {"field": "Date"},
+]
+
+# 修改更新频率下拉框
 update_speed_dropdown = dbc.Row(
     dbc.Col(
         dcc.Dropdown(
@@ -19,9 +56,9 @@ update_speed_dropdown = dbc.Row(
             clearable=False,
             style={
                 "width": "100%",
-                "background-color": "#ffffff",  # Set dropdown background to white
-                "color": "#000000",  # Set text color to black for the dropdown options
-                }
+                "background-color": "#ffffff",
+                "color": "#000000",
+            }
         ),
     ),
     className="mb-3"
@@ -36,65 +73,54 @@ sector_filter_dropdown = dbc.Row(
                 'Consumer Staples', 'Materials', 'Health Care', 'Industrials', 'Utilities',
                 'Financials', 'Energy', 'Real Estate'
             ]],
-            value=["All"],  # Default selection can be 'All'
-            multi=True,  # Make it multi-select
-            clearable=True,  # Allow clearing the selection
+            value=["All"],
+            multi=True,
+            clearable=True,
             style={
                 "width": "100%",
-                "background-color": "#ffffff",  # Set dropdown background to white
-                "color": "#000000",  # Set text color to black for the dropdown options
-                }  # Make the dropdown full-width
+                "background-color": "#ffffff",
+                "color": "#000000",
+            }
         ),
     ),
     className="mb-3"
 )
 
-# Sidebar (with multi-select dropdown for sectors and refresh time)
-sidebar = [ 
-    
-    # Title and Link
+# Sidebar 定义
+sidebar = [
     html.H1("QuantaTrack", className="mt-3"),
     html.H2("NASDAQ 100 Companies", className="mt-3"),
     html.A(
         "NASDAQ 100 Index ETF", 
         href="https://www.invesco.com/us/financial-products/etfs/product-detail?audienceType=Investor&productId=ETF-QQQM", 
-        # className="text-primary", 
         style={"color": "yellow"}
     ),
-    
-    html.Hr(),  # Optional line separator
-    
-    # Refresh Time Dropdown
+    html.Hr(),
     dbc.Label('Refresh Time'),
-    update_speed_dropdown,  # Assuming this is a dropdown for selecting the refresh time
-
-    html.Hr(),  # Optional line separator
-    
-    # Sector Selector Dropdown
+    update_speed_dropdown,
+    html.Hr(),
     dbc.Label("Select Sectors"),
     sector_filter_dropdown,
-    html.Hr(),  # Optional line separator
-
-    # Footer with Markdown
+    html.Hr(),
     html.Footer(
         [
-            dcc.Markdown('''
+            dcc.Markdown(f'''
                 NASDAQ 100 Tracker is developed by Ethan Fang, Jenny Zhang, Kevin Gao, and Ziyuan Zhao.  
-                The application provides dynamic, real-time NASDAQ 100 tracking to help investors make data-driven decisions with ease.  
-                Latest update on Mar. 1, 2025.  
+                The application provides dynamic, real-time NASDAQ 100 tracking to help investors make data-driven decisions with ease.\n  
+                Latest update on {latest_update_date}.  
                 [Link to the Github Repo](https://github.com/UBC-MDS/DSCI-532_2025_3_QuantaTrack)  
             ''', 
             style={
-                "text-align": "left",  # Center the text
-                "font-size": "15px",  # Set appropriate font size
-                "background-color": "#343a40",  # Dark background color for sidebar
-                "color": "#ffffff",  # Black color for footer text
-                "padding": "10px",  # Add some padding 
-                'flexShrink': 0,  # Prevent footer from shrinking
-                'position': 'absolute',  # Position the footer at the bottom
-                'bottom': '0',  # Always stick to the bottom
-                'left': '0',  # Always stick to the left
-                "width": "100%",  # Ensure it takes the full width of the sidebar
+                "text-align": "left",
+                "font-size": "15px",
+                "background-color": "#343a40",
+                "color": "#ffffff",
+                "padding": "10px",
+                'flexShrink': 0,
+                'position': 'absolute',
+                'bottom': '0',
+                'left': '0',
+                "width": "100%",
                 }
             )
         ]
@@ -157,7 +183,6 @@ price_trend_graph = html.Div(
     ]
 )
 
-
 # Filter Form (with ticker and name input)
 filter_form = dbc.Row(
     [
@@ -189,55 +214,28 @@ search_download_row = dbc.Row(
     justify="between",  
 )
 
+# 修改自定义表格列选择组件，添加 "Column Select " 标签到下拉菜单左边
+column_selector = dbc.Row([
+    dbc.Col(html.Label("Select Column"), width="auto"),
+    dbc.Col(
+        dcc.Dropdown(
+            id="column-selector",
+            options=[{"label": col["field"], "value": col["field"]} for col in all_columns],
+            value=[col["field"] for col in all_columns[:5]],    # 默认选中前5列
+            multi=True,
+            clearable=False,
+            style={"width": "100%"}
+        ),
+        width=True
+    )
+], className="mb-3")
 
-# dash ag grid 的列定义
-ag_columns = [
-    {"field": "Ticker"},
-    {"field": "Name"},
-    {"field": "Weight", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
-    {"field": "Price", "valueFormatter": {"function": "params.value.toFixed(2)" }},
-    #{"field": "IntradayReturn", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
-    {
-        "field": "IntradayReturn",
-        "valueFormatter": {
-            "function": "(params.value * 100).toFixed(2) + '%'"
-        },
-        "cellStyle": {
-            "function": "params.value ? {'backgroundColor': 'rgba(' + (params.value < 0 ? '255,0,0' : '0,255,0') + ',' + Math.min(Math.abs(params.value) / 0.1, 1) + ')'} : null"
-        }
-    },
-    {"field": "Volume", "valueFormatter": {"function": "(params.value / 1e6).toFixed(2) + 'M'" }},
-    {"field": "Amount", "valueFormatter": {"function": "(params.value / 1e9).toFixed(2) + 'B'" }},
-    {"field": "IntradayContribution", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
-    {"field": "MarketCap", "valueFormatter": {"function": "(params.value / 1e9).toFixed(2) + 'B'" }},
-    #{"field": "YTDReturn", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
-    {
-        "field": "YTDReturn",
-        "valueFormatter": {
-            "function": "(params.value * 100).toFixed(2) + '%'"
-        },
-        "cellStyle": {
-            "function": "params.value ? {'backgroundColor': 'rgba(' + (params.value < 0 ? '255,0,0' : '0,255,0') + ',' + Math.min(Math.abs(params.value) / 0.5, 1) + ')'} : null"
-        }
-    },
-    {"field": "YTDContribution", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
-    {"field": "PE", "valueFormatter": {"function": "params.value.toFixed(2)" }},
-    {"field": "PB", "valueFormatter": {"function": "params.value.toFixed(2)" }},
-    {"field": "Profit_TTM", "valueFormatter": {"function": "(params.value / 1e9).toFixed(2) + 'B'" }},
-    {"field": "DividendYield", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'"}},
-    {"field": "Dividend", "valueFormatter": {"function": "params.value.toFixed(2)" }},
-    {"field": "SharesOutstanding", "valueFormatter": {"function": "(params.value / 1e9).toFixed(2) + 'B'" }},
-    {"field": "Sector"},
-    {"field": "Date"},
-]
-
-
-# 替换原来的 dash_table.DataTable 为 dash ag grid 的 AgGrid 组件
+# dash ag grid 表格组件，使用全局变量 all_columns 作为初始列配置
 table = AgGrid(
     id="stock-table",
-    columnDefs=ag_columns,
-    rowData=[],  # 初始数据为空，后续由回调更新
-    defaultColDef={'filter': True},  # 默认启用列过滤
+    columnDefs=all_columns,
+    rowData=[],  # 初始数据为空
+    defaultColDef={'filter': True},
     style={"height": 590},
     dashGridOptions={"pagination": True, "paginationAutoPageSize": True},
 )
@@ -254,7 +252,7 @@ data_update_interval = dcc.Interval(
     n_intervals=0
 )
 
-nasdaq100_tickers = getQQQMHolding()
+
 ## 生成下拉菜单选项
 stock_dropdown_options = [
     {'label': nasdaq100_tickers.iloc[i]['Name'], 'value': nasdaq100_tickers.iloc[i]['Ticker']}
@@ -318,6 +316,8 @@ tabs = dbc.Tabs([
     
     dbc.Tab(
         [
+            # 将自定义表格列选择组件添加到 Data 页签
+            column_selector,
             search_download_row,
             dbc.Row(dbc.Col(table)),
             # Add a row at the bottom with the updated interactivity message
@@ -352,17 +352,15 @@ layout = dbc.Container(
                 dbc.Col(
                     sidebar, md=2,
                     style={
-                        # 'display': 'flex',
-                        #'flexDirection': 'column',  # Stack children vertically
-                        'position': 'fixed',  # Fix the sidebar on the left
-                        'top': '0',  # Make sure it starts at the top of the page
-                        'left': '0',  # Fix it to the left of the page
-                        'minHeight': '100vh',  # Ensure the sidebar takes full height of the page
-                        'overflowY': 'auto',  # Allow the sidebar to scroll if content exceeds viewport height
+                        'position': 'fixed',
+                        'top': '0',
+                        'left': '0',
+                        'minHeight': '100vh',
+                        'overflowY': 'auto',
                         'padding-left': 10,
                         'color': 'white', 
                         'backgroundColor': "#343a40", 
-                        "box-sizing": "border-box",  # Include padding and borders in element's total width and height
+                        "box-sizing": "border-box",
                         }
                     ),
                 dbc.Col(
