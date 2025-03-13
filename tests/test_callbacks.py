@@ -11,10 +11,10 @@ from unittest.mock import patch, MagicMock
 
 from src.callbacks import *
 
-# Add at the top of the file, after imports
 for warning in [DeprecationWarning, UserWarning, FutureWarning]:
     warnings.simplefilter("ignore", warning)
 
+# Run test in terminal with pytest tests/test_callbacks.py
 @pytest.fixture
 def app():
     """Create a Dash app with registered callbacks"""
