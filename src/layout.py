@@ -20,6 +20,7 @@ all_columns = [
             "function": "params.value ? {'backgroundColor': 'rgba(' + (params.value < 0 ? '255,0,0' : '0,255,0') + ',' + Math.min(Math.abs(params.value) / 0.1, 1) + ')'} : null"
         }
     },
+    {"field": "Date"},
     {"field": "Volume", "valueFormatter": {"function": "(params.value / 1e6).toFixed(2) + 'M'"}},
     {"field": "Amount", "valueFormatter": {"function": "(params.value / 1e9).toFixed(2) + 'B'"}},
     {"field": "IntradayContribution", "valueFormatter": {"function": "(params.value * 100).toFixed(2) + '%'" }},
@@ -39,7 +40,7 @@ all_columns = [
     {"field": "Dividend", "valueFormatter": {"function": "params.value.toFixed(2)"}},
     {"field": "SharesOutstanding", "valueFormatter": {"function": "(params.value / 1e9).toFixed(2) + 'B'"}},
     {"field": "Sector"},
-    {"field": "Date"},
+
 ]
 
 # 修改更新频率下拉框
@@ -221,7 +222,7 @@ column_selector = dbc.Row([
         dcc.Dropdown(
             id="column-selector",
             options=[{"label": col["field"], "value": col["field"]} for col in all_columns],
-            value=[col["field"] for col in all_columns[:5]],    # 默认选中前5列
+            value=[col["field"] for col in all_columns[:6]],    # 默认选中前5列
             multi=True,
             clearable=False,
             style={"width": "100%"}
