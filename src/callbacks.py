@@ -6,6 +6,11 @@ from src.layout import *
 from src.components import *
 from src.qqqm_data import getQQQMHolding
 
+CACHE_FILE = 'nasdaq100_cache.pkl'
+DEFAULT_START = "2024-01-01"
+DEFAULT_END = "2025-01-01"
+DEFAULT_TICKER = 'AAPL'
+
 def highlight_change(val):
         try:
             val = float(val)
@@ -120,8 +125,18 @@ def register_callbacks(app):
     )
     def update_regression_graph(selected_stock, start_date, end_date):
         """Updates the regession and beta value based on selected stock and date range"""
-        # 调用 render_regression_graph 函数，生成图表
-        regression_fig_html = render_regression_graph(selected_stock, start_date, end_date)
+
+        # 判断是否是默认区间
+        if start_date == DEFAULT_START and end_date == DEFAULT_END and selected_stock == DEFAULT_TICKER:
+            # 从缓存读取
+            regression_fig_html = chart_cache.get (f"regression|{selected_stock}")
+            
+            if regression_fig_html is None:
+                regression_fig_html = render_regression_graph(selected_stock, start_date, end_date)
+
+        else:
+            # 调用 render_regression_graph 函数，生成图表
+            regression_fig_html = render_regression_graph(selected_stock, start_date, end_date)
     
         # 将生成的图表 HTML 结果嵌入 Iframe 中
         return html.Iframe(
@@ -137,8 +152,18 @@ def register_callbacks(app):
     )
     def update_trend_graph(selected_stock, start_date, end_date):
         """Updates the trend graph based on selected stock and date range"""
-        # 调用 render_trend_graph 函数，生成图表
-        price_trend_fig_html = render_trend_graph(selected_stock, start_date, end_date)
+
+         # 判断是否是默认区间
+        if start_date == DEFAULT_START and end_date == DEFAULT_END and selected_stock == DEFAULT_TICKER:
+            # 从缓存读取
+            price_trend_fig_html = chart_cache.get (f"trend|{selected_stock}")
+            
+            if price_trend_fig_html is None:
+                price_trend_fig_html = render_trend_graph(selected_stock, start_date, end_date)
+
+        else:
+            # 调用 render_trend_graph 函数，生成图表
+            price_trend_fig_html = render_trend_graph(selected_stock, start_date, end_date)
     
         # 将生成的图表 HTML 结果嵌入 Iframe 中
         return html.Iframe(
