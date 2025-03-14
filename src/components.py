@@ -27,74 +27,87 @@ SECTOR_COLORS = {
 def render_pie_chart(selected_sectors=["All"]):
     """
     Generates a doughnut chart displaying the weight distribution 
-    of companies in the selected sectors.
+    of companies in the selected sectors, coloring slices by sector.
     """
-    # 1. Get and process data
     _df = getQQQMHolding()
-    
+
     # Treat an empty selection the same as ["All"]
     if not selected_sectors:
         selected_sectors = ["All"]
 
+    # If 'All' is selected, group by sector
     if "All" in selected_sectors:
         df_sector = _df.groupby('Sector', as_index=False)["Weight"].sum()
         df_sector = df_sector.sort_values("Weight", ascending=False)
-        data_pairs = list(zip(df_sector["Sector"], df_sector["Weight"]))
         chart_title = "NASDAQ 100 by Sector"
- 
+
+        # Build data_pairs from sector & weight
+        data_pairs = list(zip(df_sector["Sector"], df_sector["Weight"]))
+
+        # Build a color_list by referencing each row's Sector
+        color_list = []
+        for _, row in df_sector.iterrows():
+            sector_name = row["Sector"]
+            color_list.append(SECTOR_COLORS.get(sector_name, SECTOR_COLORS["Other"]))
+
     else:
-        # 2) Filter df by the chosen sectors
+        # Filter df by the chosen sectors
         _df = _df[_df["Sector"].isin(selected_sectors)]
 
-        # Sort by weight descending, top 10
+        # Sort by weight descending, then pick top 10
         df_sorted = _df.sort_values("Weight", ascending=False)
-        top_10 = df_sorted.head(10)
-        # Combine the "other" leftover if needed
-        rest = df_sorted.iloc[10:]
+        top_10 = df_sorted.head(10).copy()
+        rest = df_sorted.iloc[10:].copy()
+
+        # Create a row for 'Other Companies'
         rest_combined = pd.DataFrame({
-            "Name": ["Other Companies"], 
-            "Weight": [rest["Weight"].sum()]
+            "Name": ["Other Companies"],
+            "Weight": [rest["Weight"].sum()],
+            "Sector": ["Other"]  # fallback sector label
         })
+
+        # Combine top_10 with the "other" row
+        # (Ensure top_10 has a 'Sector' column as well)
+        top_10 = top_10[["Name", "Weight", "Sector"]]  # keep relevant columns
         combined_df = pd.concat([top_10, rest_combined], ignore_index=True)
-        
-        # Convert to a list of (company, weight)
-        data_pairs = list(zip(combined_df["Name"], combined_df["Weight"]))
+
         chart_title = "Top 10 Companies (Selected Sectors)"
 
-    # Build a color list for each slice in data_pairs
-    color_list = []
-    for (sector_or_name, weight) in data_pairs:
-        # if it's a sector, use that color; if it's "Other Companies", fallback
-        color_list.append(SECTOR_COLORS.get(sector_or_name, SECTOR_COLORS["Other"]))
+        # Convert to a list of (company_name, weight) for pyecharts
+        data_pairs = list(zip(combined_df["Name"], combined_df["Weight"]))
 
-    # 4. Create a doughnut chart
+        # Build a color list by each company's sector
+        color_list = []
+        for _, row in combined_df.iterrows():
+            sec = row["Sector"]
+            color_list.append(SECTOR_COLORS.get(sec, SECTOR_COLORS["Other"]))
+
+    # Create a doughnut chart with pyecharts
     chart = (
         Pie(init_opts=opts.InitOpts(width="590px", height="300px"))
         .add(
             series_name="",
             data_pair=data_pairs,
-            radius=["30%", "70%"],  # Inner and outer radius of the doughnut chart
-            center=["50%", "50%"]   # Center the chart
+            radius=["30%", "70%"],
+            center=["50%", "50%"]
         )
-        .set_colors(color_list)  # Set colors for each sector
+        .set_colors(color_list)
         .set_global_opts(
             title_opts=opts.TitleOpts(
-            title=chart_title,
-            pos_left="center",
-            # Add text style for the title
-            title_textstyle_opts=opts.TextStyleOpts(
-                font_size=18,
-                color="black",
-                font_family="Calibri",
-                font_weight="bold"
-            )
-        ),
-            legend_opts=opts.LegendOpts(is_show=False),  # Hide legend
+                title=chart_title,
+                pos_left="center",
+                title_textstyle_opts=opts.TextStyleOpts(
+                    font_size=18,
+                    color="black",
+                    font_family="Calibri",
+                    font_weight="bold"
+                )
+            ),
+            legend_opts=opts.LegendOpts(is_show=False),
             tooltip_opts=opts.TooltipOpts(formatter="{b}: {d}%")
         )
     )
 
-    # 5. Return embedded HTML
     return chart.render_embed()
 
 # Function to render the scatter plot based on selected sectors
