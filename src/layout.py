@@ -362,17 +362,17 @@ tabs = dbc.Tabs([
                 dcc.DatePickerRange(
                     id='date-picker-range',
                     start_date=pd.to_datetime('2024-01-01'),
-                    end_date=pd.to_datetime('2025-02-05'),
+                    end_date=pd.to_datetime('2025-01-01'),
                     display_format='YYYY-MM-DD',  # 日期格式
                     min_date_allowed=pd.to_datetime('2010-01-01'),
-                    max_date_allowed=pd.to_datetime('2025-12-31'),
+                    max_date_allowed=pd.to_datetime('2026-12-31'),
                 ),
                 width=6,
             ),
         ]),
             dbc.Row([
-                dbc.Col(regression_graph),
-                dbc.Col(price_trend_graph)
+                dbc.Col(regression_graph, width=6),
+                dbc.Col(price_trend_graph, width=6)
             ], class_name="g-0", style={"marginTop": "20px"}),
         ],
         label="Stock",
