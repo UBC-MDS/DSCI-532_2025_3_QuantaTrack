@@ -8,6 +8,22 @@ from pyecharts import options as opts
 from src.qqqm_data import getQQQMHolding
 from src.xueqiu_data import getUSStockHistoryByDate
 
+# A dictionary mapping each NASDAQ 100 sector to a specific color
+SECTOR_COLORS = {
+    "Information Technology": "#1f78b4",
+    "Communication Services": "#33a02c",
+    "Consumer Discretionary": "#e31a1c",
+    "Consumer Staples": "#ff7f00",
+    "Materials": "#6a3d9a",
+    "Health Care": "#b15928",
+    "Industrials": "#a6cee3",
+    "Utilities": "#b2df8a",
+    "Financials": "#fb9a99",
+    "Energy": "#fdbf6f",
+    "Real Estate": "#cab2d6",
+    "Other": "#cccccc"  # fallback for any sector not listed
+}
+
 def render_pie_chart(selected_sectors=["All"]):
     """
     Generates a doughnut chart displaying the weight distribution 
@@ -45,10 +61,11 @@ def render_pie_chart(selected_sectors=["All"]):
         data_pairs = list(zip(combined_df["Name"], combined_df["Weight"]))
         chart_title = "Top 10 Companies (Selected Sectors)"
 
-    # 3. Assign different colors for the top 10
-    colors= [
-        "#08306b", "#08519c", "#2171b5", "#4292c6", "#6baed6",
-        "#9ecae1", "#c6dbef", "#deebf7", "#f7fbff", "#cccccc"]
+    # Build a color list for each slice in data_pairs
+    color_list = []
+    for (sector_or_name, weight) in data_pairs:
+        # if it's a sector, use that color; if it's "Other Companies", fallback
+        color_list.append(SECTOR_COLORS.get(sector_or_name, SECTOR_COLORS["Other"]))
 
     # 4. Create a doughnut chart
     chart = (
@@ -59,7 +76,7 @@ def render_pie_chart(selected_sectors=["All"]):
             radius=["30%", "70%"],  # Inner and outer radius of the doughnut chart
             center=["50%", "50%"]   # Center the chart
         )
-        .set_colors(colors)  # Set colors for each sector
+        .set_colors(color_list)  # Set colors for each sector
         .set_global_opts(
             title_opts=opts.TitleOpts(
             title=chart_title,
@@ -131,25 +148,22 @@ def render_scatter_plot(selected_sectors):
     fig = go.Figure()
 
     # Create a color map for sectors
-    unique_sectors = _df['Sector'].unique()  # Get unique sectors
-    sector_to_color = {sector: px.colors.qualitative.Set1[i % len(px.colors.qualitative.Set1)] 
-                       for i, sector in enumerate(unique_sectors)}  # Map sector to a color using a color palette
+#    unique_sectors = _df['Sector'].unique()  # Get unique sectors
+#    sector_to_color = {sector: px.colors.qualitative.Set1[i % len(px.colors.qualitative.Set1)] 
+#                       for i, sector in enumerate(unique_sectors)}  # Map sector to a color using a color palette
 
     # 5. Create Plotly scatter plot
     fig = go.Figure()
 
     # Add data points to the figure, color by sector
     for data in scatter_data:
+        color_used = SECTOR_COLORS.get(data['sector'], SECTOR_COLORS["Other"])
         fig.add_trace(go.Scatter(
             x=[data['x']],
             y=[data['y']],
             mode='markers',
-            text=data['text'],  # Tooltip content
-            name=data['name'],  # Company name in legend (if needed)
-            marker=dict(
-                size=10,  # Adjust marker size
-                color=sector_to_color.get(data['sector'], 'rgba(0, 0, 0, 0.7)'),  # Color by sector (default to black if sector not in map)
-            )
+            text=data['text'],
+            marker=dict(size=10, color=color_used)
         ))
 
     # 5. Update layout
