@@ -417,7 +417,12 @@ def render_regression_graph(selected_stock, start_date, end_date):
             y=stock_returns,
             trendline="ols",
             labels={'x': 'NASDAQ 100 Returns', 'y': f'{selected_stock} Returns'},
-            title=f"Regression Analysis: <b>Beta = {beta:.2f}<b>"
+            title=(
+                f"Regression Analysis: <b>Beta = {beta: .2f}</b>"
+                "<br><span style='font-size:12px; color:gray;'>"
+                "Beta represents the sensitivity of the stock's returns to the overall market. Beta = Cov(R<sub>s</sub>, R<sub>m</sub>) / Var(R<sub>m</sub>)"
+                "</span>"
+            )
         )
 
     return regression_fig.to_html(full_html=False)
