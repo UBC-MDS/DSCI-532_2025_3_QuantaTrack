@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 
+from matplotlib import colors
 from pyecharts.charts import Pie
 import plotly.graph_objects as go
 import plotly.express as px
@@ -23,6 +24,26 @@ SECTOR_COLORS = {
     "Real Estate": "#cab2d6",
     "Other": "#cccccc"  # fallback for any sector not listed
 }
+
+def generate_darker_color(base_color, rank, total_ranks):
+    """
+    Adjust the color brightness based on rank, with higher ranks getting darker colors.
+    - base_color: The base color for the sector (hex)
+    - rank: The rank of the company (1st, 2nd, etc.)
+    - total_ranks: Total number of companies to rank (usually 10)
+    """
+    # Convert hex to RGB
+    base_color_rgb = colors.hex2color(base_color)  # (r, g, b)
+    
+    # Adjust the darkness of the color based on the rank
+    factor = (rank / total_ranks)  # Increase brightness as rank increases (up to 100% darker)
+    
+    # Apply the darkness factor to each RGB component
+    adjusted_color = [max(0, x * factor) for x in base_color_rgb]  # Ensure RGB values don't go below 0
+    
+    # Convert back to hex
+    adjusted_color_hex = colors.rgb2hex(adjusted_color)
+    return adjusted_color_hex
 
 def render_pie_chart(selected_sectors=["All"]):
     """
@@ -59,7 +80,7 @@ def render_pie_chart(selected_sectors=["All"]):
         top_10 = df_sorted.head(10).copy()
         rest = df_sorted.iloc[10:].copy()
 
-        # Create a row for 'Other Companies'
+        # Create a row for 'Other Companies' (always gray)
         rest_combined = pd.DataFrame({
             "Name": ["Other Companies"],
             "Weight": [rest["Weight"].sum()],
@@ -67,7 +88,6 @@ def render_pie_chart(selected_sectors=["All"]):
         })
 
         # Combine top_10 with the "other" row
-        # (Ensure top_10 has a 'Sector' column as well)
         top_10 = top_10[["Name", "Weight", "Sector"]]  # keep relevant columns
         combined_df = pd.concat([top_10, rest_combined], ignore_index=True)
 
@@ -76,11 +96,19 @@ def render_pie_chart(selected_sectors=["All"]):
         # Convert to a list of (company_name, weight) for pyecharts
         data_pairs = list(zip(combined_df["Name"], combined_df["Weight"]))
 
-        # Build a color list by each company's sector
+        # Build a color list by each company's sector with darkened shading
         color_list = []
-        for _, row in combined_df.iterrows():
+        total_ranks = len(top_10)  # Only apply shading to the top 10, exclude 'Other'
+
+        # Apply shading to the top 10 companies based on rank and sector
+        for rank, (_, row) in enumerate(top_10.iterrows(), start=1):
             sec = row["Sector"]
-            color_list.append(SECTOR_COLORS.get(sec, SECTOR_COLORS["Other"]))
+            base_color = SECTOR_COLORS.get(sec, SECTOR_COLORS["Other"])
+            darkened_color = generate_darker_color(base_color, rank, total_ranks)
+            color_list.append(darkened_color)
+
+        # For 'Other', use the fixed gray color
+        color_list.append(SECTOR_COLORS["Other"])
 
     # Create a doughnut chart with pyecharts
     chart = (
@@ -109,6 +137,326 @@ def render_pie_chart(selected_sectors=["All"]):
     )
 
     return chart.render_embed()
+
+# # Function to generate a fixed declining color scale based on rank
+# def generate_darker_color(base_color, rank, total_ranks):
+#     """
+#     Adjust the color darkness based on rank, with higher ranks getting darker colors.
+#     - base_color: The base color for the sector (hex)
+#     - rank: The rank of the company (1st, 2nd, etc.)
+#     - total_ranks: Total number of companies to rank (usually 10)
+#     """
+#     # Convert hex to RGB
+#     base_color_rgb = colors.hex2color(base_color)  # (r, g, b)
+    
+#     # Adjust the darkness of the color based on the rank
+#     factor = 1 - (rank / total_ranks) * 0.5  # Decrease brightness as rank increases (up to 50% darker)
+    
+#     # Apply the darkness factor to each RGB component
+#     adjusted_color = [max(0, x * factor) for x in base_color_rgb]  # Ensure RGB values don't go below 0
+    
+#     # Convert back to hex
+#     adjusted_color_hex = colors.rgb2hex(adjusted_color)
+#     return adjusted_color_hex
+
+# def render_pie_chart(selected_sectors=["All"]):
+#     """
+#     Generates a doughnut chart displaying the weight distribution 
+#     of companies in the selected sectors, coloring slices by sector.
+#     """
+#     _df = getQQQMHolding()
+
+#     # Treat an empty selection the same as ["All"]
+#     if not selected_sectors:
+#         selected_sectors = ["All"]
+
+#     # If 'All' is selected, group by sector
+#     if "All" in selected_sectors:
+#         df_sector = _df.groupby('Sector', as_index=False)["Weight"].sum()
+#         df_sector = df_sector.sort_values("Weight", ascending=False)
+#         chart_title = "NASDAQ 100 by Sector"
+
+#         # Build data_pairs from sector & weight
+#         data_pairs = list(zip(df_sector["Sector"], df_sector["Weight"]))
+
+#         # Build a color_list by referencing each row's Sector
+#         color_list = []
+#         for _, row in df_sector.iterrows():
+#             sector_name = row["Sector"]
+#             color_list.append(SECTOR_COLORS.get(sector_name, SECTOR_COLORS["Other"]))
+
+#     else:
+#         # Filter df by the chosen sectors
+#         _df = _df[_df["Sector"].isin(selected_sectors)]
+
+#         # Sort by weight descending, then pick top 10
+#         df_sorted = _df.sort_values("Weight", ascending=False)
+#         top_10 = df_sorted.head(10).copy()
+#         rest = df_sorted.iloc[10:].copy()
+
+#         # Create a row for 'Other Companies'
+#         rest_combined = pd.DataFrame({
+#             "Name": ["Other Companies"],
+#             "Weight": [rest["Weight"].sum()],
+#             "Sector": ["Other"]  # fallback sector label
+#         })
+
+#         # Combine top_10 with the "other" row
+#         top_10 = top_10[["Name", "Weight", "Sector"]]  # keep relevant columns
+#         combined_df = pd.concat([top_10, rest_combined], ignore_index=True)
+
+#         chart_title = "Top 10 Companies (Selected Sectors)"
+
+#         # Convert to a list of (company_name, weight) for pyecharts
+#         data_pairs = list(zip(combined_df["Name"], combined_df["Weight"]))
+
+#         # Build a color list by each company's sector with fixed shading
+#         color_list = []
+#         total_ranks = len(combined_df)
+#         for rank, (_, row) in enumerate(combined_df.iterrows(), start=1):
+#             sec = row["Sector"]
+#             base_color = SECTOR_COLORS.get(sec, SECTOR_COLORS["Other"])
+#             shaded_color = generate_shaded_color(base_color, rank, total_ranks)
+#             color_list.append(shaded_color)
+
+#     # Create a doughnut chart with pyecharts
+#     chart = (
+#         Pie(init_opts=opts.InitOpts(width="590px", height="300px"))
+#         .add(
+#             series_name="",
+#             data_pair=data_pairs,
+#             radius=["30%", "70%"],
+#             center=["50%", "50%"]
+#         )
+#         .set_colors(color_list)
+#         .set_global_opts(
+#             title_opts=opts.TitleOpts(
+#                 title=chart_title,
+#                 pos_left="center",
+#                 title_textstyle_opts=opts.TextStyleOpts(
+#                     font_size=18,
+#                     color="black",
+#                     font_family="Calibri",
+#                     font_weight="bold"
+#                 )
+#             ),
+#             legend_opts=opts.LegendOpts(is_show=False),
+#             tooltip_opts=opts.TooltipOpts(formatter="{b}: {d}%")
+#         )
+#     )
+
+#     return chart.render_embed()
+
+# def adjust_shade(color, weight, max_weight):
+#     """
+#     Adjust the brightness of the color based on the company's weight in the pie chart.
+#     Lighter colors for smaller weights and darker colors for larger weights.
+#     """
+#     # Convert the hex color to RGB
+#     color_rgb = np.array([int(color[i:i+2], 16) for i in (1, 3, 5)], dtype=float) / 255.0
+    
+#     # Convert RGB to HSL
+#     max_rgb = np.max(color_rgb)
+#     min_rgb = np.min(color_rgb)
+#     delta = max_rgb - min_rgb
+
+#     # Lightness calculation (average of max and min values)
+#     lightness = (max_rgb + min_rgb) / 2
+    
+#     # Normalize weight based on the max_weight
+#     weight_ratio = weight / max_weight
+    
+#     # Reduce lightness for higher weights and increase for lower weights (inverting)
+#     adjusted_lightness = max(0.2, min(1.0, lightness - 0.5 * weight_ratio))  # Ensure lightness stays within bounds
+    
+#     # Apply the adjusted lightness
+#     color_rgb = np.array([color_rgb[0], color_rgb[1], color_rgb[2]])  # To preserve RGB structure
+    
+#     # Scale the RGB values to match the adjusted lightness
+#     # For simplicity, we use a simple formula to adjust RGB based on lightness change
+#     color_rgb = (color_rgb - 0.5) * adjusted_lightness + 0.5
+    
+#     # Convert back to hex color
+#     adjusted_color = "#{:02x}{:02x}{:02x}".format(int(color_rgb[0] * 255), int(color_rgb[1] * 255), int(color_rgb[2] * 255))
+    
+#     return adjusted_color
+
+# def render_pie_chart(selected_sectors=["All"]):
+#     """
+#     Generates a doughnut chart displaying the weight distribution 
+#     of companies in the selected sectors, coloring slices by sector.
+#     """
+#     _df = getQQQMHolding()
+
+#     # Treat an empty selection the same as ["All"]
+#     if not selected_sectors:
+#         selected_sectors = ["All"]
+
+#     # If 'All' is selected, group by sector
+#     if "All" in selected_sectors:
+#         df_sector = _df.groupby('Sector', as_index=False)["Weight"].sum()
+#         df_sector = df_sector.sort_values("Weight", ascending=False)
+#         chart_title = "NASDAQ 100 by Sector"
+
+#         # Build data_pairs from sector & weight
+#         data_pairs = list(zip(df_sector["Sector"], df_sector["Weight"]))
+
+#         # Build a color_list by referencing each row's Sector
+#         color_list = []
+#         for _, row in df_sector.iterrows():
+#             sector_name = row["Sector"]
+#             color_list.append(SECTOR_COLORS.get(sector_name, SECTOR_COLORS["Other"]))
+
+#     else:
+#         # Filter df by the chosen sectors
+#         _df = _df[_df["Sector"].isin(selected_sectors)]
+
+#         # Sort by weight descending, then pick top 10
+#         df_sorted = _df.sort_values("Weight", ascending=False)
+#         top_10 = df_sorted.head(10).copy()
+#         rest = df_sorted.iloc[10:].copy()
+
+#         # Create a row for 'Other Companies'
+#         rest_combined = pd.DataFrame({
+#             "Name": ["Other Companies"],
+#             "Weight": [rest["Weight"].sum()],
+#             "Sector": ["Other"]  # fallback sector label
+#         })
+
+#         # Combine top_10 with the "other" row
+#         top_10 = top_10[["Name", "Weight", "Sector"]]  # keep relevant columns
+#         combined_df = pd.concat([top_10, rest_combined], ignore_index=True)
+
+#         chart_title = "Top 10 Companies (Selected Sectors)"
+
+#         # Convert to a list of (company_name, weight) for pyecharts
+#         data_pairs = list(zip(combined_df["Name"], combined_df["Weight"]))
+
+#         # Calculate the maximum weight across the top 10 companies for shading purposes
+#         max_weight = combined_df["Weight"].max()
+
+#         # Generate color list with adjusted shading based on company weight (within the top 10)
+#         color_list = []
+#         for _, row in combined_df.iterrows():
+#             sector = row["Sector"]
+#             weight = row["Weight"]
+#             base_color = SECTOR_COLORS.get(sector, SECTOR_COLORS["Other"])  # Get the sector base color
+#             adjusted_color = adjust_shade(base_color, weight, max_weight)
+#             color_list.append(adjusted_color)
+
+#     # Create a doughnut chart with pyecharts
+#     chart = (
+#         Pie(init_opts=opts.InitOpts(width="590px", height="300px"))
+#         .add(
+#             series_name="",
+#             data_pair=data_pairs,
+#             radius=["30%", "70%"],
+#             center=["50%", "50%"]
+#         )
+#         .set_colors(color_list)  # Apply dynamic color list
+#         .set_global_opts(
+#             title_opts=opts.TitleOpts(
+#                 title=chart_title,
+#                 pos_left="center",
+#                 title_textstyle_opts=opts.TextStyleOpts(
+#                     font_size=18,
+#                     color="black",
+#                     font_family="Calibri",
+#                     font_weight="bold"
+#                 )
+#             ),
+#             legend_opts=opts.LegendOpts(is_show=False),
+#             tooltip_opts=opts.TooltipOpts(formatter="{b}: {d}%")
+#         )
+#     )
+
+#     return chart.render_embed()
+
+# def render_pie_chart(selected_sectors=["All"]):
+#     """
+#     Generates a doughnut chart displaying the weight distribution 
+#     of companies in the selected sectors, coloring slices by sector.
+#     """
+#     _df = getQQQMHolding()
+
+#     # Treat an empty selection the same as ["All"]
+#     if not selected_sectors:
+#         selected_sectors = ["All"]
+
+#     # If 'All' is selected, group by sector
+#     if "All" in selected_sectors:
+#         df_sector = _df.groupby('Sector', as_index=False)["Weight"].sum()
+#         df_sector = df_sector.sort_values("Weight", ascending=False)
+#         chart_title = "NASDAQ 100 by Sector"
+
+#         # Build data_pairs from sector & weight
+#         data_pairs = list(zip(df_sector["Sector"], df_sector["Weight"]))
+
+#         # Build a color_list by referencing each row's Sector
+#         color_list = []
+#         for _, row in df_sector.iterrows():
+#             sector_name = row["Sector"]
+#             color_list.append(SECTOR_COLORS.get(sector_name, SECTOR_COLORS["Other"]))
+
+#     else:
+#         # Filter df by the chosen sectors
+#         _df = _df[_df["Sector"].isin(selected_sectors)]
+
+#         # Sort by weight descending, then pick top 10
+#         df_sorted = _df.sort_values("Weight", ascending=False)
+#         top_10 = df_sorted.head(10).copy()
+#         rest = df_sorted.iloc[10:].copy()
+
+#         # Create a row for 'Other Companies'
+#         rest_combined = pd.DataFrame({
+#             "Name": ["Other Companies"],
+#             "Weight": [rest["Weight"].sum()],
+#             "Sector": ["Other"]  # fallback sector label
+#         })
+
+#         # Combine top_10 with the "other" row
+#         # (Ensure top_10 has a 'Sector' column as well)
+#         top_10 = top_10[["Name", "Weight", "Sector"]]  # keep relevant columns
+#         combined_df = pd.concat([top_10, rest_combined], ignore_index=True)
+
+#         chart_title = "Top 10 Companies (Selected Sectors)"
+
+#         # Convert to a list of (company_name, weight) for pyecharts
+#         data_pairs = list(zip(combined_df["Name"], combined_df["Weight"]))
+
+#         # Build a color list by each company's sector
+#         color_list = []
+#         for _, row in combined_df.iterrows():
+#             sec = row["Sector"]
+#             color_list.append(SECTOR_COLORS.get(sec, SECTOR_COLORS["Other"]))
+
+#     # Create a doughnut chart with pyecharts
+#     chart = (
+#         Pie(init_opts=opts.InitOpts(width="590px", height="300px"))
+#         .add(
+#             series_name="",
+#             data_pair=data_pairs,
+#             radius=["30%", "70%"],
+#             center=["50%", "50%"]
+#         )
+#         .set_colors(color_list)
+#         .set_global_opts(
+#             title_opts=opts.TitleOpts(
+#                 title=chart_title,
+#                 pos_left="center",
+#                 title_textstyle_opts=opts.TextStyleOpts(
+#                     font_size=18,
+#                     color="black",
+#                     font_family="Calibri",
+#                     font_weight="bold"
+#                 )
+#             ),
+#             legend_opts=opts.LegendOpts(is_show=False),
+#             tooltip_opts=opts.TooltipOpts(formatter="{b}: {d}%")
+#         )
+#     )
+
+#     return chart.render_embed()
 
 # Function to render the scatter plot based on selected sectors
 def render_scatter_plot(selected_sectors):
