@@ -798,6 +798,7 @@ def render_regression_graph(selected_stock, start_date, end_date):
                 "Beta represents the sensitivity of the stock's returns to the overall market. Beta = Cov(R<sub>s</sub>, R<sub>m</sub>) / Var(R<sub>m</sub>)"
                 "</span>"
             )
+            
         )
 
     return regression_fig.to_html(full_html=False)
@@ -820,6 +821,16 @@ def render_trend_graph(selected_stock, start_date, end_date):
         y=['Stock Price', 'NASDAQ Price'],  # Y 轴：股票和指数价格
         labels={'value': 'Normalized Price', 'variable': 'Legend'},  # 标签
         title=f'{selected_stock} and NASDAQ 100 Price Trend (Normalized)'  # 标题
+    )
+
+    price_trend_fig.update_layout(
+        legend=dict(
+            y=0.02,        # 图例的 y 坐标 (0=左, 1=右)
+            x=0.7,        # 图例的 x 坐标 (0=下, 1=上)
+            #yanchor='left',  
+            #xanchor='top',
+            bgcolor='rgba(255,255,255,0.6)'  # 可选：给图例一个半透明背景
+        )
     )
 
     return price_trend_fig.to_html(full_html=False)
