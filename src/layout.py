@@ -150,7 +150,16 @@ pie_chart = html.Div(
             srcDoc=render_pie_chart(selected_sectors=["All"]), 
             style={"border": "0", "width": "100%", "height": "350px"}
         )
-    ]
+    ],
+    style={
+        "backgroundColor": "#ffffff",
+        "padding": "15px",
+        "borderRadius": "12px",
+        "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.15)",
+        "margin": "2px auto 10px auto",  # 20px margin on top and bottom, auto centers it horizontally
+        "maxWidth": "95%",
+        "maxHeight": "360px"
+    }
 )
 
 scatter_plot = html.Div(
@@ -159,7 +168,16 @@ scatter_plot = html.Div(
             srcDoc=render_scatter_plot(selected_sectors=["All"]),  # Default to all sectors
             style={"border": "0", "width": "100%", "height": "350px"}
         )
-    ]
+    ],
+    style={
+        "backgroundColor": "#ffffff",
+        "padding": "15px",
+        "borderRadius": "12px",
+        "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.15)",
+        "margin": "2px auto 10px auto",  # 20px margin on top and bottom, auto centers it horizontally
+        "maxWidth": "95%",
+        "maxHeight": "360px"
+    }
 )
 
 ytd_dist = html.Div(
@@ -168,7 +186,16 @@ ytd_dist = html.Div(
             srcDoc=render_ytd_distribution(selected_sectors=["All"]),
             style={"border": "0", "width": "100%", "height": "350px"}
         )
-    ]
+    ],
+    style={
+        "backgroundColor": "#ffffff",
+        "padding": "15px",
+        "borderRadius": "12px",
+        "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.15)",
+        "margin": "2px auto 10px auto",  # 20px margin on top and bottom, auto centers it horizontally
+        "maxWidth": "95%",
+        "maxHeight": "360px"
+    }
 )
 
 intraday_cont_5 = html.Div(
@@ -177,7 +204,16 @@ intraday_cont_5 = html.Div(
             srcDoc=render_intraday_contribution_5(selected_sectors=["All"]),
             style={"border": "0", "width": "100%", "height": "350px"}
         )
-    ]
+    ],
+     style={
+        "backgroundColor": "#ffffff",
+        "padding": "15px",
+        "borderRadius": "12px",
+        "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.15)",
+        "margin": "2px auto 10px auto",  # 20px margin on top and bottom, auto centers it horizontally
+        "maxWidth": "95%",
+        "maxHeight": "360px"
+    }
 )
 
 # Components for stock analysis
