@@ -100,19 +100,19 @@ sidebar = [
     dbc.Label('Refresh Time'),
     update_speed_dropdown,  # Assuming this is a dropdown for selecting the refresh time
     
-    # Last Refresh Time Message (using html.Div for consistency)
-    html.P(
-        id="footer-refresh-time",  # This ID is used to update the refresh time dynamically
-        style={
-            "textAlign": "left",
-            "fontStyle": "italic",
-            "marginTop": "10px",
-            "fontSize": "14px",
-            "color": "#ffffff",  # White color for the text
-            "background-color": "#343a40",  # Keep the same background as the footer
-        }
-    ),
-    html.Hr(),  # Optional line separator
+    # # Last Refresh Time Message (using html.Div for consistency)
+    # html.P(
+    #     id="footer-refresh-time",  # This ID is used to update the refresh time dynamically
+    #     style={
+    #         "textAlign": "left",
+    #         "fontStyle": "italic",
+    #         "marginTop": "10px",
+    #         "fontSize": "14px",
+    #         "color": "#ffffff",  # White color for the text
+    #         "background-color": "#343a40",  # Keep the same background as the footer
+    #     }
+    # ),
+    # html.Hr(),  # Optional line separator
     
     # Sector Selector Dropdown
     dbc.Label("Select Sectors"),
@@ -148,17 +148,21 @@ pie_chart = html.Div(
     id="pie-chart-container", children=[
         html.Iframe(
             srcDoc=render_pie_chart(selected_sectors=["All"]), 
-            style={"border": "0", "width": "100%", "height": "350px"}
+            style={"border": "0", "width": "100%", "height": "100%", 
+                   "overflow": "hidden", "display": "block"}
         )
     ],
     style={
         "backgroundColor": "#ffffff",
-        "padding": "15px",
+        # "padding": "10px",
+        "padding": "0px",
         "borderRadius": "12px",
         "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.15)",
-        "margin": "2px auto 10px auto",  # 20px margin on top and bottom, auto centers it horizontally
-        "maxWidth": "95%",
-        "maxHeight": "360px"
+        # "margin": "2px auto 20px auto",  # 20px margin on top and bottom, auto centers it horizontally
+        "margin": "5px auto",
+        "maxWidth": "98%",
+        "maxHeight": "320px",
+        "overflow": "hidden"
     }
 )
 
@@ -166,17 +170,21 @@ scatter_plot = html.Div(
     id="scatter-plot-container", children=[
         html.Iframe(
             srcDoc=render_scatter_plot(selected_sectors=["All"]),  # Default to all sectors
-            style={"border": "0", "width": "100%", "height": "350px"}
+            style={"border": "0", "width": "100%", "height": "350px", 
+                   "overflow": "hidden", "display": "block"}
         )
     ],
     style={
         "backgroundColor": "#ffffff",
-        "padding": "15px",
+        # "padding": "10px",
+        "padding": "0px",
         "borderRadius": "12px",
         "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.15)",
-        "margin": "2px auto 10px auto",  # 20px margin on top and bottom, auto centers it horizontally
-        "maxWidth": "95%",
-        "maxHeight": "360px"
+        # "margin": "2px auto 20px auto",  # 20px margin on top and bottom, auto centers it horizontally
+        "margin": "5px auto",
+        "maxWidth": "98%",
+        "maxHeight": "320px",
+        "overflow": "hidden"
     }
 )
 
@@ -184,17 +192,21 @@ ytd_dist = html.Div(
     id="ytd-dist-container", children=[
         html.Iframe(
             srcDoc=render_ytd_distribution(selected_sectors=["All"]),
-            style={"border": "0", "width": "100%", "height": "350px"}
+            style={"border": "0", "width": "100%", "height": "350px", 
+                   "overflow": "hidden", "display": "block"}
         )
     ],
     style={
         "backgroundColor": "#ffffff",
-        "padding": "15px",
+        # "padding": "10px",
+        "padding": "0px",
         "borderRadius": "12px",
         "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.15)",
-        "margin": "2px auto 10px auto",  # 20px margin on top and bottom, auto centers it horizontally
-        "maxWidth": "95%",
-        "maxHeight": "360px"
+        # "margin": "2px auto 20px auto",  # 20px margin on top and bottom, auto centers it horizontally
+        "margin": "5px auto",
+        "maxWidth": "98%",
+        "maxHeight": "320px",
+        "overflow": "hidden"
     }
 )
 
@@ -202,17 +214,21 @@ intraday_cont_5 = html.Div(
     id="intraday-contribution-top5-bottom5-container", children=[
         html.Iframe(
             srcDoc=render_intraday_contribution_5(selected_sectors=["All"]),
-            style={"border": "0", "width": "100%", "height": "350px"}
+            style={"border": "0", "width": "100%", "height": "350px", 
+                   "overflow": "hidden", "display": "block"}
         )
     ],
-     style={
+    style={
         "backgroundColor": "#ffffff",
-        "padding": "15px",
+        # "padding": "10px",
+        "padding": "0px",
         "borderRadius": "12px",
         "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.15)",
-        "margin": "2px auto 10px auto",  # 20px margin on top and bottom, auto centers it horizontally
-        "maxWidth": "95%",
-        "maxHeight": "360px"
+        # "margin": "2px auto 20px auto",  # 20px margin on top and bottom, auto centers it horizontally
+        "margin": "5px auto",
+        "maxWidth": "98%",
+        "maxHeight": "320px",
+        "overflow": "hidden"
     }
 )
 
@@ -268,7 +284,7 @@ search_download_row = dbc.Row(
 
 # 修改自定义表格列选择组件，添加 "Column Select " 标签到下拉菜单左边
 column_selector = dbc.Row([
-    dbc.Col(html.Label("Select Column"), width="auto"),
+    dbc.Col(html.Label("Select Column(s)"), width="auto"),
     dbc.Col(
         dcc.Dropdown(
             id="column-selector",
@@ -288,7 +304,7 @@ table = AgGrid(
     columnDefs=all_columns,
     rowData=[],  # 初始数据为空
     defaultColDef={'filter': True},
-    style={"height": 590},
+    style={"height": 550},
     dashGridOptions={"pagination": True, "paginationAutoPageSize": True},
 )
 
