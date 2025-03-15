@@ -280,11 +280,38 @@ search_download_row = dbc.Row(
         download_csv
     ],
     justify="between",  
+    style={"marginLeft": "5px", "marginRight": "5px"}  # Add margin to the left and right
 )
 
-# 修改自定义表格列选择组件，添加 "Column Select " 标签到下拉菜单左边
+# # Row for the search box and download CSV button on the same line
+# search_download_row = dbc.Row(
+#     [
+#         search_box,
+#         download_csv
+#     ],
+#     justify="between",  
+# )
+
 column_selector = dbc.Row([
-    dbc.Col(html.Label("Select Column(s)"), width="auto"),
+    dbc.Col(
+        html.Div(
+            html.Label("Select Column(s)", id="select-column-label",
+                       style={
+                           "backgroundColor": "#007bff",  # Blue background
+                           "color": "white",              # White text
+                           "padding": "8px 15px",         # Padding for box size
+                           "fontWeight": "bold",          # Bold text
+                           "borderRadius": "5px 0 0 5px", # Rounded corners on left side only
+                           "display": "flex",             # Flexbox to align items horizontally
+                           "alignItems": "center",        # Center text vertically
+                           "justifyContent": "center",    # Center text horizontally
+                           "cursor": "default",           # No pointer cursor
+                           "fontSize": "14px"             # Adjust font size
+                       }),
+            style={"display": "inline-flex", "alignItems": "center"}  # Align label inline with the dropdown
+        ),
+        width="auto", style={"paddingRight": "0px"}  # Remove any padding on the right side
+    ),
     dbc.Col(
         dcc.Dropdown(
             id="column-selector",
@@ -292,11 +319,28 @@ column_selector = dbc.Row([
             value=[col["field"] for col in all_columns[:6]],    # 默认选中前5列
             multi=True,
             clearable=False,
-            style={"width": "100%"}
+            style={"width": "100%", "borderRadius": "0 5px 5px 0"}  # Rounded corners on right side only
         ),
-        width=True
+        width=True, style={"paddingLeft": "0px"}  # Remove any padding on the left side
     )
-], className="mb-3")
+], className="mb-3", align="center", style={"padding": "0", "margin": "0"})  # Adjusting the Row's padding and margin
+
+
+# # 修改自定义表格列选择组件，添加 "Column Select " 标签到下拉菜单左边
+# column_selector = dbc.Row([
+#     dbc.Col(html.Label("Select Column(s)"), width="auto"),
+#     dbc.Col(
+#         dcc.Dropdown(
+#             id="column-selector",
+#             options=[{"label": col["field"], "value": col["field"]} for col in all_columns],
+#             value=[col["field"] for col in all_columns[:6]],    # 默认选中前5列
+#             multi=True,
+#             clearable=False,
+#             style={"width": "100%"}
+#         ),
+#         width=True
+#     )
+# ], className="mb-3")
 
 # dash ag grid 表格组件，使用全局变量 all_columns 作为初始列配置
 table = AgGrid(
