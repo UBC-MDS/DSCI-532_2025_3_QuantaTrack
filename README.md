@@ -21,13 +21,19 @@ and make confident, data-driven investment decisions in a dynamic market environ
 
 ### Overview
 
-The QuantaTrack dashboard is organized into a sidebar with global widgets for user input and a data display section. 
+The QuantaTrack dashboard is organized into a sidebar with global widgets for user input and three data display tabs for a streamlined and interactive experience. 
 The sidebar allows users to filter data by sector, providing a customized view of the data. 
 Additionally, users can select their preferred refresh interval for the stock screener table, with updates available every 3 or 10 seconds.
 
-In the data display section, the dashboard offers real-time insights on key performance metrics, 
-including intraday performance, sector composition, return distribution and stock metrics like dividend yield and PE ratio. 
-Below the charts, the stock screener table allows users to search for specific tickers or company names, 
+In the data display section, the Dashboard tab offers real-time insights on key performance metrics, 
+including intraday performance, sector composition, return distribution 
+and stock metrics like dividend yield and PE ratio. 
+The Stock tab allows users to perform beta analysis for a specified duration and stock, 
+offering deeper insights into stock performance. 
+Finally, the Table tab presents a stock screener with search, filter, and sort capabilities, 
+enabling users to easily find specific tickers or company names or criteria. 
+Users can also customize the table by selecting which columns to display, 
+making the data more adaptable to individual needs, 
 and they can download the data in CSV format based on the current view for further analysis.
 
 #### Demo
