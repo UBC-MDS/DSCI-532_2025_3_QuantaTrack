@@ -34,7 +34,7 @@ Finally, the Table tab presents a stock screener with search, filter, and sort c
 enabling users to easily find specific tickers or company names or criteria. 
 Users can also customize the table by selecting which columns to display, 
 making the data more adaptable to individual needs, 
-and they can download the data in CSV format based on the current view for further analysis.
+and download the data in CSV format based on the current view for further analysis.
 
 #### Demo
 
