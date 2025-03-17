@@ -795,7 +795,9 @@ def render_regression_graph(selected_stock, start_date, end_date):
             title=(
                 f"Regression Analysis: <b>Beta = {beta: .2f}</b>"
                 "<br><span style='font-size:12px; color:gray;'>"
-                "Beta represents the sensitivity of the stock's returns to the overall market. Beta = Cov(R<sub>s</sub>, R<sub>m</sub>) / Var(R<sub>m</sub>)"
+                "Beta represents the sensitivity of the stock's returns to the overall market."
+                "<br><span style='font-size:12px; color:gray;'>"
+                "Beta = Cov(R<sub>s</sub>, R<sub>m</sub>) / Var(R<sub>m</sub>)"
                 "</span>"
             )
             
