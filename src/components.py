@@ -849,6 +849,7 @@ def render_regression_graph(selected_stock, start_date, end_date):
             x=nasdaq_returns,
             y=stock_returns,
             trendline="ols",
+            trendline_color_override="#9932CC",  # Deep purple color
             labels={'x': 'NASDAQ 100 Returns', 'y': f'{selected_stock} Returns'},
             title=(
                 f"Regression Analysis: <b>Beta = {beta: .2f}</b>"
