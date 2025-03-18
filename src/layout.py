@@ -7,7 +7,6 @@ from src.qqqm_data import getQQQMHolding
 nasdaq100_tickers = getQQQMHolding()
 latest_update_date = nasdaq100_tickers['Date'].iloc[0] if not nasdaq100_tickers.empty else "N/A"
 
-# 定义所有表格列配置，供表格和下拉菜单使用
 all_columns = [
     {"field": "Ticker"},
     {"field": "Name"},
@@ -43,7 +42,6 @@ all_columns = [
 
 ]
 
-# 修改更新频率下拉框
 update_speed_dropdown = dbc.Row(
     dbc.Col(
         dcc.Dropdown(

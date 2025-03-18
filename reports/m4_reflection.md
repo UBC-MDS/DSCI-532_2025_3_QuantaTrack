@@ -1,21 +1,30 @@
 # Reflection
 
-This milestone felt like the culmination of our efforts to bring the dashboard to life. We’ve implemented a range of features that not only meet our initial proposal but also incorporate valuable feedback from peers. In this reflection, I’ll walk through the changes we made, the insights we gained, and areas we see for future improvements.
+This final milestone represents the culmination of our dashboard development efforts. We have implemented numerous features from our original proposal and refined our design based on feedback, leading to a more polished and user-friendly product.
 
-## Implemented Features
+## Implemented & Refined Features
 
-Since Milestone 3, we have made several significant updates. We unified the color schemes across our charts by implementing a global sector-to-color dictionary. This ensures that every chart—from the pie chart to the scatter plot—displays consistent hues for each sector, which makes the dashboard easier to interpret at a glance. We also added interactive filtering; users can now select multiple sectors from a dropdown to refine the visualizations, which has made our data exploration much more dynamic.
-
-Another major enhancement was the introduction of a Top 5/Bottom 5 bar chart for intraday contributions. This not only highlights the extremes but also provides a quick visual summary of the companies making the biggest moves. Additionally, we refined the layout to display our key visualizations in a 2×2 grid, ensuring that everything fits on one page without overwhelming the user with scrolling. The pinned sidebar was adjusted based on feedback to keep it visible at all times without detracting from the main charts.
+Since Milestone 3, our group has integrated several key improvements:
+- **Consistent Color Encoding:** We introduced a global sector-to-color dictionary so that all charts (pie, scatter, and bar) use the same colors for each sector. This consistency has made the dashboard easier to interpret and more professional in appearance.
+- **Enhanced Interactivity:** We added multi-select filtering for sectors, allowing users to explore data by selecting specific sectors. In addition, we implemented a Top 5/Bottom 5 bar chart for intraday contribution, which quickly highlights the most significant movers.
+- **Optimized Layout:** Our 2×2 grid layout now neatly displays all primary visualizations on one page. We adjusted margins and padding based on peer feedback to reduce unnecessary gaps and ensure each chart “pops” without overwhelming the viewer.
+- **Pinned Sidebar & Data Tabs:** We refined the sidebar’s design to keep essential filters always visible and created separate tabs for visualizations and data exploration, enhancing the overall navigation and usability of the dashboard.
 
 ## Insights & Feedback
 
-One of the most useful pieces of feedback we received was to standardize the color encoding across charts. Once we aligned our color schemes, the overall look of the dashboard became much more polished. We also learned that minor CSS tweaks—such as adjusting margins, padding, and box shadows—can have a major impact on how “stand out” the charts appear. For instance, reducing extra spacing and adding subtle backgrounds to each chart container helped each element pop without feeling cluttered.
+One of the most valuable pieces of feedback was the recommendation to unify our color schemes. Once we standardized the colors across different charts, our visualizations became significantly more cohesive and easier to understand. In addition, detailed suggestions on adjusting spacing and layout helped us eliminate clutter and improve readability.
 
-On the other hand, we would have appreciated more guidance on creating responsive layouts, especially given the challenges we faced with the fixed sidebar. While the current layout works well on larger screens, smaller devices still feel a bit cramped. This is something we hope to address in future iterations.
+We also appreciated guidance on how to incorporate interactive elements, which pushed us to explore new methods of data filtering and visualization. However, more resources on responsive design for pinned sidebars and mobile layouts would have further enhanced our ability to create a truly adaptive dashboard.
 
-## What’s Working & Future Improvements
+## Limitations & Future Improvements
 
-Overall, the dashboard now offers a cohesive snapshot of the NASDAQ 100 companies. The consistent visuals, interactive filters, and detailed charts provide users with clear insights into market performance. However, there are still a few areas for improvement. For example, making the layout fully responsive to various screen sizes would be a major upgrade. In addition, we’d like to explore more advanced analytics and predictive elements if time allowed, such as real-time data integration and machine learning-based trend analysis.
+While our dashboard now successfully provides a comprehensive snapshot of the NASDAQ 100, some limitations remain:
+- **Responsive Design:** The current layout works well on larger screens but could be further optimized for smaller devices. A more responsive sidebar and dynamic scaling of charts would improve mobile usability.
+- **Real-Time Updates:** Although our dashboard includes refresh intervals, the update mechanism could be more robust during non-trading hours or periods of low activity.
+- **Advanced Analytics:** We have focused on descriptive analytics; however, integrating predictive elements (e.g., regression analysis, machine learning forecasts) could add significant value.
 
-In summary, while our dashboard already meets our core objectives, we see plenty of opportunities to further refine and enhance its functionality and usability. The feedback we received was invaluable, and the process taught us much about balancing design, technical implementation, and user experience.
+## Deviations & Final Thoughts
+
+We intentionally deviated from some of the best practices learned in 531 regarding strict responsive design in favor of a pinned sidebar, as we felt it enhanced quick data filtering. While this approach may limit mobile responsiveness, it serves our primary goal of offering an immediately accessible and informative overview during trading hours.
+
+In summary, our dashboard now offers consistent visual encoding, improved interactivity, and a clear layout. Although there are still opportunities for enhanced responsiveness and advanced analytics, the current version meets our core objectives and provides a strong foundation for future development.
