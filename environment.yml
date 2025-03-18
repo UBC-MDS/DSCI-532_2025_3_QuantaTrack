@@ -17,4 +17,5 @@ dependencies:
   - statsmodels=0.14.4
   - pip:
       - dash_bootstrap_components==1.7.1
-      - dash-ag-grid
+      - dash-ag-grid==31.3.0
+      - pytest==8.3.5
