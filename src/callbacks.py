@@ -90,7 +90,27 @@ def register_callbacks(app):
     Input('filter-sector', 'value')          # 以 filter-sector 的 value 作为输入
     )
     def update_stock_dropdown(selected_sector):
-        
+        """
+        Updates the options and default value of the 'stock-dropdown' based on the
+        sector selected in the 'sector-dropdown'.
+    
+        When the user selects 'All', this function returns all available tickers.
+        Otherwise, it filters the NASDAQ 100 tickers by the chosen sector and
+        constructs a corresponding list of dropdown options.
+    
+        Args:
+            selected_sector (str): The sector selected in the 'sector-dropdown'. 
+                                   Can be 'All' or a specific sector name.
+    
+        Returns:
+            tuple:
+                - new_options (list): A list of dictionaries for the dropdown, each 
+                                      containing a 'label' and 'value' key.
+                - new_value (str): The default ticker value to be displayed in the 
+                                   dropdown. If the filtered list is non-empty, this 
+                                   will be the first ticker in the filtered list; 
+                                   otherwise, None.
+        """
         nasdaq100_tickers = getQQQMHolding()
         # 如果没有选或者选了 'All'，那就把全部股票都显示出来
         if not selected_sector or 'All' in selected_sector:
@@ -124,7 +144,28 @@ def register_callbacks(app):
          Input('date-picker-range', 'end_date')]
     )
     def update_regression_graph(selected_stock, start_date, end_date):
-        """Updates the regession and beta value based on selected stock and date range"""
+        """
+        Updates and displays a regression graph based on the selected stock and 
+        the specified date range.
+    
+        This callback function:
+            1. Checks if the selected stock and date range are the default values.
+               - If so, retrieves the precomputed regression graph from the cache 
+                 and displays it.
+            2. If the requested graph is not in the cache, it generates a new 
+               regression graph using `render_regression_graph` and stores the 
+               result in the cache.
+            3. Returns an Iframe containing the HTML of the regression graph.
+    
+        Args:
+            selected_stock (str): The ticker symbol selected from the 'stock-dropdown'.
+            start_date (str): The start date selected from the 'date-picker-range'.
+            end_date (str): The end date selected from the 'date-picker-range'.
+    
+        Returns:
+            dash.html.Iframe: An Iframe component displaying the regression graph 
+                              for the chosen stock and date range.
+        """
 
         # 判断是否是默认区间
         if start_date == DEFAULT_START and end_date == DEFAULT_END and selected_stock == DEFAULT_TICKER:
@@ -151,8 +192,30 @@ def register_callbacks(app):
          Input('date-picker-range', 'end_date')]
     )
     def update_trend_graph(selected_stock, start_date, end_date):
-        """Updates the trend graph based on selected stock and date range"""
-
+        """
+        Updates and displays a trend graph based on the selected stock and the 
+        specified date range.
+    
+        This callback function:
+            1. Checks if the user is using the default date range and default stock.
+               - If so, it attempts to retrieve a precomputed (cached) trend graph 
+                 from chart_cache.
+            2. If the trend graph is not in the cache (or if the user changed the 
+               date range or stock), it generates a new trend graph with 
+               `render_trend_graph` and stores the result in the cache.
+            3. Returns an Iframe containing the HTML code of the trend graph.
+    
+        Args:
+            selected_stock (str): The ticker symbol chosen from the 'stock-dropdown'.
+            start_date (str): The start date selected in 'YYYY-MM-DD' format from 
+                              the 'date-picker-range'.
+            end_date (str): The end date selected in 'YYYY-MM-DD' format from 
+                            the 'date-picker-range'.
+    
+        Returns:
+            dash.html.Iframe: An Iframe component displaying the trend graph for 
+                              the chosen stock and date range.
+        """
          # 判断是否是默认区间
         if start_date == DEFAULT_START and end_date == DEFAULT_END and selected_stock == DEFAULT_TICKER:
             # 从缓存读取
