@@ -5,10 +5,11 @@ This final milestone represents the culmination of our dashboard development eff
 ## Implemented & Refined Features
 
 Since Milestone 3, our group has integrated several key improvements:
+
 - **Consistent Color Encoding:** We introduced a global sector-to-color dictionary so that all charts (pie, scatter, and bar) use the same colors for each sector. This consistency has made the dashboard easier to interpret and more professional in appearance.
-- **Enhanced Interactivity:** We added multi-select filtering for sectors, allowing users to explore data by selecting specific sectors. In addition, we implemented a Top 5/Bottom 5 bar chart for intraday contribution, which quickly highlights the most significant movers.
 - **Optimized Layout:** Our 2×2 grid layout now neatly displays all primary visualizations on one page. We adjusted margins and padding based on peer feedback to reduce unnecessary gaps and ensure each chart “pops” without overwhelming the viewer.
-- **Pinned Sidebar & Data Tabs:** We refined the sidebar’s design to keep essential filters always visible and created separate tabs for visualizations and data exploration, enhancing the overall navigation and usability of the dashboard.
+- **Customizable Data Table:** The table is now customizable with selectable columns, and filters can be applied to the columns, alongside sorting and a search box. This improvement enhances the user’s ability to explore and interact with the data more effectively.
+- **Commentary for Guidance:** A refresh time indicator was added to the sidebar to show when the data was last updated. Additionally, we included a commentary section that offers guidance on interactivity, a glossary of financial terms, and a beta definition on the Stock tab to clarify the term's relevance and its application in the data.
 
 ## Insights & Feedback
 
@@ -25,6 +26,6 @@ While our dashboard now successfully provides a comprehensive snapshot of the NA
 
 ## Deviations & Final Thoughts
 
-We intentionally deviated from some of the best practices learned in 531 regarding strict responsive design in favor of a pinned sidebar, as we felt it enhanced quick data filtering. While this approach may limit mobile responsiveness, it serves our primary goal of offering an immediately accessible and informative overview during trading hours.
+Our intentional deviation from best visualization practices continues to be the same as explained in Milestone 2. This approach has also been addressed in the peer review feedback, particularly regarding the necessity of coloring by industry sectors.
 
 In summary, our dashboard now offers consistent visual encoding, improved interactivity, and a clear layout. Although there are still opportunities for enhanced responsiveness and advanced analytics, the current version meets our core objectives and provides a strong foundation for future development.
