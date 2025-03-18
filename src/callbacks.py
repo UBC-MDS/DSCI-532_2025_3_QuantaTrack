@@ -1,10 +1,15 @@
 import pandas as pd
 from dash import html, dcc, Input, Output
 import dash
-
+from src.layout import all_columns  # 导入全局所有列定义
 from src.layout import *
 from src.components import *
 from src.qqqm_data import getQQQMHolding
+
+CACHE_FILE = 'nasdaq100_cache.pkl'
+DEFAULT_START = "2024-01-01"
+DEFAULT_END = "2025-01-01"
+DEFAULT_TICKER = 'AAPL'
 
 def highlight_change(val):
         try:
@@ -120,8 +125,18 @@ def register_callbacks(app):
     )
     def update_regression_graph(selected_stock, start_date, end_date):
         """Updates the regession and beta value based on selected stock and date range"""
-        # 调用 render_regression_graph 函数，生成图表
-        regression_fig_html = render_regression_graph(selected_stock, start_date, end_date)
+
+        # 判断是否是默认区间
+        if start_date == DEFAULT_START and end_date == DEFAULT_END and selected_stock == DEFAULT_TICKER:
+            # 从缓存读取
+            regression_fig_html = chart_cache.get (f"regression|{selected_stock}")
+            
+            if regression_fig_html is None:
+                regression_fig_html = render_regression_graph(selected_stock, start_date, end_date)
+
+        else:
+            # 调用 render_regression_graph 函数，生成图表
+            regression_fig_html = render_regression_graph(selected_stock, start_date, end_date)
     
         # 将生成的图表 HTML 结果嵌入 Iframe 中
         return html.Iframe(
@@ -137,8 +152,18 @@ def register_callbacks(app):
     )
     def update_trend_graph(selected_stock, start_date, end_date):
         """Updates the trend graph based on selected stock and date range"""
-        # 调用 render_trend_graph 函数，生成图表
-        price_trend_fig_html = render_trend_graph(selected_stock, start_date, end_date)
+
+         # 判断是否是默认区间
+        if start_date == DEFAULT_START and end_date == DEFAULT_END and selected_stock == DEFAULT_TICKER:
+            # 从缓存读取
+            price_trend_fig_html = chart_cache.get (f"trend|{selected_stock}")
+            
+            if price_trend_fig_html is None:
+                price_trend_fig_html = render_trend_graph(selected_stock, start_date, end_date)
+
+        else:
+            # 调用 render_trend_graph 函数，生成图表
+            price_trend_fig_html = render_trend_graph(selected_stock, start_date, end_date)
     
         # 将生成的图表 HTML 结果嵌入 Iframe 中
         return html.Iframe(
@@ -203,6 +228,55 @@ def register_callbacks(app):
             return True, 1000  # interval value doesn't matter
 
 
+    # @app.callback(
+    #     [Output("stock-table", "rowData"),
+    #     Output("footer-refresh-time", "children")],  # Add output for the footer refresh time
+    #     [Input("filter-ticker", "value"),
+    #     Input("filter-name", "value"),
+    #     Input("filter-sector", "value"),
+    #     Input("data-store", "data")]
+    # )
+    # def update_table(ticker, name, sectors, data):
+    #     """
+    #     Updates the data displayed in the stock table based on filters for ticker, 
+    #     name, and sector, and also updates the refresh time in the footer.
+
+    #     Args:
+    #         ticker (str): The ticker symbol to filter by (optional).
+    #         name (str): The company name to filter by (optional).
+    #         sectors (list): A list of selected sectors to filter by (optional).
+    #         data (list): The full dataset to filter.
+
+    #     Returns:
+    #         list: A list of filtered records suitable for use in the stock table.
+    #         str: The latest refresh time to display in the footer.
+    #     """
+    #     df = pd.DataFrame(data) if data else pd.DataFrame()
+
+    #     if ticker:
+    #         df = df[df["Ticker"].str.contains(ticker, case=False, na=False)]
+    #     if name:
+    #         df = df[df["Name"].str.contains(name, case=False, na=False)]
+
+    #     # Filter by sectors (handling multiple selections)
+    #     if sectors and "All" not in sectors:
+    #         df = df[df["Sector"].isin(sectors)]  # Filter to keep rows with sectors in the selected list
+
+    #     # Extract the most recent refresh time from the 'Date' column (assuming 'Date' is in a proper datetime format)
+    #     if not df.empty:
+    #         df["Date"] = pd.to_datetime(df["Date"], errors='coerce')  # This will handle any invalid date entries by setting them to NaT (Not a Time)
+    #         latest_refresh_time = df["Date"].max()  # Get the most recent date
+    #         if pd.isna(latest_refresh_time):
+    #             refresh_time_str = "Last Refresh Time Not Available"  # If no valid dates are available
+    #         else:
+    #             refresh_time_str = f"Latest Data Refresh on {latest_refresh_time.strftime('%Y-%m-%d %H:%M:%S')}"
+    #     else:
+    #         refresh_time_str = "Awaiting Data Refresh"  # If no data is available
+
+    #     # Return both the filtered data and the refresh time for the footer
+    #     return df.to_dict("records"), refresh_time_str
+
+
     @app.callback(
         Output("stock-table", "rowData"),
         [Input("filter-ticker", "value"),
@@ -241,6 +315,18 @@ def register_callbacks(app):
         
         return df.to_dict("records")
         
+
+    # 新回调：根据用户选择更新自定义表格列
+    @app.callback(
+        Output("stock-table", "columnDefs"),
+        Input("column-selector", "value")
+    )
+    def update_table_columns(selected_columns):
+        # 如果未选择任何列，返回全部列
+        if not selected_columns:
+            return all_columns
+        filtered_columns = [col for col in all_columns if col["field"] in selected_columns]
+        return filtered_columns
 
 
     @app.callback(
