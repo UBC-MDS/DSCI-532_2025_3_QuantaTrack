@@ -764,7 +764,40 @@ def calculate_beta(stock_returns, index_returns):
 
 
 def fetch_stock_data(selected_stock, start_date, end_date):
+    """
+    Fetches historical data for a specified stock and the NASDAQ 100 ETF (QQQ) 
+    over a given date range, then calculates their respective daily returns.
 
+    This function performs the following steps:
+        1. Retrieves historical data for the selected stock using 
+           getUSStockHistoryByDate(), keeping only relevant columns 
+           (date, percentage change, and close price).
+        2. Converts the date column to DateTime format, sets it as the index, 
+           drops any missing values, and converts the percentage change to 
+           percentage form by multiplying by 100.
+        3. Repeats the same data-processing steps for QQQ (NASDAQ 100 ETF).
+        4. Extracts the daily returns series for both the selected stock 
+           and QQQ.
+        5. Returns the processed stock data, NASDAQ data, and their respective 
+           daily returns.
+
+    Args:
+        selected_stock (str): The ticker symbol of the stock to retrieve 
+                              historical data for (e.g., 'AAPL').
+        start_date (str): The start date for the data retrieval, 
+                          in 'YYYY-MM-DD' format.
+        end_date (str): The end date for the data retrieval, 
+                        in 'YYYY-MM-DD' format.
+
+    Returns:
+        tuple:
+            - stock_data (pd.DataFrame): Processed historical data (price and returns) 
+              for the selected stock.
+            - nasdaq_data (pd.DataFrame): Processed historical data (price and returns) 
+              for QQQ (NASDAQ 100 ETF).
+            - stock_returns (pd.Series): Daily returns for the selected stock.
+            - nasdaq_returns (pd.Series): Daily returns for the QQQ.
+    """
     stock_data = getUSStockHistoryByDate(selected_stock, start_date, end_date)
     stock_data = stock_data[['Timestamp_str', 'percent', 'close']]  # Keep only the desired columns
     stock_data = stock_data.rename(columns={'Timestamp_str': 'Date', 'percent': 'return', 'close': 'price'})  # Rename columns
@@ -782,7 +815,32 @@ def fetch_stock_data(selected_stock, start_date, end_date):
     return stock_data, nasdaq_data, stock_returns, nasdaq_returns
 
 def render_regression_graph(selected_stock, start_date, end_date):
+    """
+    Fetches historical price data for a selected stock and for the NASDAQ 100 index 
+    over a specified date range, computes daily returns for both, performs a linear 
+    regression (to estimate the stock’s beta relative to the NASDAQ), and returns 
+    an HTML string of the resulting regression plot.
 
+    The function:
+        1. Retrieves historical data for the selected stock and the NASDAQ 100 index
+           within the given date range.
+        2. Computes percentage returns for both datasets.
+        3. Performs a linear regression to estimate the relationship (beta) between 
+           the stock’s returns and the NASDAQ 100’s returns.
+        4. Renders a plot of the regression line along with the data points and 
+           textual annotations of the beta value.
+        5. Returns the plot in HTML format (suitable for embedding in web pages or 
+           notebooks).
+
+    Args:
+        selected_stock (str): The stock ticker symbol to analyze.
+        start_date (str): The start date for the analysis in 'YYYY-MM-DD' format.
+        end_date (str): The end date for the analysis in 'YYYY-MM-DD' format.
+
+    Returns:
+        str: An HTML string containing the regression plot. 
+             This can be embedded directly in a web page or a Jupyter notebook.
+    """
     stock_data, nasdaq_data, stock_returns, nasdaq_returns = fetch_stock_data(selected_stock, start_date, end_date)
 
     beta = calculate_beta(stock_returns, nasdaq_returns)
@@ -791,6 +849,7 @@ def render_regression_graph(selected_stock, start_date, end_date):
             x=nasdaq_returns,
             y=stock_returns,
             trendline="ols",
+            trendline_color_override="#9932CC",  # Deep purple color
             labels={'x': 'NASDAQ 100 Returns', 'y': f'{selected_stock} Returns'},
             title=(
                 f"Regression Analysis: <b>Beta = {beta: .2f}</b>"
@@ -806,32 +865,52 @@ def render_regression_graph(selected_stock, start_date, end_date):
     return regression_fig.to_html(full_html=False)
 
 def render_trend_graph(selected_stock, start_date, end_date):
+    """
+    Renders a normalized price trend graph for a specified stock and the NASDAQ 100 index 
+    over a given date range, then returns the graph in HTML format.
 
+    This function:
+        1. Fetches historical price data (and daily returns) for the specified stock 
+           and the NASDAQ 100 index using `fetch_stock_data`.
+        2. Normalizes both price series to a common scale for direct comparison.
+        3. Combines the data into a single DataFrame and generates a line plot 
+           illustrating both normalized price trends over time.
+        4. Returns the resulting plot as an HTML string that can be embedded in 
+           a webpage or Jupyter notebook.
+
+    Args:
+        selected_stock (str): The stock ticker symbol to analyze.
+        start_date (str): The start date for the analysis in 'YYYY-MM-DD' format.
+        end_date (str): The end date for the analysis in 'YYYY-MM-DD' format.
+
+    Returns:
+        str: An HTML string representing the rendered line plot. 
+    """
     stock_data, nasdaq_data, stock_returns, nasdaq_returns = fetch_stock_data(selected_stock, start_date, end_date)
     stock_price_normalized = stock_data['price'].dropna() / stock_data['price'].iloc[0]
     nasdaq_price_normalized = nasdaq_data['price'].dropna() / nasdaq_data['price'].iloc[0]
     combined_data = pd.DataFrame({
-        'Date': stock_price_normalized.index,  # 日期索引
-        'Stock Price': stock_price_normalized,  # 归一化后的股票价格
-        'NASDAQ Price': nasdaq_price_normalized  # 归一化后的指数价格
+        'Date': stock_price_normalized.index,  
+        'Stock Price': stock_price_normalized, 
+        'NASDAQ Price': nasdaq_price_normalized  
     })
 
-        # 绘制价格走势图
+        
     price_trend_fig = px.line(
-        combined_data,  # 数据
-        x='Date',  # X 轴：日期
-        y=['Stock Price', 'NASDAQ Price'],  # Y 轴：股票和指数价格
-        labels={'value': 'Normalized Price', 'variable': 'Legend'},  # 标签
-        title=f'{selected_stock} and NASDAQ 100 Price Trend (Normalized)'  # 标题
+        combined_data,  
+        x='Date',  
+        y=['Stock Price', 'NASDAQ Price'],  
+        labels={'value': 'Normalized Price', 'variable': 'Legend'},  
+        title=f'{selected_stock} and NASDAQ 100 Price Trend (Normalized)' 
     )
 
     price_trend_fig.update_layout(
         legend=dict(
-            y=0.02,        # 图例的 y 坐标 (0=左, 1=右)
-            x=0.7,        # 图例的 x 坐标 (0=下, 1=上)
+            y=0.02,        
+            x=0.7,       
             #yanchor='left',  
             #xanchor='top',
-            bgcolor='rgba(255,255,255,0.6)'  # 可选：给图例一个半透明背景
+            bgcolor='rgba(255,255,255,0.6)' 
         )
     )
 

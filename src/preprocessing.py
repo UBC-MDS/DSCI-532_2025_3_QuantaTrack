@@ -18,8 +18,36 @@ START_DATE = "2024-01-01"
 END_DATE   = "2025-01-01"
 
 def precompute_nasdaq100():
-    
-    # 如果已存在缓存文件，先读出来，避免重复计算
+    """
+    Precomputes and caches regression and trend graphs for a predefined set of 
+    NASDAQ 100 tickers within a specified date range.
+
+    This function:
+        1. Checks if a cache file (defined by CACHE_FILE) already exists.
+           - If it exists, loads previously cached graph data from this file.
+           - Otherwise, initializes an empty cache dictionary.
+        2. Iterates through a list of tickers (defined by TICKER).
+           - For each ticker, constructs cache keys for the regression graph 
+             and the trend graph.
+           - If the corresponding key is not found in the cache, the function 
+             generates the graph using `render_regression_graph` or 
+             `render_trend_graph`, then stores the result in the cache.
+        3. Saves (pickles) the updated cache dictionary back to the cache file.
+        4. Prints a summary indicating how many graphs have been cached.
+
+    Global Variables (assumed to be defined elsewhere):
+        - TICKER (list): A list of NASDAQ 100 ticker symbols.
+        - START_DATE (str): The start date for the historical data (e.g., 'YYYY-MM-DD').
+        - END_DATE (str): The end date for the historical data (e.g., 'YYYY-MM-DD').
+        - CACHE_FILE (str): The path to the pickle file used for caching.
+
+    Side Effects:
+        - Reads and writes a pickle file to store the cached graphs.
+        - Prints a message summarizing the caching operation.
+
+    Returns:
+        None
+    """
     if os.path.exists(CACHE_FILE):
         with open(CACHE_FILE, "rb") as f:
             cache_data = pickle.load(f)
@@ -27,11 +55,10 @@ def precompute_nasdaq100():
         cache_data = {}
 
     for symbol in TICKER:
-        # 为回归图、趋势图各定义一个 key
+    
         key_regression = f"regression|{symbol}"
         key_trend = f"trend|{symbol}"
 
-        # 若缓存里没有，就调用函数生成并存储
         if key_regression not in cache_data:
             fig_reg = render_regression_graph(symbol, START_DATE, END_DATE)
             cache_data[key_regression] = fig_reg
@@ -40,7 +67,6 @@ def precompute_nasdaq100():
             fig_trend = render_trend_graph(symbol, START_DATE, END_DATE)
             cache_data[key_trend] = fig_trend
 
-    # 把更新后的字典写回到文件
     with open(CACHE_FILE, "wb") as f:
         pickle.dump(cache_data, f)
 
